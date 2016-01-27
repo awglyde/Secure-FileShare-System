@@ -1,11 +1,9 @@
-
 import java.util.List;
 
 /**
  * Interface describing the operations that must be supported by the
  * client application used to talk with the file servers.  All methods
  * must be implemented!
- *
  */
 public interface FileClientInterface
 {
@@ -14,17 +12,14 @@ public interface FileClientInterface
      * work until the client is connected to a file server.
      *
      * @param server The IP address or hostname of the file server
-     * @param port The port that the file server is listening on
-     *
+     * @param port   The port that the file server is listening on
      * @return true if the connection succeeds, false otherwise
-     *
      */
     public boolean connect(final String server, final int port);
 
 
     /**
      * Close down the connection to the file server.
-     *
      */
     public void disconnect();
 
@@ -34,9 +29,7 @@ public interface FileClientInterface
      * members of the groups encoded in the supplied user token.
      *
      * @param token The UserToken object assigned to the user invoking this operation
-     *
      * @return A list of filenames
-     *
      */
     public List<String> listFiles(final UserToken token);
 
@@ -51,9 +44,7 @@ public interface FileClientInterface
      * @param destFile   The filename to use on the server
      * @param group      The group to share this file with
      * @param token      The token of the user uploading the file
-     *
      * @return true on success, false on failure
-     *
      */
     public boolean upload(final String sourceFile, final String destFile, final String group, final UserToken token);
 
@@ -65,9 +56,7 @@ public interface FileClientInterface
      * @param sourceFile The filename used on the server
      * @param destFile   The filename to use locally
      * @param token      The token of the user uploading the file
-     *
      * @return true on success, false on failure
-     *
      */
     public boolean download(final String sourceFile, final String destFile, final UserToken token);
 
@@ -78,9 +67,7 @@ public interface FileClientInterface
      *
      * @param filename The file to delete
      * @param token    The token of the user requesting the delete
-     *
      * @return true on success, false on failure
-     *
      */
     public boolean delete(final String filename, final UserToken token);
 

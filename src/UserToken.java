@@ -1,14 +1,12 @@
-
 import java.util.List;
 
 /**
  * A simple interface to the token data structure that will be
- * returned by a group server.  
- *
+ * returned by a group server.
+ * <p>
  * You will need to develop a class that implements this interface so
  * that your code can interface with the tokens created by your group
  * server.
- *
  */
 public interface UserToken
 {
@@ -20,7 +18,6 @@ public interface UserToken
      * string "Server1".
      *
      * @return The issuer of this token
-     *
      */
     public String getIssuer();
 
@@ -32,7 +29,6 @@ public interface UserToken
      * the string "Alice".
      *
      * @return The subject of this token
-     *
      */
     public String getSubject();
 
@@ -44,7 +40,6 @@ public interface UserToken
      * will return ["G1", "G2"].
      *
      * @return The list of group memberships encoded in this token
-     *
      */
     public List<String> getGroups();
 
