@@ -12,17 +12,17 @@ public class UserList implements java.io.Serializable
     public synchronized void addUser(String username)
     {
         User newUser = new User();
-        list.put(username, newUser);
+        this.list.put(username, newUser);
     }
 
     public synchronized void deleteUser(String username)
     {
-        list.remove(username);
+        this.list.remove(username);
     }
 
     public synchronized boolean checkUser(String username)
     {
-        if (list.containsKey(username))
+        if (this.list.containsKey(username))
         {
             return true;
         } else
@@ -33,32 +33,32 @@ public class UserList implements java.io.Serializable
 
     public synchronized ArrayList<String> getUserGroups(String username)
     {
-        return list.get(username).getGroups();
+        return this.list.get(username).getGroups();
     }
 
     public synchronized ArrayList<String> getUserOwnership(String username)
     {
-        return list.get(username).getOwnership();
+        return this.list.get(username).getOwnership();
     }
 
     public synchronized void addGroup(String user, String groupname)
     {
-        list.get(user).addGroup(groupname);
+        this.list.get(user).addGroup(groupname);
     }
 
     public synchronized void removeGroup(String user, String groupname)
     {
-        list.get(user).removeGroup(groupname);
+        this.list.get(user).removeGroup(groupname);
     }
 
     public synchronized void addOwnership(String user, String groupname)
     {
-        list.get(user).addOwnership(groupname);
+        this.list.get(user).addOwnership(groupname);
     }
 
     public synchronized void removeOwnership(String user, String groupname)
     {
-        list.get(user).removeOwnership(groupname);
+        this.list.get(user).removeOwnership(groupname);
     }
 
 
@@ -74,48 +74,48 @@ public class UserList implements java.io.Serializable
 
         public User()
         {
-            groups = new ArrayList<String>();
-            ownership = new ArrayList<String>();
+            this.groups = new ArrayList<String>();
+            this.ownership = new ArrayList<String>();
         }
 
         public ArrayList<String> getGroups()
         {
-            return groups;
+            return this.groups;
         }
 
         public ArrayList<String> getOwnership()
         {
-            return ownership;
+            return this.ownership;
         }
 
         public void addGroup(String group)
         {
-            groups.add(group);
+            this.groups.add(group);
         }
 
         public void removeGroup(String group)
         {
-            if (!groups.isEmpty())
+            if (!this.groups.isEmpty())
             {
-                if (groups.contains(group))
+                if (this.groups.contains(group))
                 {
-                    groups.remove(groups.indexOf(group));
+                    this.groups.remove(this.groups.indexOf(group));
                 }
             }
         }
 
         public void addOwnership(String group)
         {
-            ownership.add(group);
+            this.ownership.add(group);
         }
 
         public void removeOwnership(String group)
         {
-            if (!ownership.isEmpty())
+            if (!this.ownership.isEmpty())
             {
-                if (ownership.contains(group))
+                if (this.ownership.contains(group))
                 {
-                    ownership.remove(ownership.indexOf(group));
+                    this.ownership.remove(this.ownership.indexOf(group));
                 }
             }
         }

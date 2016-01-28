@@ -108,10 +108,10 @@ public class GroupThread extends Thread
                     /* TODO:  Write this handler */
                 } else if (message.getMessage().equals("LMEMBERS")) //Client wants a list of members in a group
                 {
-				    /* TODO:  Write this handler */
+                    /* TODO:  Write this handler */
                 } else if (message.getMessage().equals("AUSERTOGROUP")) //Client wants to add user to a group
                 {
-				    /* TODO:  Write this handler */
+                    /* TODO:  Write this handler */
                 } else if (message.getMessage().equals("RUSERFROMGROUP")) //Client wants to remove user from a group
                 {
 				    /* TODO:  Write this handler */

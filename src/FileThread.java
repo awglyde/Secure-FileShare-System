@@ -16,9 +16,9 @@ public class FileThread extends Thread
         boolean proceed = true;
         try
         {
-            System.out.println("*** New connection from " + socket.getInetAddress() + ":" + socket.getPort() + "***");
-            final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-            final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            System.out.println("*** New connection from " + this.socket.getInetAddress() + ":" + this.socket.getPort() + "***");
+            final ObjectInputStream input = new ObjectInputStream(this.socket.getInputStream());
+            final ObjectOutputStream output = new ObjectOutputStream(this.socket.getOutputStream());
             Envelope response;
 
             do

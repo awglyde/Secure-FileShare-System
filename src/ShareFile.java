@@ -11,30 +11,30 @@ public class ShareFile implements java.io.Serializable, Comparable<ShareFile>
 
     public ShareFile(String _owner, String _group, String _path)
     {
-        group = _group;
-        owner = _owner;
-        path = _path;
+        this.group = _group;
+        this.owner = _owner;
+        this.path = _path;
     }
 
     public String getPath()
     {
-        return path;
+        return this.path;
     }
 
     public String getOwner()
     {
-        return owner;
+        return this.owner;
     }
 
     public String getGroup()
     {
-        return group;
+        return this.group;
     }
 
     public int compareTo(ShareFile rhs)
     {
-        if (path.compareTo(rhs.getPath()) == 0) return 0;
-        else if (path.compareTo(rhs.getPath()) < 0) return -1;
+        if (this.path.compareTo(rhs.getPath()) == 0) return 0;
+        else if (this.path.compareTo(rhs.getPath()) < 0) return -1;
         else return 1;
     }
 

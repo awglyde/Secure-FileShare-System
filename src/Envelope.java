@@ -13,22 +13,22 @@ public class Envelope implements java.io.Serializable
 
     public Envelope(String text)
     {
-        msg = text;
+        this.msg = text;
     }
 
     public String getMessage()
     {
-        return msg;
+        return this.msg;
     }
 
     public ArrayList<Object> getObjContents()
     {
-        return objContents;
+        return this.objContents;
     }
 
     public void addObject(Object object)
     {
-        objContents.add(object);
+        this.objContents.add(object);
     }
 
 }

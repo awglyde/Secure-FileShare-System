@@ -11,7 +11,7 @@ public class FileServer extends Server
 
     public FileServer()
     {
-        super(SERVER_PORT, "FilePile");
+        super(this.SERVER_PORT, "FilePile");
     }
 
     public FileServer(int _port)
@@ -34,12 +34,12 @@ public class FileServer extends Server
         {
             FileInputStream fis = new FileInputStream(fileFile);
             fileStream = new ObjectInputStream(fis);
-            fileList = (FileList) fileStream.readObject();
+            this.fileList = (FileList) fileStream.readObject();
         } catch (FileNotFoundException e)
         {
             System.out.println("FileList Does Not Exist. Creating FileList...");
 
-            fileList = new FileList();
+            this.fileList = new FileList();
 
         } catch (IOException e)
         {

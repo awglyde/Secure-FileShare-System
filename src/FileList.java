@@ -1,5 +1,5 @@
 /* T
- * his list represents the files on the server */
+ * his this.list represents the files on the server */
 
 public class FileList implements java.io.Serializable
 {
@@ -10,31 +10,31 @@ public class FileList implements java.io.Serializable
 
     public FileList()
     {
-        list = new ArrayList<ShareFile>();
+        this.list = new ArrayList<ShareFile>();
     }
 
     public synchronized void addFile(String owner, String group, String path)
     {
         ShareFile newFile = new ShareFile(owner, group, path);
-        list.add(newFile);
+        this.list.add(newFile);
     }
 
     public synchronized void removeFile(String path)
     {
-        for (int i = 0; i < list.size(); i++)
+        for (int i = 0; i < this.list.size(); i++)
         {
-            if (list.get(i).getPath().compareTo(path) == 0)
+            if (this.list.get(i).getPath().compareTo(path) == 0)
             {
-                list.remove(i);
+                this.list.remove(i);
             }
         }
     }
 
     public synchronized boolean checkFile(String path)
     {
-        for (int i = 0; i < list.size(); i++)
+        for (int i = 0; i < this.list.size(); i++)
         {
-            if (list.get(i).getPath().compareTo(path) == 0)
+            if (this.list.get(i).getPath().compareTo(path) == 0)
             {
                 return true;
             }
@@ -44,17 +44,17 @@ public class FileList implements java.io.Serializable
 
     public synchronized ArrayList<ShareFile> getFiles()
     {
-        Collections.sort(list);
-        return list;
+        Collections.sort(this.list);
+        return this.list;
     }
 
     public synchronized ShareFile getFile(String path)
     {
-        for (int i = 0; i < list.size(); i++)
+        for (int i = 0; i < this.list.size(); i++)
         {
-            if (list.get(i).getPath().compareTo(path) == 0)
+            if (this.list.get(i).getPath().compareTo(path) == 0)
             {
-                return list.get(i);
+                return this.list.get(i);
             }
         }
         return null;

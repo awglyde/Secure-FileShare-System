@@ -6,20 +6,20 @@ public abstract class Server
 
     public Server(int _SERVER_PORT, String _serverName)
     {
-        port = _SERVER_PORT;
-        name = _serverName;
+        this.port = _SERVER_PORT;
+        this.name = _serverName;
     }
 
     abstract void start();
 
     public int getPort()
     {
-        return port;
+        return this.port;
     }
 
     public String getName()
     {
-        return name;
+        return this.name;
     }
 
 }

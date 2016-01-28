@@ -21,7 +21,7 @@ public class GroupServer extends Server
 
     public GroupServer()
     {
-        super(SERVER_PORT, "ALPHA");
+        super(this.SERVER_PORT, "ALPHA");
     }
 
     public GroupServer(int _port)
@@ -47,7 +47,7 @@ public class GroupServer extends Server
         {
             FileInputStream fis = new FileInputStream(userFile);
             userStream = new ObjectInputStream(fis);
-            userList = (UserList) userStream.readObject();
+            this.userList = (UserList) userStream.readObject();
         } catch (FileNotFoundException e)
         {
             System.out.println("UserList File Does Not Exist. Creating UserList...");
@@ -56,10 +56,10 @@ public class GroupServer extends Server
             String username = console.next();
 
             //Create a new list, add current user to the ADMIN group. They now own the ADMIN group.
-            userList = new UserList();
-            userList.addUser(username);
-            userList.addGroup(username, "ADMIN");
-            userList.addOwnership(username, "ADMIN");
+            this.userList = new UserList();
+            this.userList.addUser(username);
+            this.userList.addGroup(username, "ADMIN");
+            this.userList.addOwnership(username, "ADMIN");
         } catch (IOException e)
         {
             System.out.println("Error reading from UserList file");
@@ -107,7 +107,7 @@ class ShutDownListener extends Thread
 
     public ShutDownListener(GroupServer _gs)
     {
-        my_gs = _gs;
+        this.my_gs = _gs;
     }
 
     public void run()
@@ -117,7 +117,7 @@ class ShutDownListener extends Thread
         try
         {
             outStream = new ObjectOutputStream(new FileOutputStream("UserList.bin"));
-            outStream.writeObject(my_gs.userList);
+            outStream.writeObject(this.my_gs.userList);
         } catch (Exception e)
         {
             System.err.println("Error: " + e.getMessage());
@@ -132,7 +132,7 @@ class AutoSave extends Thread
 
     public AutoSave(GroupServer _gs)
     {
-        my_gs = _gs;
+        this.my_gs = _gs;
     }
 
     public void run()
@@ -147,7 +147,7 @@ class AutoSave extends Thread
                 try
                 {
                     outStream = new ObjectOutputStream(new FileOutputStream("UserList.bin"));
-                    outStream.writeObject(my_gs.userList);
+                    outStream.writeObject(this.my_gs.userList);
                 } catch (Exception e)
                 {
                     System.err.println("Error: " + e.getMessage());

@@ -22,7 +22,7 @@ public abstract class Client
 
     public boolean isConnected()
     {
-        if (sock == null || !sock.isConnected())
+        if (this.sock == null || !this.sock.isConnected())
         {
             return false;
         } else
@@ -38,7 +38,7 @@ public abstract class Client
             try
             {
                 Envelope message = new Envelope("DISCONNECT");
-                output.writeObject(message);
+                this.output.writeObject(message);
             } catch (Exception e)
             {
                 System.err.println("Error: " + e.getMessage());
