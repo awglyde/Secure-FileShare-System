@@ -1,11 +1,14 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 
 public class Database
 {
@@ -18,12 +21,24 @@ public class Database
         this.groupDB = groupPath;
     }
 
-    public HashMap<String, User> UserDB() throws FileNotFoundException, ParseException
+    public HashMap<String, User> UserDB() throws IOException, ParseException
     {
-        Scanner dbScanner = new Scanner(new File(this.usersDB));
-        fileJson = JSONParser().parse(dbScanner.read());
-        System.out.println(fileJson);
+        HashMap<String, User> userMap = new HashMap<>();
 
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse(new FileReader("db/users.json"));
+        JSONArray users = (JSONArray) jsonObject.get("users");
+
+        for(Object user : users)
+        {
+            JSONObject jo = (JSONObject) user;
+            String name = jo.get("name").toString();
+            String password = jo.get("password").toString()
+            userMap.put(name, new User(name, password));
+
+        }
+
+        return userMap;
     }
 
     public HashMap<String, Group> GroupDB()
@@ -88,14 +103,18 @@ public class Database
         return null;
     }
 
-    public static void main(String args[])
-    {
-        UserDB()
-    }
 }
 
 class User
 {
+    String username;
+    String password;
+
+    public User(String username, String password)
+    {
+        this.username = username;
+        this.password = password;
+    }
 
 }
 
