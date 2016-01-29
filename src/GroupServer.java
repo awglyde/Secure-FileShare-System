@@ -106,21 +106,6 @@ public class GroupServer extends Server
 
 }
 
-class GroupList
-{
-    public GroupList()
-    {
-
-    }
-
-    public void removeMember()
-    {
-
-    }
-
-
-}
-
 
 //This thread saves the user list
 class ShutDownListener extends Thread
