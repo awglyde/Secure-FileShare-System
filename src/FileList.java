@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Collections;
 
 /* T
@@ -25,9 +24,9 @@ public class FileList implements java.io.Serializable
 
     public synchronized void removeFile(String path)
     {
-        for (int i = 0; i < this.list.size(); i++)
+        for(int i = 0; i < this.list.size(); i++)
         {
-            if (this.list.get(i).getPath().compareTo(path) == 0)
+            if(this.list.get(i).getPath().compareTo(path) == 0)
             {
                 this.list.remove(i);
             }
@@ -36,9 +35,9 @@ public class FileList implements java.io.Serializable
 
     public synchronized boolean checkFile(String path)
     {
-        for (int i = 0; i < this.list.size(); i++)
+        for(int i = 0; i < this.list.size(); i++)
         {
-            if (this.list.get(i).getPath().compareTo(path) == 0)
+            if(this.list.get(i).getPath().compareTo(path) == 0)
             {
                 return true;
             }
@@ -54,9 +53,9 @@ public class FileList implements java.io.Serializable
 
     public synchronized ShareFile getFile(String path)
     {
-        for (int i = 0; i < this.list.size(); i++)
+        for(int i = 0; i < this.list.size(); i++)
         {
-            if (this.list.get(i).getPath().compareTo(path) == 0)
+            if(this.list.get(i).getPath().compareTo(path) == 0)
             {
                 return this.list.get(i);
             }

@@ -22,13 +22,13 @@ public class GroupClient extends Client implements GroupClientInterface
             response = (Envelope) input.readObject();
 
             //Successful response
-            if (response.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
                 //If there is a token in the Envelope, return it
                 ArrayList<Object> temp = null;
                 temp = response.getObjContents();
 
-                if (temp.size() == 1)
+                if(temp.size() == 1)
                 {
                     token = (UserToken) temp.get(0);
                     return token;
@@ -36,7 +36,8 @@ public class GroupClient extends Client implements GroupClientInterface
             }
 
             return null;
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -59,13 +60,14 @@ public class GroupClient extends Client implements GroupClientInterface
             response = (Envelope) input.readObject();
 
             //If server indicates success, return true
-            if (response.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
                 return true;
             }
 
             return false;
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -88,13 +90,14 @@ public class GroupClient extends Client implements GroupClientInterface
             response = (Envelope) input.readObject();
 
             //If server indicates success, return true
-            if (response.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
                 return true;
             }
 
             return false;
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -116,13 +119,14 @@ public class GroupClient extends Client implements GroupClientInterface
             response = (Envelope) input.readObject();
 
             //If server indicates success, return true
-            if (response.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
                 return true;
             }
 
             return false;
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -143,13 +147,14 @@ public class GroupClient extends Client implements GroupClientInterface
 
             response = (Envelope) input.readObject();
             //If server indicates success, return true
-            if (response.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
                 return true;
             }
 
             return false;
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -172,14 +177,15 @@ public class GroupClient extends Client implements GroupClientInterface
             response = (Envelope) input.readObject();
 
             //If server indicates success, return the member list
-            if (response.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
                 return (List<String>) response.getObjContents().get(0); //This cast creates compiler warnings. Sorry.
             }
 
             return null;
 
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -201,13 +207,14 @@ public class GroupClient extends Client implements GroupClientInterface
 
             response = (Envelope) input.readObject();
             //If server indicates success, return true
-            if (response.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
                 return true;
             }
 
             return false;
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -229,13 +236,14 @@ public class GroupClient extends Client implements GroupClientInterface
 
             response = (Envelope) input.readObject();
             //If server indicates success, return true
-            if (response.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
                 return true;
             }
 
             return false;
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);

@@ -25,10 +25,11 @@ public class UserList implements java.io.Serializable
 
     public synchronized boolean checkUser(String username)
     {
-        if (this.list.containsKey(username))
+        if(this.list.containsKey(username))
         {
             return true;
-        } else
+        }
+        else
         {
             return false;
         }
@@ -98,9 +99,9 @@ public class UserList implements java.io.Serializable
 
         public void removeGroup(String group)
         {
-            if (!this.groups.isEmpty())
+            if(!this.groups.isEmpty())
             {
-                if (this.groups.contains(group))
+                if(this.groups.contains(group))
                 {
                     this.groups.remove(this.groups.indexOf(group));
                 }
@@ -114,9 +115,9 @@ public class UserList implements java.io.Serializable
 
         public void removeOwnership(String group)
         {
-            if (!this.ownership.isEmpty())
+            if(!this.ownership.isEmpty())
             {
-                if (this.ownership.contains(group))
+                if(this.ownership.contains(group))
                 {
                     this.ownership.remove(this.ownership.indexOf(group));
                 }

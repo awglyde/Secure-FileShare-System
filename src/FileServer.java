@@ -1,12 +1,6 @@
 /* FileServer loads files from FileList.bin.  Stores files in shared_files directory. */
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -42,30 +36,35 @@ public class FileServer extends Server
             FileInputStream fis = new FileInputStream(fileFile);
             fileStream = new ObjectInputStream(fis);
             this.fileList = (FileList) fileStream.readObject();
-        } catch (FileNotFoundException e)
+        }
+        catch(FileNotFoundException e)
         {
             System.out.println("FileList Does Not Exist. Creating FileList...");
 
             this.fileList = new FileList();
 
-        } catch (IOException e)
+        }
+        catch(IOException e)
         {
             System.out.println("Error reading from FileList file");
             System.exit(-1);
-        } catch (ClassNotFoundException e)
+        }
+        catch(ClassNotFoundException e)
         {
             System.out.println("Error reading from FileList file");
             System.exit(-1);
         }
 
         File file = new File("shared_files");
-        if (file.mkdir())
+        if(file.mkdir())
         {
             System.out.println("Created new shared_files directory");
-        } else if (file.exists())
+        }
+        else if(file.exists())
         {
             System.out.println("Found shared_files directory");
-        } else
+        }
+        else
         {
             System.out.println("Error creating shared_files directory");
         }
@@ -86,7 +85,7 @@ public class FileServer extends Server
             Socket sock = null;
             Thread thread = null;
 
-            while (running)
+            while(running)
             {
                 sock = serverSock.accept();
                 thread = new FileThread(sock);
@@ -94,7 +93,8 @@ public class FileServer extends Server
             }
 
             System.out.printf("%s shut down\n", this.getClass().getName());
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -114,7 +114,8 @@ class ShutDownListenerFS implements Runnable
         {
             outStream = new ObjectOutputStream(new FileOutputStream("FileList.bin"));
             outStream.writeObject(FileServer.fileList);
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -137,16 +138,18 @@ class AutoSaveFS extends Thread
                 {
                     outStream = new ObjectOutputStream(new FileOutputStream("FileList.bin"));
                     outStream.writeObject(FileServer.fileList);
-                } catch (Exception e)
+                }
+                catch(Exception e)
                 {
                     System.err.println("Error: " + e.getMessage());
                     e.printStackTrace(System.err);
                 }
 
-            } catch (Exception e)
+            }
+            catch(Exception e)
             {
                 System.out.println("Autosave Interrupted");
             }
-        } while (true);
+        } while(true);
     }
 }

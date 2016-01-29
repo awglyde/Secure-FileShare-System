@@ -1,14 +1,14 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyToken implements UserToken
+public class Token implements UserToken
 {
 
     private String issuer;
     private String subject;
     private ArrayList<String> groups;
 
-    public MyToken(String issuer, String subject, ArrayList<String> groups)
+    public Token(String issuer, String subject, ArrayList<String> groups)
     {
         this.issuer = issuer;
         this.subject = subject;

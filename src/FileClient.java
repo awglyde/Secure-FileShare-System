@@ -12,10 +12,11 @@ public class FileClient extends Client implements FileClientInterface
     public boolean delete(String filename, UserToken token)
     {
         String remotePath;
-        if (filename.charAt(0) == '/')
+        if(filename.charAt(0) == '/')
         {
             remotePath = filename.substring(1);
-        } else
+        }
+        else
         {
             remotePath = filename;
         }
@@ -27,18 +28,21 @@ public class FileClient extends Client implements FileClientInterface
             output.writeObject(env);
             env = (Envelope) input.readObject();
 
-            if (env.getMessage().compareTo("OK") == 0)
+            if(env.getMessage().compareTo("OK") == 0)
             {
                 System.out.printf("File %s deleted successfully\n", filename);
-            } else
+            }
+            else
             {
                 System.out.printf("Error deleting file %s (%s)\n", filename, env.getMessage());
                 return false;
             }
-        } catch (IOException e1)
+        }
+        catch(IOException e1)
         {
             e1.printStackTrace();
-        } catch (ClassNotFoundException e1)
+        }
+        catch(ClassNotFoundException e1)
         {
             e1.printStackTrace();
         }
@@ -48,7 +52,7 @@ public class FileClient extends Client implements FileClientInterface
 
     public boolean download(String sourceFile, String destFile, UserToken token)
     {
-        if (sourceFile.charAt(0) == '/')
+        if(sourceFile.charAt(0) == '/')
         {
             sourceFile = sourceFile.substring(1);
         }
@@ -58,7 +62,7 @@ public class FileClient extends Client implements FileClientInterface
         {
 
 
-            if (!file.exists())
+            if(!file.exists())
             {
                 file.createNewFile();
                 FileOutputStream fos = new FileOutputStream(file);
@@ -70,7 +74,7 @@ public class FileClient extends Client implements FileClientInterface
 
                 env = (Envelope) input.readObject();
 
-                while (env.getMessage().compareTo("CHUNK") == 0)
+                while(env.getMessage().compareTo("CHUNK") == 0)
                 {
                     fos.write((byte[]) env.getObjContents().get(0), 0, (Integer) env.getObjContents().get(1));
                     System.out.printf(".");
@@ -80,33 +84,37 @@ public class FileClient extends Client implements FileClientInterface
                 }
                 fos.close();
 
-                if (env.getMessage().compareTo("EOF") == 0)
+                if(env.getMessage().compareTo("EOF") == 0)
                 {
                     fos.close();
                     System.out.printf("\nTransfer successful file %s\n", sourceFile);
                     env = new Envelope("OK"); //Success
                     output.writeObject(env);
-                } else
+                }
+                else
                 {
                     System.out.printf("Error reading file %s (%s)\n", sourceFile, env.getMessage());
                     file.delete();
                     return false;
                 }
-            } else
+            }
+            else
             {
                 System.out.printf("Error couldn't create file %s\n", destFile);
                 return false;
             }
 
 
-        } catch (IOException e1)
+        }
+        catch(IOException e1)
         {
 
             System.out.printf("Error couldn't create file %s\n", destFile);
             return false;
 
 
-        } catch (ClassNotFoundException e1)
+        }
+        catch(ClassNotFoundException e1)
         {
             e1.printStackTrace();
         }
@@ -127,14 +135,15 @@ public class FileClient extends Client implements FileClientInterface
             e = (Envelope) input.readObject();
 
             //If server indicates success, return the member list
-            if (e.getMessage().equals("OK"))
+            if(e.getMessage().equals("OK"))
             {
                 return (List<String>) e.getObjContents().get(0); //This cast creates compiler warnings. Sorry.
             }
 
             return null;
 
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -146,7 +155,7 @@ public class FileClient extends Client implements FileClientInterface
                           UserToken token)
     {
 
-        if (destFile.charAt(0) != '/')
+        if(destFile.charAt(0) != '/')
         {
             destFile = "/" + destFile;
         }
@@ -168,11 +177,12 @@ public class FileClient extends Client implements FileClientInterface
             env = (Envelope) input.readObject();
 
             //If server indicates success, return the member list
-            if (env.getMessage().equals("READY"))
+            if(env.getMessage().equals("READY"))
             {
                 System.out.printf("Meta data upload successful\n");
 
-            } else
+            }
+            else
             {
 
                 System.out.printf("Upload failed: %s\n", env.getMessage());
@@ -183,17 +193,18 @@ public class FileClient extends Client implements FileClientInterface
             do
             {
                 byte[] buf = new byte[4096];
-                if (env.getMessage().compareTo("READY") != 0)
+                if(env.getMessage().compareTo("READY") != 0)
                 {
                     System.out.printf("Server error: %s\n", env.getMessage());
                     return false;
                 }
                 message = new Envelope("CHUNK");
                 int n = fis.read(buf); //can throw an IOException
-                if (n > 0)
+                if(n > 0)
                 {
                     System.out.printf(".");
-                } else if (n < 0)
+                }
+                else if(n < 0)
                 {
                     System.out.println("Read error");
                     return false;
@@ -209,34 +220,37 @@ public class FileClient extends Client implements FileClientInterface
 
 
             }
-            while (fis.available() > 0);
+            while(fis.available() > 0);
 
             //If server indicates success, return the member list
-            if (env.getMessage().compareTo("READY") == 0)
+            if(env.getMessage().compareTo("READY") == 0)
             {
 
                 message = new Envelope("EOF");
                 output.writeObject(message);
 
                 env = (Envelope) input.readObject();
-                if (env.getMessage().compareTo("OK") == 0)
+                if(env.getMessage().compareTo("OK") == 0)
                 {
                     System.out.printf("\nFile data upload successful\n");
-                } else
+                }
+                else
                 {
 
                     System.out.printf("\nUpload failed: %s\n", env.getMessage());
                     return false;
                 }
 
-            } else
+            }
+            else
             {
 
                 System.out.printf("Upload failed: %s\n", env.getMessage());
                 return false;
             }
 
-        } catch (Exception e1)
+        }
+        catch(Exception e1)
         {
             System.err.println("Error: " + e1.getMessage());
             e1.printStackTrace(System.err);

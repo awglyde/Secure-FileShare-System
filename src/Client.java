@@ -17,15 +17,16 @@ public abstract class Client
         System.out.println("attempting to connect");
 
   		/* TODO: Write this method */
-      return false;
+        return false;
     }
 
     public boolean isConnected()
     {
-        if (this.sock == null || !this.sock.isConnected())
+        if(this.sock == null || !this.sock.isConnected())
         {
             return false;
-        } else
+        }
+        else
         {
             return true;
         }
@@ -33,13 +34,14 @@ public abstract class Client
 
     public void disconnect()
     {
-        if (isConnected())
+        if(isConnected())
         {
             try
             {
                 Envelope message = new Envelope("DISCONNECT");
                 this.output.writeObject(message);
-            } catch (Exception e)
+            }
+            catch(Exception e)
             {
                 System.err.println("Error: " + e.getMessage());
                 e.printStackTrace(System.err);

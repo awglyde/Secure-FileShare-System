@@ -9,24 +9,17 @@
  *
  */
 
-import java.io.IOException;
-import java.io.FileNotFoundException;
-
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-
-import java.util.Scanner;
-
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class GroupServer extends Server
 {
 
     public static final int SERVER_PORT = 8765;
     public UserList userList;
+    public GroupList groupList;
 
     public GroupServer()
     {
@@ -57,7 +50,8 @@ public class GroupServer extends Server
             FileInputStream fis = new FileInputStream(userFile);
             userStream = new ObjectInputStream(fis);
             this.userList = (UserList) userStream.readObject();
-        } catch (FileNotFoundException e)
+        }
+        catch(FileNotFoundException e)
         {
             System.out.println("UserList File Does Not Exist. Creating UserList...");
             System.out.println("No users currently exist. Your account will be the administrator.");
@@ -69,11 +63,13 @@ public class GroupServer extends Server
             this.userList.addUser(username);
             this.userList.addGroup(username, "ADMIN");
             this.userList.addOwnership(username, "ADMIN");
-        } catch (IOException e)
+        }
+        catch(IOException e)
         {
             System.out.println("Error reading from UserList file");
             System.exit(-1);
-        } catch (ClassNotFoundException e)
+        }
+        catch(ClassNotFoundException e)
         {
             System.out.println("Error reading from UserList file");
             System.exit(-1);
@@ -93,13 +89,14 @@ public class GroupServer extends Server
             Socket sock = null;
             GroupThread thread = null;
 
-            while (true)
+            while(true)
             {
                 sock = serverSock.accept();
                 thread = new GroupThread(sock, this);
                 thread.start();
             }
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -108,6 +105,22 @@ public class GroupServer extends Server
     }
 
 }
+
+class GroupList
+{
+    public GroupList()
+    {
+
+    }
+
+    public void removeMember()
+    {
+
+    }
+
+
+}
+
 
 //This thread saves the user list
 class ShutDownListener extends Thread
@@ -127,7 +140,8 @@ class ShutDownListener extends Thread
         {
             outStream = new ObjectOutputStream(new FileOutputStream("UserList.bin"));
             outStream.writeObject(this.my_gs.userList);
-        } catch (Exception e)
+        }
+        catch(Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -157,16 +171,18 @@ class AutoSave extends Thread
                 {
                     outStream = new ObjectOutputStream(new FileOutputStream("UserList.bin"));
                     outStream.writeObject(this.my_gs.userList);
-                } catch (Exception e)
+                }
+                catch(Exception e)
                 {
                     System.err.println("Error: " + e.getMessage());
                     e.printStackTrace(System.err);
                 }
 
-            } catch (Exception e)
+            }
+            catch(Exception e)
             {
                 System.out.println("Autosave Interrupted");
             }
-        } while (true);
+        } while(true);
     }
 }
