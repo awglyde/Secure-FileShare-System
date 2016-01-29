@@ -16,8 +16,8 @@ public abstract class Client
     {
         System.out.println("attempting to connect");
 
-		/* TODO: Write this method */
-
+  		/* TODO: Write this method */
+      return false;
     }
 
     public boolean isConnected()

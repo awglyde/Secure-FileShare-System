@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Collections;
+
 /* T
  * his this.list represents the files on the server */
 
@@ -59,4 +63,4 @@ public class FileList implements java.io.Serializable
         }
         return null;
     }
-}	
+}

@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.Hashtable;
+
 /* This list represents the users on the server */
 
 public class UserList implements java.io.Serializable
@@ -122,4 +125,4 @@ public class UserList implements java.io.Serializable
 
     }
 
-}	
+}

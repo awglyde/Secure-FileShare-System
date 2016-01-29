@@ -1,4 +1,11 @@
 /* FileServer loads files from FileList.bin.  Stores files in shared_files directory. */
+import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -11,7 +18,7 @@ public class FileServer extends Server
 
     public FileServer()
     {
-        super(this.SERVER_PORT, "FilePile");
+        super(SERVER_PORT, "FilePile");
     }
 
     public FileServer(int _port)

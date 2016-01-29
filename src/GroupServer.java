@@ -9,9 +9,18 @@
  *
  */
 
+import java.io.IOException;
+import java.io.FileNotFoundException;
+
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+
+import java.util.Scanner;
+
 import java.net.ServerSocket;
 import java.net.Socket;
-
 
 public class GroupServer extends Server
 {
@@ -21,7 +30,7 @@ public class GroupServer extends Server
 
     public GroupServer()
     {
-        super(this.SERVER_PORT, "ALPHA");
+        super(SERVER_PORT, "ALPHA");
     }
 
     public GroupServer(int _port)

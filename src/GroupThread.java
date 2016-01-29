@@ -1,6 +1,11 @@
 /* This thread does all the work. It communicates with the client through Envelopes.
- * 
+ *
  */
+
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import java.util.ArrayList;
 
 import java.net.Socket;
 
