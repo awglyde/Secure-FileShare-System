@@ -12,7 +12,7 @@ Download JSON:
 ```https://code.google.com/archive/p/json-simple/```
 
 Any java files that utilize the jason-simple library will have to be compiled as such:
-```javac -classpath "C:\Path\To\JSON\jar" ClassName.java```
+``` javac -classpath "./resources/json-simple-1.1.1.jar" "./src/ClassName.java"```
 
 ### Contribution guidelines ###
 
