@@ -144,62 +144,128 @@ public class Database
         return true;
     }
 
+    // Removes the given group
     public boolean removeGroup(String groupName)
     {
-        // TODO
+        return null == this.groups.remove(groupName);
+    }
+
+    // Checks if user exists
+    public boolean userExists(String userName)
+    {
+        return this.users.get(userName) == null;
+    }
+
+    // Check if group exists
+    public boolean groupExists(String groupName)
+    {
+        return this.users.get(groupName) == null;
+    }
+
+    // Checks if user in group
+    public boolean userInGroup(String userName, String groupName)
+    {
+        Group g = this.groups.get(groupName);
+
+        for(int i = 0; i < this.users.size(); i++)
+        {
+            if(g.users.get(i).equals(userName))
+                return true;
+        }
         return false;
     }
 
-    public void addUser()
+    // Create new user with the given name and password
+    public void createUser(String name, String password)
     {
-        // TODO
+        this.users.put(name, new User(name, password));
     }
 
-    public void removeUser()
+    // Delete given user
+    public boolean deleteUser(String userName)
     {
-        // TODO
+        return null == this.users.remove(userName);
     }
 
-    public void createUser()
+    // Add a given user to the given group
+    public boolean addUserToGroup(String userName, String groupName)
     {
-        // TODO
+        if(!groupExists(groupName))
+            return false;
+
+        if(!userExists(userName))
+            return false;
+
+        if(userInGroup(userName, groupName))
+            return true;
+
+        this.groups.get(groupName).users.add(userName);
+        return true;
     }
 
-    public void deleteUser()
+    // Remove a given user from the given group
+    public boolean removeUserFromGroup(String userName, String groupName)
     {
-        // TODO
+        if(!groupExists(groupName))
+            return false;
+
+        if(!userExists(userName))
+            return false;
+
+        Group g = this.groups.get(groupName);
+
+        for(int i = 0; i < g.users.size(); i++)
+        {
+            if(g.users.get(i).equals(userName))
+            {
+                g.users.remove(i);
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public void changeOwner()
+    // Change the owner of a group to the given user. User must already be a member of the group.
+    public boolean changeOwner(String userName, String groupName)
     {
-        // TODO
+        if(!groupExists(groupName))
+            return false;
+        if(!userExists(userName))
+            return false;
+        if(!userInGroup(userName, groupName))
+            return false;
+
+        this.groups.get(groupName).owner = userName;
+        return true;
     }
 
-    public Group getGroup()
+    // Return the given group
+    public Group getGroup(String groupName)
     {
-        // TODO
-        return null;
+        return this.groups.get(groupName);
     }
 
-    /*
-      Returns a list of Group objects. If there are no groups, returns null.
-    */
+
+    // Returns a list of Group objects. If there are no groups, returns null.
     public ArrayList<Group> getGroups()
     {
-        //TODO
-        return null;
+        return (ArrayList<Group>) this.groups.values();
     }
 
-    public User getUser()
+    // Returns the given user
+    public User getUser(String userName)
     {
-        //TODO
-        return null;
+        return this.users.get(userName);
     }
 
-    public ArrayList<String> getUsers()
+    // Returns a list of User objects. If there are no users, returns null.
+    public ArrayList<String> getUsers(String groupName)
     {
-        //TODO
-        return null;
+        if(!groupExists(groupName))
+            return null;
+
+        return this.groups.get(groupName).users;
     }
 }
 
