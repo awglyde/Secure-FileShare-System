@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "name": "cs1671",
+      "owner": "Alex",
+      "users": [
+        "Alex",
+        "Ethan",
+        "Sam"
+      ]
+    },
+    {
+      "name": "cs1653",
+      "owner": "Ethan",
+      "users": [
+        "Ethan",
+        "Joel",
+        "John"
+      ]
+    }
+  ]
+}
