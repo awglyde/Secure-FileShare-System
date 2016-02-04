@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -15,8 +16,15 @@ public abstract class Client
     public boolean connect(final String server, final int port)
     {
         System.out.println("attempting to connect");
+        try
+        {
+            this.sock = new Socket(server, port);
+            return true;
+        }
+        catch(IOException ignored)
+        {
+        }
 
-  		/* TODO: Write this method */
         return false;
     }
 
