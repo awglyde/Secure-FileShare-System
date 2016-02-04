@@ -310,8 +310,8 @@ class Group
 
     public Group(JSONObject json)
     {
-        this.name = (String) json.get("name"));
-        this.owner = (String) json.get("owner"));
+        this.name = (String) json.get("name");
+        this.owner = (String) json.get("owner");
         for(Object use: (JSONArray) json.get("users"))
         {
             this.users.add((String) use);
