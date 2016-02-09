@@ -20,17 +20,11 @@ public class UserClient
         {
             GroupClient groupClient = new GroupClient();
             FileClient fileClient = new FileClient();
-            // Connect to the specified server
-            final Socket sock = new Socket(serverName, GroupServer.SERVER_PORT);
-            System.out.println("Connected to " + serverName + " on port " + GroupServer.SERVER_PORT);
 
-            // Set up I/O streams with the server
-            final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-            final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+            groupClient.connect(serverName,  GroupServer.SERVER_PORT);
 
             if (groupClient.isConnected())
             {
-
                 System.out.println("Enter username to get token: ");
                 BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
                 groupClient.getToken(in.readLine());
@@ -39,9 +33,6 @@ public class UserClient
             {
                 System.out.println("System error. Group Server is not running.");
             }
-
-            // shut things down
-            sock.close();
 
         } catch (Exception e)
         {
