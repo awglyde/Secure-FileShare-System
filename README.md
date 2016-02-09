@@ -8,11 +8,19 @@ CS1653 - Applied Cryptography
 
 ### How do I get set up? ###
 
-Download JSON:
-```https://code.google.com/archive/p/json-simple/```
+1. Download the source code.
+2. Run the following command from the "src" folder to compile.
 
-Any java files that utilize the jason-simple library will have to be compiled as such:
-``` javac -classpath "./resources/json-simple-1.1.1.jar" "./src/ClassName.java"```
+    ``` javac *.java '''
+
+3. To run the code you must run the Group Server and the File Server. To do that use the following commands:
+
+    ''' java RunGroupServer '''
+    ''' java RunFileServer '''
+
+4. Then run the User Client to utilize the Group Server and File Server. Follow the prompt.
+
+    ''' java UserClient '''
 
 ### Contribution guidelines ###
 
