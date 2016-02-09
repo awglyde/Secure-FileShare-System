@@ -44,12 +44,7 @@ public class FileServer extends Server
             this.fileList = new FileList();
 
         }
-        catch(IOException e)
-        {
-            System.out.println("Error reading from FileList file");
-            System.exit(-1);
-        }
-        catch(ClassNotFoundException e)
+        catch(IOException | ClassNotFoundException e)
         {
             System.out.println("Error reading from FileList file");
             System.exit(-1);
