@@ -4,25 +4,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-/**
- * Simple client class.  This class connects to an EchoServer to send
- * text back and forth.  Java message serialization is used to pass
- * Message objects around.
- *
- * @author Adam J. Lee (adamlee@cs.pitt.edu)
- */
 public class UserClient
 {
 
     /**
      * Main method.
      *
-     * @param args First argument specifies the server to connect to
+     * @param args (No Arguments)
      */
     public static void main(String[] args)
     {
         String serverName = "localhost";
-        
+
         try
         {
             GroupClient groupClient = new GroupClient();
@@ -30,6 +23,17 @@ public class UserClient
             // Connect to the specified server
             final Socket sock = new Socket(serverName, GroupServer.SERVER_PORT);
             System.out.println("Connected to " + serverName + " on port " + GroupServer.SERVER_PORT);
+            if (groupClient.isConnected())
+            {
+
+                System.out.println("Enter username to get token: ");
+                BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+                groupClient.getToken(in.readLine());
+            }
+            else
+            {
+                System.out.println("System error. Group Server is not running.");
+            }
 
             // shut things down
             sock.close();
@@ -42,26 +46,4 @@ public class UserClient
 
     } //-- end main(String[])
 
-
-    /**
-     * Simple method to print a prompt and read a line of text.
-     *
-     * @return A line of text read from the console
-     */
-    private static String readSomeText()
-    {
-        try
-        {
-            System.out.println("Enter a line of text, or type \"EXIT\" to quit.");
-            System.out.print(" > ");
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            return in.readLine();
-        } catch (Exception e)
-        {
-            // Uh oh...
-            return "";
-        }
-
-    } //-- end readSomeText()
-
-} //-- end class EchoClient
+} //-- end class UserClient
