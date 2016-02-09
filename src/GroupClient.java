@@ -19,7 +19,7 @@ public class GroupClient extends Client implements GroupClientInterface
             output.writeObject(message);
 
             //Get the response from the server
-            response = (Envelope) input.readObject();
+             response = (Envelope) input.readObject();
 
             //Successful response
             if(response.getMessage().equals("OK"))

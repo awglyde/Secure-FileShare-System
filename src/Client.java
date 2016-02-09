@@ -25,7 +25,6 @@ public abstract class Client
             this.output = new ObjectOutputStream(sock.getOutputStream());
             this.input = new ObjectInputStream(sock.getInputStream());
 
-
             System.out.println("Connected to " + serverName + " on port " + GroupServer.SERVER_PORT);
             return true;
         }

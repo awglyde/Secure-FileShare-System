@@ -8,7 +8,7 @@ import java.util.List;
  * that your code can interface with the tokens created by your group
  * server.
  */
-public interface UserToken
+public interface UserToken 
 {
     /**
      * This method should return a string describing the issuer of

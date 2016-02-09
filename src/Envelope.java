@@ -30,5 +30,4 @@ public class Envelope implements java.io.Serializable
     {
         this.objContents.add(object);
     }
-
 }
