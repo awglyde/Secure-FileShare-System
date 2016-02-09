@@ -20,9 +20,11 @@ public abstract class Client
         {
             this.sock = new Socket(serverName, port);
 
+            // TODO: ask professor why output and input need to be in this specific order
             // open the input/output stream objects to communicate with the server
             this.output = new ObjectOutputStream(sock.getOutputStream());
             this.input = new ObjectInputStream(sock.getInputStream());
+
 
             System.out.println("Connected to " + serverName + " on port " + GroupServer.SERVER_PORT);
             return true;
