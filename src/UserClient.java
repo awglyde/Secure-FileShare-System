@@ -22,22 +22,14 @@ public class UserClient
     public static void main(String[] args)
     {
         String serverName = "localhost";
-
-        // Error checking for arguments
-        if (args.length != 1)
-        {
-            System.err.println("Not enough arguments.\n");
-            System.err.println("Usage:  java EchoClient <Server name or IP>\n");
-            System.exit(-1);
-        }
-
+        
         try
         {
             GroupClient groupClient = new GroupClient();
             FileClient fileClient = new FileClient();
             // Connect to the specified server
-            final Socket sock = new Socket(serverName, EchoServer.SERVER_PORT);
-            System.out.println("Connected to " + serverName + " on port " + EchoServer.SERVER_PORT);
+            final Socket sock = new Socket(serverName, GroupServer.SERVER_PORT);
+            System.out.println("Connected to " + serverName + " on port " + GroupServer.SERVER_PORT);
 
             // shut things down
             sock.close();
