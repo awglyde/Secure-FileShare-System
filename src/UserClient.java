@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class UserClient
@@ -9,47 +10,108 @@ public class UserClient
      *
      * @param args (No Arguments)
      */
+    static String serverName = "localhost";
+
     public static void main(String[] args)
     {
-        String serverName = "localhost";
+        menu();
+    }
+
+    public static Token connectGroupServer()
+    {
+
         Token userToken = null;
+        GroupClient groupClient = new GroupClient();
+        groupClient.connect(serverName,  GroupServer.SERVER_PORT);
 
-        try
+        if (groupClient.isConnected())
         {
-            GroupClient groupClient = new GroupClient();
-            FileClient fileClient = new FileClient();
+            System.out.println("Enter username to get token: ");
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-            groupClient.connect(serverName,  GroupServer.SERVER_PORT);
-
-            if (groupClient.isConnected())
+            String username = "";
+            try
             {
-                System.out.println("Enter username to get token: ");
-                BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-                userToken = (Token) groupClient.getToken(in.readLine()); // Create token for this user
+                 username = in.readLine();
+            }
+            catch(IOException e)
+            {
+                System.out.println("Error parsing username. Exiting...");
+            }
 
-                if(userToken == null)
-                {
-                    System.out.println("Your username was not recognized.");
-                }
-                else
-                {
-                    System.out.println("Username Accepted!");
-                }
+            userToken = (Token) groupClient.getToken(username);
 
-                groupClient.disconnect();
-
+            if(userToken == null)
+            {
+                System.out.println("Your username was not recognized.");
             }
             else
             {
-                System.out.println("System error. Group Server is not running.");
+                System.out.println("Username Accepted!");
             }
-
-        } catch (Exception e)
+            groupClient.disconnect();
+        }
+        else
         {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace(System.err);
+            System.out.println("System error. Group Server is not running.");
+        }
+        return userToken;
+    }
+
+    public static void connectFileServer()
+    {
+        FileClient fileClient = new FileClient();
+
+    }
+
+
+    public static void menu()
+    {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
+        try
+        {
+            while(true)
+            {
+                System.out.println("1. \tGroup Server");
+                System.out.println("2. \tFile Server");
+                System.out.println("0. \tExit");
+
+                String choice = in.readLine();
+
+                switch(choice)
+                {
+                    case "1":
+                        System.out.println("Group Server");
+                        Token userToken = connectGroupServer();
+
+                        break;
+                    case "2":
+                        connectFileServer();
+
+                        break;
+                    case "0":
+                        System.out.println("Exiting");
+
+                        return;
+                    case "-help":
+                        System.out.println("You're screwed. Sorry...");
+
+                        break;
+                    default:
+                        System.out.println("Command not recognized");
+
+                }
+
+            }
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
         }
 
-    } //-- end main(String[])
+
+    }
+
 
 } //-- end class UserClient
