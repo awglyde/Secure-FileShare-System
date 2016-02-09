@@ -66,20 +66,34 @@ public class UserList implements java.io.Serializable
     }
 
 
-    class User implements java.io.Serializable
+    public static class User implements java.io.Serializable
     {
-
-        /**
-         *
-         */
         private static final long serialVersionUID = -6699986336399821598L;
         private ArrayList<String> groups;
         private ArrayList<String> ownership;
+
+        String username = "";
+        Token userToken = null;
 
         public User()
         {
             this.groups = new ArrayList<String>();
             this.ownership = new ArrayList<String>();
+        }
+
+        public User(String username, Token userToken)
+        {
+            this.groups = new ArrayList<String>();
+            this.ownership = new ArrayList<String>();
+
+            this.username = username;
+            this.userToken = userToken;
+        }
+
+        public boolean isAdmin()
+        {
+            //TODO
+            return false;
         }
 
         public ArrayList<String> getGroups()

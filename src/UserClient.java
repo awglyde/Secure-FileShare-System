@@ -5,43 +5,31 @@ import java.io.InputStreamReader;
 public class UserClient
 {
 
-    /**
-     * Main method.
-     *
-     * @param args (No Arguments)
-     */
-    static String serverName = "localhost";
 
-    public static void main(String[] args)
+    static String serverName = "localhost";
+    static GroupClient groupClient = new GroupClient();
+    static String username = "";
+
+    public static void connectGroupServer()
     {
-        menu();
+        //TODO
     }
 
-    public static Token connectGroupServer()
+    public static void connectFileServer()
     {
+        //TODO
+    }
 
-        Token userToken = null;
-        GroupClient groupClient = new GroupClient();
+    public static Token getToken(String username)
+    {
         groupClient.connect(serverName,  GroupServer.SERVER_PORT);
+        Token newToken = (Token) groupClient.getToken(username);
 
         if (groupClient.isConnected())
         {
-            System.out.println("Enter username to get token: ");
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-            String username = "";
-            try
-            {
-                 username = in.readLine();
-            }
-            catch(IOException e)
-            {
-                System.out.println("Error parsing username. Exiting...");
-            }
 
-            userToken = (Token) groupClient.getToken(username);
-
-            if(userToken == null)
+            if(newToken == null)
             {
                 System.out.println("Your username was not recognized.");
             }
@@ -55,17 +43,10 @@ public class UserClient
         {
             System.out.println("System error. Group Server is not running.");
         }
-        return userToken;
+        return newToken;
     }
 
-    public static void connectFileServer()
-    {
-        FileClient fileClient = new FileClient();
-
-    }
-
-
-    public static void menu()
+    public static void chooseServer(UserList.User user)
     {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -83,7 +64,7 @@ public class UserClient
                 {
                     case "1":
                         System.out.println("Group Server");
-                        Token userToken = connectGroupServer();
+                        connectGroupServer();
 
                         break;
                     case "2":
@@ -109,9 +90,26 @@ public class UserClient
         {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String args[])
+    {
+        System.out.println("Enter username to login: ");
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
+        String username = "";
+        try
+        {
+            username = in.readLine();
+            UserList.User user = new UserList.User(username, getToken(username));
+            chooseServer(user);
+        }
+        catch(IOException e)
+        {
+            System.out.println("Error parsing username. Exiting...");
+        }
 
 
     }
-
 
 } //-- end class UserClient
