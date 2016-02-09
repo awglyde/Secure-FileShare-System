@@ -23,6 +23,11 @@ public class UserClient
             // Connect to the specified server
             final Socket sock = new Socket(serverName, GroupServer.SERVER_PORT);
             System.out.println("Connected to " + serverName + " on port " + GroupServer.SERVER_PORT);
+
+            // Set up I/O streams with the server
+            final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+            final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+
             if (groupClient.isConnected())
             {
 
