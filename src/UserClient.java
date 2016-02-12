@@ -43,23 +43,27 @@ public class UserClient
 
                 switch(choice)
                 {
-                    case "1":
-                        if (user.isAdmin())
+                    case "1": // Create a user
+                        if (user.isAdmin()){
                             System.out.println("User is admin! great");
+                            // If user is admin, prompt for username to create
+                        }
                         break;
-                    case "2":
-                        if (user.isAdmin())
+                    case "2": // Delete a user
+                        if (user.isAdmin()) {
                             System.out.println("User is admin! great");
+                            // If user is admin, prompt for username to delete
+                        }
                         break;
-                    case "3":
+                    case "3": // Create a group
                         break;
-                    case "4":
+                    case "4": // Delete a group
                         break;
-                    case "5":
+                    case "5": // Add a user to a group
                         break;
-                    case "6":
+                    case "6": // Remove a user from a group
                         break;
-                    case "7":
+                    case "7": // List all of the members of a group
                         break;
                     case "0":
                         return;
