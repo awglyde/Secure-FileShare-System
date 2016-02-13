@@ -25,6 +25,11 @@ public class FileThread extends Thread
 
             do
             {
+
+                // flushes / resets the output stream
+                output.flush();
+                output.reset();
+                
                 Envelope e = (Envelope) input.readObject();
                 System.out.println("Request received: " + e.getMessage());
 
