@@ -92,7 +92,6 @@ public class UserList implements java.io.Serializable
 
         public boolean isAdmin()
         {
-            System.out.println(this.userToken.getGroups());
             if (this.userToken.getGroups().contains("ADMIN"))
                 return true;
             else

@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class UserClient
 {
@@ -13,23 +14,45 @@ public class UserClient
     public static void connectGroupServer() throws IOException
     {
         //TODO
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         groupClient.connect(serverName,  GroupServer.SERVER_PORT);
-        String choice = "";
         if (groupClient.isConnected())
         {
-            System.out.println("Welcome to the group server! Please choose from the list of options.\n\n");
+            groupOptions();
+        }
+        else
+        {
+            System.out.println("System error. Group Server is not running.");
+        }
 
-            while (true)
+        groupClient.disconnect();
+    }
+
+    public static void groupOptions() throws IOException
+    {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        String choice = "";
+        System.out.println("Welcome to the group server! Please choose from the list of options.\n\n");
+        String[] menuOptions = new String[]{"Disconnect from group server",
+                                            "Add (create) a group",
+                                            "Remove (delete) a group",
+                                            "Add a user to a group",
+                                            "Remove a user from a group",
+                                            "List all of the members of a group",
+                                            "Add (create) a user",
+                                            "Remove (delete) a user"};
+
+        while (true)
+        {
+
+            for (int i = 0; i < menuOptions.length-2; i++)
             {
-                System.out.println("1. \tAdd (create) a user");
-                System.out.println("2. \tRemove (delete) a user");
-                System.out.println("3. \tAdd (create) a group");
-                System.out.println("4. \tRemove (delete) a group");
-                System.out.println("5. \tAdd a user to a group");
-                System.out.println("6. \tRemove a user from a group");
-                System.out.println("7. \tList all of the members of a group");
-                System.out.println("0. \tDisconnect from group server");
+                System.out.println(i+". \t"+menuOptions[i]);
+            }
+
+            if (user.isAdmin())
+            {
+                System.out.println("6. \t"+menuOptions[6]);
+                System.out.println("7. \t"+menuOptions[7]);
                 System.out.print(user.username+" >> ");
 
                 try
@@ -43,17 +66,17 @@ public class UserClient
 
                 switch(choice)
                 {
+
+                    case "0":
+                        in.close();
+                        return;
                     case "1": // Create a user
-                        if (user.isAdmin()){
                             System.out.println("User is admin! great");
                             // If user is admin, prompt for username to create
-                        }
                         break;
                     case "2": // Delete a user
-                        if (user.isAdmin()) {
                             System.out.println("User is admin! great");
                             // If user is admin, prompt for username to delete
-                        }
                         break;
                     case "3": // Create a group
                         break;
@@ -65,8 +88,45 @@ public class UserClient
                         break;
                     case "7": // List all of the members of a group
                         break;
+                    case "-help":
+                        System.out.println("You're screwed. Sorry...");
+                        break;
+                    default:
+                        System.out.println("Command not recognized");
+
+                }
+            }
+            else
+            {
+                System.out.print(user.username+" >> ");
+                try
+                {
+                    choice = in.readLine();
+                }
+                catch(IOException e)
+                {
+                    System.out.println("Error parsing username. Exiting...");
+                }
+
+                switch(choice)
+                {
                     case "0":
+                        in.close();
                         return;
+                    case "1": // Create a user
+                            System.out.println("User is admin! great");
+                            // If user is admin, prompt for username to create
+                        break;
+                    case "2": // Delete a user
+                            System.out.println("User is admin! great");
+                            // If user is admin, prompt for username to delete
+                        break;
+                    case "3": // Create a group
+                        break;
+                    case "4": // Delete a group
+                        break;
+                    case "5": // Add a user to a group
+                        break;
                     case "-help":
                         System.out.println("You're screwed. Sorry...");
                         break;
@@ -76,12 +136,6 @@ public class UserClient
                 }
             }
         }
-        else
-        {
-            System.out.println("System error. Group Server is not running.");
-        }
-        in.close();
-        groupClient.disconnect();
     }
 
     public static void connectFileServer()
