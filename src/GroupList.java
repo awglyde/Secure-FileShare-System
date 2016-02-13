@@ -82,6 +82,7 @@ public class GroupList implements java.io.Serializable
 
         public ArrayList<String> getMemberNames()
         {
+            System.out.println("NUM OF MEM:" + groupMembers.size());
             return this.groupMembers;
         }
 

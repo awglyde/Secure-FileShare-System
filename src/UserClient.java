@@ -34,148 +34,135 @@ public class UserClient
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         String choice = "";
         System.out.println("Welcome to the group server! Please choose from the list of options.\n\n");
+
         String[] menuOptions = new String[]{"Disconnect from group server",
                                             "Add (create) a group",
                                             "Remove (delete) a group",
                                             "Add a user to a group",
                                             "Remove a user from a group",
-                                            "List all of the members of a group",
-                                            "Add (create) a user",
-                                            "Remove (delete) a user"};
+                                            "List all of the members of a group"};
+
+        String[] adminOptions = new String[]{"Add (create) a user",
+                                             "Remove (delete) a user"};
 
         while (true)
         {
-
-            for (int i = 0; i < menuOptions.length-2; i++)
+            for (int i = 0; i < menuOptions.length; i++)
             {
                 System.out.println(i+". \t"+menuOptions[i]);
             }
 
+            // print admin options if they are an admin
             if (userToken.isAdmin())
             {
-                System.out.println("6. \t"+menuOptions[6]);
-                System.out.println("7. \t"+menuOptions[7]);
-                System.out.print(username+" >> ");
-
-                try
-                {
-                    choice = inputValidation(in.readLine());
-                }
-                catch(IOException e)
-                {
-                    System.out.println("Error parsing username. Exiting...");
+                for(int i = 0; i < adminOptions.length; i++){
+                    System.out.println((i+menuOptions.length) + ". \t" + adminOptions[i]);
                 }
 
-                // Admin group options
+            }
+
+            System.out.print(username+" >> ");
+
+            try
+            {
+                choice = inputValidation(in.readLine());
+            }
+            catch(IOException e)
+            {
+                System.out.println("Error parsing username. Exiting...");
+            }
+
+            // Options for Admins Only
+            boolean selectedAdminOption = false;
+            if(userToken.isAdmin()){
                 switch(choice)
                 {
-
-                    case "0":
-
-                        return;
-                    case "1": // Create a group
-                        System.out.println("Enter a group name: ");
-                        String newGroupName = inputValidation(in.readLine());
-                        if (groupClient.createGroup(newGroupName, userToken)) {
-                            System.out.println("Group creation succeeded!");
-                        }
-                        else
-                            System.out.println("Group creation failed. :(");
-                        break;
-                    case "2": // Delete a group
-                        break;
-                    case "3": // Add a user to a group
-                        // GET the owner of the group specified
-                        // Make sure the userToken matches the owner of the group
-                        // then add the user to the group
-                        System.out.println("Enter a user name to add: ");
-                        String userToAdd = inputValidation(in.readLine());
-
-                        System.out.println("Enter a group to add "+userToAdd+" to: ");
-                        String groupToAddUserTo = inputValidation(in.readLine());
-
-                        if (groupClient.addUserToGroup(userToAdd, groupToAddUserTo, userToken))
-                            System.out.println(userToAdd+" added successfully to "+groupToAddUserTo+".");
-                        else
-                        {
-                            System.out.println("Failed to add user to group.");
-                            System.out.println("You must be the owner of a group to add a user.");
-                        }
-
-                        break;
-                    case "4": // Remove a user from a group
-                        break;
-                    case "5": // List all the members of a group
-                        System.out.println("Enter a group name you're a member of to list: ");
-                        String groupName = inputValidation(in.readLine());
-                        List<String> groupMembers = groupClient.listMembers(groupName, userToken);
-                        if (groupMembers != null)
-                        {
-                            System.out.println(groupName+": ");
-                            for (String memberName : groupMembers)
-                                System.out.println(memberName);
-
-                        }
-                        else
-                        {
-                            System.out.println("Group does not exist");
-                        }
-                        break;
                     case "6": // Create a user
                         System.out.println("Enter username of new user to create: ");
                         String newUserName = inputValidation(in.readLine());
                         if (groupClient.createUser(newUserName, userToken))
+                        {
                             System.out.println("User created successfully! great");
+                        }
+                        selectedAdminOption = true;
                         break;
                     case "7": // Delete a user
                         System.out.println("Enter username of user to delete: ");
                         String userToDelete = inputValidation(in.readLine());
                         if (groupClient.deleteUser(userToDelete, userToken))
+                        {
                             System.out.println("User deleted successfully! great");
+                        }
+                        selectedAdminOption = true;
                         break;
-                    case "-help":
-                        System.out.println("You're screwed. Sorry...");
-                        break;
-                    default:
-                        System.out.println("Command not recognized");
-
                 }
             }
-            else
+
+            // Options for Any Users
+            switch(choice)
             {
-                System.out.print(username+" >> ");
-                try
-                {
-                    choice = inputValidation(in.readLine());
-                }
-                catch(IOException e)
-                {
-                    System.out.println("Error parsing username. Exiting...");
-                }
+                case "0":
+                    return;
+                case "1": // Create a group
+                    System.out.println("Enter a group name: ");
+                    String newGroupName = inputValidation(in.readLine());
+                    if (groupClient.createGroup(newGroupName, userToken))
+                    {
+                        System.out.println("Group creation succeeded!");
+                    }
+                    else
+                    {
+                        System.out.println("Group creation failed. :(");
+                    }
+                    break;
+                case "2": // Delete a group
+                    break;
+                case "3": // Add a user to a group
+                    // GET the owner of the group specified
+                    // Make sure the userTo`ken matches the owner of the group
+                    // then add the user to the group
+                    System.out.println("Enter a user name to add: ");
+                    String userToAdd = inputValidation(in.readLine());
 
-                // User group options
-                switch(choice)
-                {
-                    case "0":
+                    System.out.println("Enter a group to add "+userToAdd+" to: ");
+                    String groupToAddUserTo = inputValidation(in.readLine());
 
-                        return;
-                    case "1": // Create a group
-                        break;
-                    case "2": // Delete a group
-                        break;
-                    case "3": // Add a user to a group
-                        break;
-                    case "4": // Remove a user from a group
-                        break;
-                    case "5": // List all the members of a group
-                        break;
-                    case "-help":
-                        System.out.println("You're screwed. Sorry...");
-                        break;
-                    default:
-                        System.out.println("Command not recognized");
-
-                }
+                    if (groupClient.addUserToGroup(userToAdd, groupToAddUserTo, userToken))
+                    {
+                        System.out.println(userToAdd+" added successfully to "+groupToAddUserTo+".");
+                    }
+                    else
+                    {
+                        // TODO update error warning, could fail if user doesn't exist, etc...
+                        System.out.println("Failed to add user to group.");
+                        System.out.println("You must be the owner of a group to add a user.");
+                    }
+                    break;
+                case "4": // Remove a user from a group
+                    break;
+                case "5": // List all the members of a group
+                    System.out.println("Enter a group name you're a member of to list: ");
+                    String groupName = inputValidation(in.readLine());
+                    List<String> groupMembers = groupClient.listMembers(groupName, userToken);
+                    if (groupMembers != null)
+                    {
+                        System.out.println(groupName+": ");
+                        for (String memberName : groupMembers)
+                            System.out.println(memberName);
+                    }
+                    else
+                    {
+                        System.out.println("Group does not exist");
+                    }
+                    break;
+                case "-help":
+                    System.out.println("You're screwed. Sorry...");
+                    break;
+                default:
+                    if(!selectedAdminOption)
+                    {
+                        System.out.println("Command not recognized.");
+                    }
             }
         }
     }
