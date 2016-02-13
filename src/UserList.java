@@ -81,23 +81,6 @@ public class UserList implements java.io.Serializable
             this.ownership = new ArrayList<String>();
         }
 
-        public User(String username, Token userToken)
-        {
-            this.groups = new ArrayList<String>();
-            this.ownership = new ArrayList<String>();
-
-            this.username = username;
-            this.userToken = userToken;
-        }
-
-        public boolean isAdmin()
-        {
-            if (this.userToken.getGroups().contains("ADMIN"))
-                return true;
-            else
-                return false;
-        }
-
         public ArrayList<String> getGroups()
         {
             return this.groups;

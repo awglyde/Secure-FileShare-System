@@ -57,4 +57,14 @@ public class Token implements UserToken, java.io.Serializable
         return this.groups;
     }
 
+
+    public boolean isAdmin()
+    {
+        if (this.getGroups().contains("ADMIN"))
+            return true;
+        else
+            return false;
+    }
+
+
 }

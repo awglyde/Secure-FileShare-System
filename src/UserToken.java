@@ -8,7 +8,7 @@ import java.util.List;
  * that your code can interface with the tokens created by your group
  * server.
  */
-public interface UserToken 
+public interface UserToken
 {
     /**
      * This method should return a string describing the issuer of
@@ -42,5 +42,10 @@ public interface UserToken
      * @return The list of group memberships encoded in this token
      */
     public List<String> getGroups();
+
+    /*
+    * This method returns whether or not the user is ADMIN
+    */
+    public boolean isAdmin();
 
 }   //-- end interface UserToken

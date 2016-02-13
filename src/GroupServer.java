@@ -148,7 +148,9 @@ class AutoSave extends Thread
         {
             try
             {
-                Thread.sleep(300000); //Save group and user lists every 5 minutes
+                // TODO: change this back to 5 minutes
+                // Thread.sleep(300000); //Save group and user lists every 5 minutes
+                Thread.sleep(10000); //Save group and user lists every 5 minutes
                 System.out.println("Autosave group and user lists...");
                 ObjectOutputStream outStream;
                 try

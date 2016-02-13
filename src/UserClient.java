@@ -9,7 +9,7 @@ public class UserClient
     static String serverName = "localhost";
     static GroupClient groupClient = new GroupClient();
     static String username = "";
-    static UserList.User user;
+    static UserToken userToken = null;
 
     public static void connectGroupServer() throws IOException
     {
@@ -49,11 +49,11 @@ public class UserClient
                 System.out.println(i+". \t"+menuOptions[i]);
             }
 
-            if (user.isAdmin())
+            if (userToken.isAdmin())
             {
                 System.out.println("6. \t"+menuOptions[6]);
                 System.out.println("7. \t"+menuOptions[7]);
-                System.out.print(user.username+" >> ");
+                System.out.print(username+" >> ");
 
                 try
                 {
@@ -74,13 +74,14 @@ public class UserClient
                     case "1": // Create a group
                         System.out.println("Enter a group name: ");
                         String newGroupName = inputValidation(in.readLine());
-                        if (groupClient.createGroup(newGroupName, user.userToken))
+                        if (groupClient.createGroup(newGroupName, userToken)) {
+                            // user.addOwnership(newGroupName);
                             System.out.println("Group creation succeeded!");
+                        }
                         else
                             System.out.println("Group creation failed. :(");
                         break;
                     case "2": // Delete a group
-                        
                         break;
                     case "3": // Add a user to a group
                         break;
@@ -89,10 +90,16 @@ public class UserClient
                     case "5": // List all the members of a group
                         break;
                     case "6": // Create a user
-                        System.out.println("User is admin! great");
+                        System.out.println("Enter username of new user to create: ");
+                        String newUserName = inputValidation(in.readLine());
+                        if (groupClient.createUser(newUserName, userToken))
+                            System.out.println("User created successfully! great");
                         break;
                     case "7": // Delete a user
-                        System.out.println("User is admin! great");
+                        System.out.println("Enter username of user to delete: ");
+                        String userToDelete = inputValidation(in.readLine());
+                        if (groupClient.deleteUser(userToDelete, userToken))
+                            System.out.println("User deleted successfully! great");
                         break;
                     case "-help":
                         System.out.println("You're screwed. Sorry...");
@@ -104,7 +111,7 @@ public class UserClient
             }
             else
             {
-                System.out.print(user.username+" >> ");
+                System.out.print(username+" >> ");
                 try
                 {
                     choice = inputValidation(in.readLine());
@@ -152,26 +159,14 @@ public class UserClient
         Token newToken = (Token) groupClient.getToken(username);
 
         if (groupClient.isConnected())
-        {
-
-            if(newToken == null)
-            {
-                System.out.println("Your username was not recognized.");
-            }
-            else
-            {
-                System.out.println("Username Accepted!");
-            }
             groupClient.disconnect();
-        }
         else
-        {
             System.out.println("System error. Group Server is not running.");
-        }
+
         return newToken;
     }
 
-    public static void chooseServer(UserList.User user) throws IOException
+    public static void chooseServer() throws IOException
     {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -197,6 +192,7 @@ public class UserClient
 
                         break;
                     case "0":
+                        in.close();
                         System.out.println("Exiting");
 
                         return;
@@ -229,12 +225,16 @@ public class UserClient
         System.out.println("Enter username to login: ");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-        String username = "";
         try
         {
             username = inputValidation(in.readLine());
-            user = new UserList.User(username, getToken(username));
-            chooseServer(user);
+            userToken = getToken(username);
+            if (userToken != null) {
+                System.out.println("Token acquired!");
+                chooseServer();
+            }
+            else
+                System.out.println("Your username was not recognized. Contact administrator");
         }
         catch(IOException e)
         {
