@@ -1,2 +1,4 @@
 *.class
 *.bin
+shared_files/
+*.txt
