@@ -12,9 +12,9 @@ public class GroupList implements java.io.Serializable
     private static final long serialVersionUID = 7660378893561417352L;
     private Hashtable<String, Group> list = new Hashtable<String, Group>();
 
-    public synchronized void addGroup(String groupName)
+    public synchronized void addGroup(String owner, String groupName)
     {
-        Group newGroup = new Group();
+        Group newGroup = new Group(owner);
         this.list.put(groupName, newGroup);
     }
 
@@ -62,10 +62,11 @@ public class GroupList implements java.io.Serializable
         private ArrayList<String> groupMembers;
         String owner;
 
-        public Group()
+        public Group(String owner)
         {
             this.groupMembers = new ArrayList<String>();
-            this.owner = null;
+            groupMembers.add(owner);
+            this.owner = owner;
         }
 
         public ArrayList<String> getMemberNames()

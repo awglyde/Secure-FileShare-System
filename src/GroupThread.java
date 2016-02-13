@@ -56,7 +56,7 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("CUSER")) //Client wants to create a user
                 {
-                    if(message.getObjContents().size() < 2)
+                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
                     {
                         response = new Envelope("FAIL");
                     }
@@ -64,8 +64,10 @@ public class GroupThread extends Thread
                     {
                         response = new Envelope("FAIL");
 
+                        // Checking first param isn't null
                         if(message.getObjContents().get(0) != null)
                         {
+                            // Checking second param isn't null
                             if(message.getObjContents().get(1) != null)
                             {
                                 String username = (String) message.getObjContents().get(0); //Extract the username
@@ -112,6 +114,32 @@ public class GroupThread extends Thread
                 else if(message.getMessage().equals("CGROUP")) //Client wants to create a group
                 {
                     /* TODO:  Write this handler */
+                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking first param isn't null
+                        if(message.getObjContents().get(0) != null)
+                        {
+                            // Checking second param isn't null
+                            if(message.getObjContents().get(1) != null)
+                            {
+                                String groupname = (String) message.getObjContents().get(0); //Extract the username
+                                UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract the token
+
+                                if(createGroup(groupname, yourToken))
+                                {
+                                    response = new Envelope("OK"); //Success
+                                }
+                            }
+                        }
+                    }
+
+                    output.writeObject(response);
                 }
                 else if(message.getMessage().equals("DGROUP")) //Client wants to delete a group
                 {
@@ -263,6 +291,33 @@ public class GroupThread extends Thread
             else
             {
                 return false; //requester is not an administer
+            }
+        }
+        else
+        {
+            return false; //requester does not exist
+        }
+    }
+
+    private boolean createGroup(String groupName, UserToken yourToken)
+    {
+        // creator of group
+        String requester = yourToken.getSubject();
+
+        //Check if requester exists (creator of group)
+        if(my_gs.userList.checkUser(requester))
+        {
+            //Does group already exist?
+            if(my_gs.groupList.checkGroup(groupName))
+            {
+                return false; // Group already exists
+            }
+            else
+            {
+                my_gs.userList.addGroup(requester, groupName);
+                my_gs.userList.addOwnership(requester, groupName);
+                my_gs.groupList.addGroup(requester, groupName);
+                return true;
             }
         }
         else

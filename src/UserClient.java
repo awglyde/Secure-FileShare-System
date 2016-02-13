@@ -76,7 +76,6 @@ public class UserClient
                         System.out.println("Enter a group name: ");
                         String newGroupName = inputValidation(in.readLine());
                         if (groupClient.createGroup(newGroupName, userToken)) {
-                            // user.addOwnership(newGroupName);
                             System.out.println("Group creation succeeded!");
                         }
                         else
