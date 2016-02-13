@@ -47,6 +47,9 @@ public class UserClient
 
         while (true)
         {
+            // reset the group client to reset the state of objects on the stream
+            groupClient.reset();
+
             for (int i = 0; i < menuOptions.length; i++)
             {
                 System.out.println(i+". \t"+menuOptions[i]);

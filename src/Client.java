@@ -48,6 +48,20 @@ public abstract class Client
         }
     }
 
+    public void reset()
+    {
+        try
+        {
+            // flushes the output stream
+            output.reset();
+        }
+        catch (IOException e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+        }
+    }
+
     public void disconnect()
     {
         if(isConnected())
