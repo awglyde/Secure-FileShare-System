@@ -241,6 +241,7 @@ public class UserClient
         {
             // reset the group client to reset the state of objects on the stream
             fileClient.reset();
+            userToken = getToken(username);
 
             for (int i = 0; i < menuOptions.length; i++)
             {
