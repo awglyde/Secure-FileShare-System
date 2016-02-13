@@ -57,13 +57,14 @@ public class UserClient
 
                 try
                 {
-                    choice = in.readLine();
+                    choice = inputValidation(in.readLine());
                 }
                 catch(IOException e)
                 {
                     System.out.println("Error parsing username. Exiting...");
                 }
 
+                // Admin group options
                 switch(choice)
                 {
 
@@ -71,9 +72,15 @@ public class UserClient
                         in.close();
                         return;
                     case "1": // Create a group
-                        
+                        System.out.println("Enter a group name: ");
+                        String newGroupName = inputValidation(in.readLine());
+                        if (groupClient.createGroup(newGroupName, user.userToken))
+                            System.out.println("Group creation succeeded!");
+                        else
+                            System.out.println("Group creation failed. :(");
                         break;
                     case "2": // Delete a group
+                        
                         break;
                     case "3": // Add a user to a group
                         break;
@@ -100,13 +107,14 @@ public class UserClient
                 System.out.print(user.username+" >> ");
                 try
                 {
-                    choice = in.readLine();
+                    choice = inputValidation(in.readLine());
                 }
                 catch(IOException e)
                 {
                     System.out.println("Error parsing username. Exiting...");
                 }
 
+                // User group options
                 switch(choice)
                 {
                     case "0":
@@ -175,7 +183,7 @@ public class UserClient
                 System.out.println("2. \tFile Server");
                 System.out.println("0. \tExit");
 
-                String choice = in.readLine();
+                String choice = inputValidation(in.readLine());
 
                 switch(choice)
                 {
@@ -210,6 +218,12 @@ public class UserClient
         in.close();
     }
 
+    public static String inputValidation(String input)
+    {
+        // Validate input here with a regex eventually
+        return input;
+    }
+
     public static void main(String args[]) throws IOException
     {
         System.out.println("Enter username to login: ");
@@ -218,7 +232,7 @@ public class UserClient
         String username = "";
         try
         {
-            username = in.readLine();
+            username = inputValidation(in.readLine());
             user = new UserList.User(username, getToken(username));
             chooseServer(user);
         }
