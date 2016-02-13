@@ -8,6 +8,7 @@ import java.util.List;
 
 public class FileClient extends Client implements FileClientInterface
 {
+    public static final int SERVER_PORT = 4321;
 
     public boolean delete(String filename, UserToken token)
     {
@@ -260,4 +261,3 @@ public class FileClient extends Client implements FileClientInterface
     }
 
 }
-

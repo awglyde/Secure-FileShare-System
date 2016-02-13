@@ -9,14 +9,14 @@ public class UserClient
 
     static String serverName = "localhost";
     static GroupClient groupClient = new GroupClient();
+    static FileClient fileClient = new FileClient();
     static String username = "";
     static UserToken userToken = null;
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
     public static void connectGroupServer() throws IOException
     {
-        //TODO
-        groupClient.connect(serverName,  GroupServer.SERVER_PORT);
+        groupClient.connect(serverName,  GroupClient.SERVER_PORT);
         if (groupClient.isConnected())
         {
             groupOptions();
@@ -31,7 +31,6 @@ public class UserClient
 
     public static void groupOptions() throws IOException
     {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         String choice = "";
         System.out.println("Welcome to the group server! Please choose from the list of options.\n\n");
 
@@ -73,7 +72,7 @@ public class UserClient
             }
             catch(IOException e)
             {
-                System.out.println("Error parsing username. Exiting...");
+                System.out.println("Error parsing input. Exiting...");
             }
 
             // Options for Admins Only
@@ -86,7 +85,7 @@ public class UserClient
                         String newUserName = inputValidation(in.readLine());
                         if (groupClient.createUser(newUserName, userToken))
                         {
-                            System.out.println("User created successfully! great");
+                            System.out.println("User created successfully!");
                         }
                         else
                         {
@@ -101,7 +100,7 @@ public class UserClient
                         String userToDelete = inputValidation(in.readLine());
                         if (groupClient.deleteUser(userToDelete, userToken))
                         {
-                            System.out.println("User deleted successfully! great");
+                            System.out.println("User deleted successfully!");
                         }
                         else
                         {
@@ -213,14 +212,124 @@ public class UserClient
         }
     }
 
-    public static void connectFileServer()
+    public static void connectFileServer() throws IOException
     {
-        //TODO
+        fileClient.connect(serverName,  FileClient.SERVER_PORT);
+        if (fileClient.isConnected())
+        {
+            fileOptions();
+        }
+        else
+        {
+            System.out.println("System error. File Server is not running.");
+        }
+
+        fileClient.disconnect();
+    }
+    public static void fileOptions() throws IOException
+    {
+        String choice = "";
+        System.out.println("Welcome to the File Server! Please choose from the list of options.\n\n");
+
+        String[] menuOptions = new String[]{"Disconnect from file server",
+                                            "List shared files",
+                                            "Upload file to group",
+                                            "Download file",
+                                            "Delete file"};
+
+        while (true)
+        {
+            // reset the group client to reset the state of objects on the stream
+            fileClient.reset();
+
+            for (int i = 0; i < menuOptions.length; i++)
+            {
+                System.out.println(i+". \t"+menuOptions[i]);
+            }
+            System.out.print(username+" >> ");
+
+            try
+            {
+                choice = inputValidation(in.readLine());
+            }
+            catch(IOException e)
+            {
+                System.out.println("Error parsing input. Exiting...");
+            }
+
+            switch(choice)
+            {
+                case "0":
+                    return;
+                case "1":
+                    System.out.println("List of files: \n");
+                    List<String> fileList = fileClient.listFiles(userToken);
+                    for (String file : fileList)
+                     System.out.println(file);
+
+                    System.out.println();
+                    break;
+                case "2":
+                    System.out.println("Enter a source file name to upload: ");
+                    String srcFile = inputValidation(in.readLine());
+
+                    System.out.println("Enter a destination file name to add to the server: ");
+                    String destFile = inputValidation(in.readLine());
+
+                    System.out.println("Enter a group name to share the file with: ");
+                    String groupName = inputValidation(in.readLine());
+
+
+                    if (fileClient.upload(srcFile, destFile, groupName, userToken))
+                        System.out.println("File uploaded successfully!");
+                    else
+                    {
+                        System.out.println("File upload failed.");
+                        System.out.println("You must be a member of the group you're uploading to");
+                        System.out.println("The file must exist. Please try again.");
+                    }
+
+                    break;
+                case "3":
+                    System.out.println("Enter a source file name from the server: ");
+                    srcFile = inputValidation(in.readLine());
+
+                    System.out.println("Enter a destination file name to download to: ");
+                    destFile = inputValidation(in.readLine());
+
+                    if (fileClient.download(srcFile, destFile, userToken))
+                        System.out.println("File downloaded succesfully!");
+                    else
+                    {
+                        System.out.println("File download failed.");
+                        System.out.println("The file must exist. Please try again.");
+                    }
+                    break;
+                case "4":
+                    System.out.println("Enter a filename to delete: ");
+                    String fileName = inputValidation(in.readLine());
+                    if (fileClient.delete(fileName, userToken))
+                        System.out.println("File deletion successful.");
+                    else
+                    {
+                        System.out.println("File deletion failed.");
+                        System.out.println("The file must exist. Please try again.");
+                    }
+
+
+                    break;
+                case "-help":
+                    System.out.println("You're screwed. Sorry...");
+                    break;
+                default:
+                    System.out.println("Command not recognized.");
+            }
+        }
     }
 
     public static Token getToken(String username)
     {
-        groupClient.connect(serverName,  GroupServer.SERVER_PORT);
+        groupClient.connect(serverName,  GroupClient.SERVER_PORT);
         Token newToken = (Token) groupClient.getToken(username);
 
         if (groupClient.isConnected())
@@ -253,6 +362,7 @@ public class UserClient
 
                         break;
                     case "2":
+                        System.out.println("File Server");
                         connectFileServer();
 
                         break;
@@ -287,7 +397,6 @@ public class UserClient
     public static void main(String args[]) throws IOException
     {
         System.out.println("Enter username to login: ");
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
         try
         {
