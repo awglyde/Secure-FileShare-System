@@ -44,13 +44,13 @@ public class GroupList implements java.io.Serializable
 
     public synchronized String getGroupOwnership(String groupName)
     {
-        return this.list.get(groupName).getOwnerName();
+        return this.getGroup(groupName).getOwnerName();
     }
 
     public synchronized void removeMember(String userName, String groupName)
     {
-        this.list.get(groupName).removeMember(userName);
-        if (this.list.get(groupName).getOwnerName().equals(userName))
+        this.getGroup(groupName).removeMember(userName);
+        if (this.getGroup(groupName).getOwnerName().equals(userName))
             this.deleteGroup(groupName);
 
     }
