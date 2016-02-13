@@ -46,9 +46,9 @@ public class UserList implements java.io.Serializable
         return this.list.get(username).getOwnership();
     }
 
-    public synchronized void addGroup(String user, String groupname)
+    public synchronized boolean addGroup(String user, String groupname)
     {
-        this.list.get(user).addGroup(groupname);
+        return this.list.get(user).addGroup(groupname);
     }
 
     public synchronized void removeGroup(String user, String groupname)
@@ -92,9 +92,9 @@ public class UserList implements java.io.Serializable
             return this.ownership;
         }
 
-        public void addGroup(String group)
+        public boolean addGroup(String group)
         {
-            this.groups.add(group);
+            return this.groups.add(group);
         }
 
         public void removeGroup(String group)

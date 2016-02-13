@@ -171,10 +171,6 @@ public class GroupThread extends Thread
                                     response = new Envelope("OK"); //Success
                                     response.addObject(members);
                                 }
-                                else
-                                {
-                                    response = new Envelope("FAIL");
-                                }
                             }
                         }
                     }
@@ -184,6 +180,32 @@ public class GroupThread extends Thread
                 else if(message.getMessage().equals("AUSERTOGROUP")) //Client wants to add user to a group
                 {
                     /* TODO:  Write this handler */
+                    if(message.getObjContents().size() < 3) // If we don't get a token and a name, fail
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking params aren't null
+                        if( message.getObjContents().get(0) != null ||
+                            message.getObjContents().get(1) != null ||
+                            message.getObjContents().get(2) != null )
+                        {
+                            // Checking second param isn't null
+                            String userName = (String) message.getObjContents().get(0); //Extract the userName
+                            String groupName = (String) message.getObjContents().get(1); //Extract the groupName
+                            UserToken ownerToken = (UserToken) message.getObjContents().get(2); //Extract the owner token
+
+                            if(addUserToGroup(userName, groupName, ownerToken))
+                            {
+                                response = new Envelope("OK"); //Success
+                            }
+                        }
+                    }
+
+                    output.writeObject(response);
                 }
                 else if(message.getMessage().equals("RUSERFROMGROUP")) //Client wants to remove user from a group
                 {
@@ -379,6 +401,32 @@ public class GroupThread extends Thread
         else
         {
             return null; //requester does not exist
+        }
+
+    }
+
+    public boolean addUserToGroup(String userName, String groupName, UserToken ownerToken)
+    {
+        // Owner of group (HOPEFULLY)
+        String requester = ownerToken.getSubject();
+
+        //Check if group exists & requester is owner
+        if(my_gs.groupList.checkGroup(groupName) && my_gs.groupList.getGroup(groupName).isOwner(requester))
+        {
+            // Check if user exists && is not already a member of the group
+            if(!my_gs.userList.checkUser(userName) && !my_gs.groupList.getGroup(groupName).isMember(userName))
+            {
+                return false; // User name to add to group does not exist
+            }
+            else
+            {
+                return  my_gs.userList.addGroup(userName, groupName) &&
+                        my_gs.groupList.getGroup(groupName).addMember(userName);
+            }
+        }
+        else
+        {
+            return false; // Group does not exist or requester is not owner
         }
 
     }

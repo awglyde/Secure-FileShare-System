@@ -85,6 +85,23 @@ public class UserClient
                     case "2": // Delete a group
                         break;
                     case "3": // Add a user to a group
+                        // GET the owner of the group specified
+                        // Make sure the userToken matches the owner of the group
+                        // then add the user to the group
+                        System.out.println("Enter a user name to add: ");
+                        String userToAdd = inputValidation(in.readLine());
+
+                        System.out.println("Enter a group to add "+userToAdd+" to: ");
+                        String groupToAddUserTo = inputValidation(in.readLine());
+
+                        if (groupClient.addUserToGroup(userToAdd, groupToAddUserTo, userToken))
+                            System.out.println(userToAdd+" added successfully to "+groupToAddUserTo+".");
+                        else
+                        {
+                            System.out.println("Failed to add user to group.");
+                            System.out.println("You must be the owner of a group to add a user.");
+                        }
+
                         break;
                     case "4": // Remove a user from a group
                         break;
@@ -103,7 +120,6 @@ public class UserClient
                         {
                             System.out.println("Group does not exist");
                         }
-
                         break;
                     case "6": // Create a user
                         System.out.println("Enter username of new user to create: ");
