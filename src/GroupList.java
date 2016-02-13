@@ -55,6 +55,11 @@ public class GroupList implements java.io.Serializable
 
     }
 
+    public synchronized ArrayList<String> getMembers(String groupName)
+    {
+        return this.getGroup(groupName).getMemberNames();
+    }
+
     public static class Group implements java.io.Serializable
     {
         private static final long serialVersionUID = -6688886336399711764L;

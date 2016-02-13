@@ -148,6 +148,38 @@ public class GroupThread extends Thread
                 else if(message.getMessage().equals("LMEMBERS")) //Client wants a list of members in a group
                 {
                     /* TODO:  Write this handler */
+                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking first param isn't null
+                        if(message.getObjContents().get(0) != null)
+                        {
+                            // Checking second param isn't null
+                            if(message.getObjContents().get(1) != null)
+                            {
+                                String groupname = (String) message.getObjContents().get(0); //Extract the username
+                                UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract the token
+
+                                ArrayList<String> members = listMembers(groupname, yourToken);
+                                if(members != null)
+                                {
+                                    response = new Envelope("OK"); //Success
+                                    response.addObject(members);
+                                }
+                                else
+                                {
+                                    response = new Envelope("FAIL");
+                                }
+                            }
+                        }
+                    }
+
+                    output.writeObject(response);
                 }
                 else if(message.getMessage().equals("AUSERTOGROUP")) //Client wants to add user to a group
                 {
@@ -324,6 +356,31 @@ public class GroupThread extends Thread
         {
             return false; //requester does not exist
         }
+    }
+
+    private ArrayList<String> listMembers(String groupName, UserToken yourToken)
+    {
+        // Member of group
+        String requester = yourToken.getSubject();
+
+        //Check if requester exists (creator of group)
+        if(my_gs.userList.checkUser(requester))
+        {
+            // Is requester a member of the group
+            if(!my_gs.groupList.getGroup(groupName).getMemberNames().contains(requester))
+            {
+                return null; // Requester is NOT a member of the group, no authorization
+            }
+            else
+            {
+                return my_gs.groupList.getGroup(groupName).getMemberNames();
+            }
+        }
+        else
+        {
+            return null; //requester does not exist
+        }
+
     }
 
 }

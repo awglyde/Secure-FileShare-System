@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
 public class UserClient
 {
@@ -88,6 +89,21 @@ public class UserClient
                     case "4": // Remove a user from a group
                         break;
                     case "5": // List all the members of a group
+                        System.out.println("Enter a group name you're a member of to list: ");
+                        String groupName = inputValidation(in.readLine());
+                        List<String> groupMembers = groupClient.listMembers(groupName, userToken);
+                        if (groupMembers != null)
+                        {
+                            System.out.println(groupName+": ");
+                            for (String memberName : groupMembers)
+                                System.out.println(memberName);
+
+                        }
+                        else
+                        {
+                            System.out.println("Group does not exist");
+                        }
+
                         break;
                     case "6": // Create a user
                         System.out.println("Enter username of new user to create: ");
