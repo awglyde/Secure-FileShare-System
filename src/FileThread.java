@@ -2,6 +2,7 @@
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 public class FileThread extends Thread
 {
@@ -30,7 +31,16 @@ public class FileThread extends Thread
                 // Handler to list files that this user is allowed to see
                 if(e.getMessage().equals("LFILES"))
                 {
-                    /* TODO: Write this handler */
+                    response = new Envelope("FAIL");
+                    // Ensure envelope size is 1 (contains token) and the token is not null
+                    if( e.getObjContents().size() == 1 && e.getObjContents().get(0) != null)
+                    {
+                        UserToken yourToken = (UserToken) e.getObjContents().get(0); //Extract the token
+                        response = new Envelope("OK"); //Success
+                        response.addObject(FileServer.fileList.getUserFiles(yourToken)); // append the users files
+                    }
+
+                    output.writeObject(response);
                 }
                 if(e.getMessage().equals("UPLOADF"))
                 {

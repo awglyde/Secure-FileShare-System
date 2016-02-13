@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /* T
  * his this.list represents the files on the server */
@@ -50,6 +51,20 @@ public class FileList implements java.io.Serializable
         Collections.sort(this.list);
         return this.list;
     }
+
+    public synchronized ArrayList<String> getUserFiles(UserToken token)
+    {
+        List<String> userGroups = token.getGroups();
+        ArrayList<ShareFile> files = this.getFiles();
+        ArrayList<String> userFiles = new ArrayList<String>();
+        for (ShareFile file : files)
+        {
+            if (userGroups.contains(file.getGroup()))
+                userFiles.add(file.getPath());
+        }
+        return userFiles;
+    }
+
 
     public synchronized ShareFile getFile(String path)
     {
