@@ -20,9 +20,9 @@ public class GroupList implements java.io.Serializable
     }
 
     // TODO: REMOVE ASSOCIATION FROM ALL USERS WITH GROUP
-    public synchronized void deleteGroup(String groupName)
+    public synchronized boolean deleteGroup(String groupName)
     {
-        this.list.remove(groupName);
+        return this.list.remove(groupName) != null;
     }
 
     public synchronized Group getGroup(String groupName)
