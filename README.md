@@ -30,3 +30,7 @@ YOLO
 ### Who do I talk to? ###
 
 Ethan Welsh, George Hoesch, Alex Glyde
+
+# TODO 
+    * Adding a username that already exists
+    * Validating input - Entering a userName when looking for a group gives an exception

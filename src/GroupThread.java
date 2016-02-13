@@ -315,8 +315,16 @@ public class GroupThread extends Thread
                     //If user is the owner, removeMember will automatically delete group!
                     for(int index = 0; index < deleteFromGroups.size(); index++)
                     {
-                        // TODO: add a groupList
-                        // my_gs.groupList.removeMember(username, deleteFromGroups.get(index));
+                        // Determine if user is the owner of the group we're trying to delete
+                        // If so, we need to remove the association with the group from
+                        // all other users within the group
+                        if (my_gs.groupList.getGroup(deleteFromGroups.get(index)).isOwner(username))
+                            my_gs.userList.removeAssociation(deleteFromGroups.get(index));
+
+                        // Next, we want to remove the user as a member from all groups in
+                        // the deleteFromGroups. if the user is owner this will also delete the group
+                        my_gs.groupList.removeMember(username, deleteFromGroups.get(index));
+
                     }
 
                     //If groups are owned, they must be deleted
@@ -329,12 +337,12 @@ public class GroupThread extends Thread
                     }
 
                     //Delete owned groups
-                    for(int index = 0; index < deleteOwnedGroup.size(); index++)
+                    /*for(int index = 0; index < deleteOwnedGroup.size(); index++)
                     {
                         //Use the delete group method. Token must be created for this action
                         // TODO: deleteGroup is defined in the GroupClient object
                         // deleteGroup(deleteOwnedGroup.get(index), new Token(my_gs.name, username, deleteOwnedGroup));
-                    }
+                    }*/
 
                     //Delete the user from the user list
                     my_gs.userList.deleteUser(username);
@@ -393,8 +401,9 @@ public class GroupThread extends Thread
         //Check if requester exists (creator of group)
         if(my_gs.userList.checkUser(requester))
         {
-            // Is requester a member of the group
-            if(!my_gs.groupList.getGroup(groupName).getMemberNames().contains(requester))
+            // Does group exist and is the requester a member of the group
+            if( my_gs.groupList.getGroup(groupName) == null ||
+                !my_gs.groupList.getGroup(groupName).getMemberNames().contains(requester))
             {
                 return null; // Requester is NOT a member of the group, no authorization
             }

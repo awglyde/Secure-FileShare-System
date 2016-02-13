@@ -138,6 +138,7 @@ public class UserClient
                     {
                         // TODO update error warning, could fail if user doesn't exist, etc...
                         System.out.println("Failed to add user to group.");
+                        System.out.println("Are you sure the group exists?");
                         System.out.println("You must be the owner of a group to add a user.");
                     }
                     break;

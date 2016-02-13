@@ -66,6 +66,21 @@ public class UserList implements java.io.Serializable
         this.list.get(user).removeOwnership(groupname);
     }
 
+    // Method removes association from all users with this group
+    public synchronized void removeAssociation(String groupname)
+    {
+        for (User user : this.list.values())
+        {
+            // If the user is the owner af the  group, remove their ownership
+            if (user.getOwnership().contains(groupname))
+                user.removeOwnership(groupname);
+
+            // If the user is simply a member of the group, remove their membership
+            if (user.getGroups().contains(groupname))
+                user.removeGroup(groupname);
+        }
+    }
+
 
     public static class User implements java.io.Serializable
     {
