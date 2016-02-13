@@ -12,6 +12,13 @@ public abstract class Client
     protected Socket sock;
     protected ObjectOutputStream output;
     protected ObjectInputStream input;
+    public static enum Privilege {
+        USER,
+        GROUPMEMBER,
+        GROUPOWNER,
+        ADMIN,
+        ADMINOWNER
+    }
 
     public boolean connect(final String serverName, final int port)
     {

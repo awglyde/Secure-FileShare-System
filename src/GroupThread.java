@@ -147,7 +147,32 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("DGROUP")) //Client wants to delete a group
                 {
-                    /* TODO:  Write this handler */
+                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking first param isn't null
+                        if(message.getObjContents().get(0) != null)
+                        {
+                            // Checking second param isn't null
+                            if(message.getObjContents().get(1) != null)
+                            {
+                                String groupname = (String) message.getObjContents().get(0); //Extract the username
+                                UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract the token
+
+                                if(deleteGroup(groupname, yourToken))
+                                {
+                                    response = new Envelope("OK"); //Success
+                                }
+                            }
+                        }
+                    }
+
+                    output.writeObject(response);
                 }
                 else if(message.getMessage().equals("LMEMBERS")) //Client wants a list of members in a group
                 {
@@ -368,10 +393,11 @@ public class GroupThread extends Thread
                     }
 
                     //Delete owned groups
+                    // I think our userList.removeAssociation removes group owner association as well
                     /*for(int index = 0; index < deleteOwnedGroup.size(); index++)
                     {
                         //Use the delete group method. Token must be created for this action
-                        // TODO: deleteGroup is defined in the GroupClient object
+                        // TODO:
                         // deleteGroup(deleteOwnedGroup.get(index), new Token(my_gs.name, username, deleteOwnedGroup));
                     }*/
 
@@ -426,8 +452,30 @@ public class GroupThread extends Thread
 
     public boolean deleteGroup(String groupname, UserToken token)
     {
-        // TODO implement this
-        return false;
+        // Owner of group (HOPEFULLY)
+        String requester = token.getSubject();
+
+        // Check to make sure we're not deleting the ADMIN group
+        if( !(my_gs.groupList.getGroup(groupname).equals("ADMIN")) )
+        {
+            // Check if group exists & requester is owner
+            if( my_gs.groupList.checkGroup(groupname) &&
+                my_gs.groupList.getGroup(groupname).isOwner(requester))
+            {
+                // Removes members association with the group being deleted
+                my_gs.userList.removeAssociation(groupname);
+                return my_gs.groupList.deleteGroup(groupname);
+            }
+            else
+            {
+                return false; // Group does not exist or requester is not owner
+            }
+        }
+        else
+        {
+            return false; //
+        }
+
     }
 
     private ArrayList<String> listMembers(String groupName, UserToken yourToken)

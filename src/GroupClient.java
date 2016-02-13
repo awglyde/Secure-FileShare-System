@@ -251,4 +251,12 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
+    // TODO: Implement these as a check against users trying to do operations they can't
+    // Such as a user who isn't the owner of a group requesting to delete a group
+    // The request to the server shouldn't even be made if they don't have the requisite privilege
+    public boolean checkYourPrivilege(Privilege privilege, String groupName, UserToken token) // before you wreck yourself
+    {
+        return false;
+    }
+
 }

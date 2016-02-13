@@ -45,6 +45,7 @@ public class UserClient
         String[] adminOptions = new String[]{"Add (create) a user",
                                              "Remove (delete) a user"};
 
+
         while (true)
         {
             // reset the group client to reset the state of objects on the stream
@@ -87,6 +88,11 @@ public class UserClient
                         {
                             System.out.println("User created successfully! great");
                         }
+                        else
+                        {
+                            System.out.println("User creation failed!");
+                            System.out.println("Does this user already exist?");
+                        }
                         selectedAdminOption = true;
                         break;
                         // TODO: ONLY OWNER OF ADMIN GROUP CAN DELETE OTHER ADMIN
@@ -96,6 +102,11 @@ public class UserClient
                         if (groupClient.deleteUser(userToDelete, userToken))
                         {
                             System.out.println("User deleted successfully! great");
+                        }
+                        else
+                        {
+                            System.out.println("User deletion failed!");
+                            System.out.println("Does this user exist?");
                         }
                         selectedAdminOption = true;
                         break;
@@ -112,7 +123,7 @@ public class UserClient
                     String newGroupName = inputValidation(in.readLine());
                     if (groupClient.createGroup(newGroupName, userToken))
                     {
-                        System.out.println("Group creation succeeded!");
+                        System.out.println("Group "+newGroupName+" created successfully!");
                     }
                     else
                     {
@@ -120,10 +131,24 @@ public class UserClient
                     }
                     break;
                 case "2": // Delete a group
+                    System.out.println("Enter a group name to delete: ");
+                    String groupToDelete = inputValidation(in.readLine());
+
+                    if (groupClient.deleteGroup(groupToDelete, userToken))
+                    {
+                        System.out.println("Group "+groupToDelete+" deleted successfully!");
+                    }
+                    else
+                    {
+                        System.out.println("Failed to delete the group.");
+                        System.out.println("Are you sure the group exists?");
+                        System.out.println("You must be the owner of a group to delete it.");
+                    }
+
                     break;
                 case "3": // Add a user to a group
                     // GET the owner of the group specified
-                    // Make sure the userTo`ken matches the owner of the group
+                    // Make sure the userToken matches the owner of the group
                     // then add the user to the group
                     System.out.println("Enter a user name to add: ");
                     String userToAdd = inputValidation(in.readLine());
@@ -144,6 +169,7 @@ public class UserClient
                     }
                     break;
                 case "4": // Remove a user from a group
+
                     System.out.println("Enter a group name that you're an owner of: ");
                     String group = inputValidation(in.readLine());
 

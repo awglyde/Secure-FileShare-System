@@ -19,7 +19,7 @@ public class GroupList implements java.io.Serializable
         this.list.put(groupName, newGroup);
     }
 
-    // TODO: REMOVE ASSOCIATION FROM ALL USERS WITH GROUP
+    // TODO: REMOVE ASSOCIATION FROM ALL USERS WITH GROUP IN USERLIST. DONE?
     public synchronized boolean deleteGroup(String groupName)
     {
         return this.list.remove(groupName) != null;
