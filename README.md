@@ -34,3 +34,42 @@ Ethan Welsh, George Hoesch, Alex Glyde
 # TODO 
     * Adding a username that already exists
     * Validating input - Entering a userName when looking for a group gives an exception
+
+## Tests
+
+### Create User
+- Do not allow creation of duplicate user.
+- Requester must be admin
+
+### Add User to Group
+- User must exist.
+- Group must exist.
+- User must not already be in group.
+- Requester must be owner of group.
+
+### Create Group
+- Group with the same name cannot already exist.
+- Requester is set to owner of the new group.
+
+### Delete User
+- User must not be the owner of the ADMIN group.
+- Delete any groups which this user owns (see delete group)
+- Remove this user from all groups.
+- User must exist.
+- Requester must be admin.
+
+### Delete Group
+- Requester must be owner of group.
+- Group must exist
+- Remove membership and ownership from all users.
+- Group cannot be ADMIN
+
+### Remove User from Group
+- Requester must be owner
+- If requester is the owner, delete the group (see delete group)
+- User must exist
+- Group must exist
+- User must not be the owner of the ADMIN group.
+
+### List Files
+- User can only see files of groups they are in.
