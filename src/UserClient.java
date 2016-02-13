@@ -10,6 +10,7 @@ public class UserClient
     static GroupClient groupClient = new GroupClient();
     static String username = "";
     static UserToken userToken = null;
+    static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
     public static void connectGroupServer() throws IOException
     {
@@ -69,7 +70,7 @@ public class UserClient
                 {
 
                     case "0":
-                        in.close();
+
                         return;
                     case "1": // Create a group
                         System.out.println("Enter a group name: ");
@@ -125,7 +126,7 @@ public class UserClient
                 switch(choice)
                 {
                     case "0":
-                        in.close();
+
                         return;
                     case "1": // Create a group
                         break;
@@ -168,7 +169,6 @@ public class UserClient
 
     public static void chooseServer() throws IOException
     {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
         try
         {
@@ -177,6 +177,7 @@ public class UserClient
                 System.out.println("1. \tGroup Server");
                 System.out.println("2. \tFile Server");
                 System.out.println("0. \tExit");
+                System.out.print(username+" >> ");
 
                 String choice = inputValidation(in.readLine());
 
@@ -192,7 +193,7 @@ public class UserClient
 
                         break;
                     case "0":
-                        in.close();
+
                         System.out.println("Exiting");
 
                         return;
@@ -204,14 +205,13 @@ public class UserClient
                         System.out.println("Command not recognized");
 
                 }
-
             }
         }
         catch(IOException e)
         {
             e.printStackTrace();
         }
-        in.close();
+
     }
 
     public static String inputValidation(String input)
@@ -241,8 +241,8 @@ public class UserClient
             System.out.println("Error parsing username. Exiting...");
         }
 
-        in.close();
 
+        in.close();
     }
 
 } //-- end class UserClient
