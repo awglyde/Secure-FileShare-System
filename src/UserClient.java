@@ -70,23 +70,22 @@ public class UserClient
                     case "0":
                         in.close();
                         return;
-                    case "1": // Create a user
-                            System.out.println("User is admin! great");
-                            // If user is admin, prompt for username to create
+                    case "1": // Create a group
+                        
                         break;
-                    case "2": // Delete a user
-                            System.out.println("User is admin! great");
-                            // If user is admin, prompt for username to delete
+                    case "2": // Delete a group
                         break;
-                    case "3": // Create a group
+                    case "3": // Add a user to a group
                         break;
-                    case "4": // Delete a group
+                    case "4": // Remove a user from a group
                         break;
-                    case "5": // Add a user to a group
+                    case "5": // List all the members of a group
                         break;
-                    case "6": // Remove a user from a group
+                    case "6": // Create a user
+                        System.out.println("User is admin! great");
                         break;
-                    case "7": // List all of the members of a group
+                    case "7": // Delete a user
+                        System.out.println("User is admin! great");
                         break;
                     case "-help":
                         System.out.println("You're screwed. Sorry...");
@@ -113,19 +112,15 @@ public class UserClient
                     case "0":
                         in.close();
                         return;
-                    case "1": // Create a user
-                            System.out.println("User is admin! great");
-                            // If user is admin, prompt for username to create
+                    case "1": // Create a group
                         break;
-                    case "2": // Delete a user
-                            System.out.println("User is admin! great");
-                            // If user is admin, prompt for username to delete
+                    case "2": // Delete a group
                         break;
-                    case "3": // Create a group
+                    case "3": // Add a user to a group
                         break;
-                    case "4": // Delete a group
+                    case "4": // Remove a user from a group
                         break;
-                    case "5": // Add a user to a group
+                    case "5": // List all the members of a group
                         break;
                     case "-help":
                         System.out.println("You're screwed. Sorry...");
