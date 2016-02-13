@@ -52,8 +52,9 @@ public abstract class Client
     {
         try
         {
-            // flushes the output stream
-            output.reset();
+            // flushes / resets the output stream
+            this.output.flush();
+            this.output.reset();
         }
         catch (IOException e)
         {

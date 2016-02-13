@@ -31,6 +31,11 @@ public class GroupThread extends Thread
 
             do
             {
+
+                // flushes / resets the output stream
+                output.flush();
+                output.reset();
+
                 Envelope message = (Envelope) input.readObject();
                 System.out.println("Request received: " + message.getMessage());
                 Envelope response;
