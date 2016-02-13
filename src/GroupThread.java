@@ -118,7 +118,6 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("CGROUP")) //Client wants to create a group
                 {
-                    /* TODO:  Write this handler */
                     if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
                     {
                         response = new Envelope("FAIL");
@@ -152,7 +151,6 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("LMEMBERS")) //Client wants a list of members in a group
                 {
-                    /* TODO:  Write this handler */
                     if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
                     {
                         response = new Envelope("FAIL");
@@ -184,7 +182,6 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("AUSERTOGROUP")) //Client wants to add user to a group
                 {
-                    /* TODO:  Write this handler */
                     if(message.getObjContents().size() < 3) // If we don't get a token and a name, fail
                     {
                         response = new Envelope("FAIL");
@@ -214,7 +211,41 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("RUSERFROMGROUP")) //Client wants to remove user from a group
                 {
-                    /* TODO:  Write this handler */
+                    if(message.getObjContents().size() < 3) // If we don't get a token and a name, fail
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking params aren't null
+                        if( message.getObjContents().get(0) != null ||
+                            message.getObjContents().get(1) != null ||
+                            message.getObjContents().get(2) != null )
+                        {
+                            // Checking second param isn't null
+                            String userName = (String) message.getObjContents().get(0); //Extract the userName
+                            String groupName = (String) message.getObjContents().get(1); //Extract the groupName
+                            UserToken ownerToken = (UserToken) message.getObjContents().get(2); //Extract the owner token
+
+                            // If we're in the special case where the username being removed
+                            // is the owner of the group they're being removed from, then delete the group
+                            if(my_gs.groupList.getGroupOwnership(groupName).equals(userName))
+                            {
+                                if (deleteGroup(groupName, ownerToken))
+                                {
+                                    response = new Envelope("OK"); // success
+                                }
+                            }
+                            else if(deleteUserFromGroup(userName, groupName, ownerToken))
+                            {
+                                response = new Envelope("OK"); //Success
+                            }
+                        }
+                    }
+
+                    output.writeObject(response);
                 }
                 else if(message.getMessage().equals("DISCONNECT")) //Client wants to disconnect
                 {
@@ -393,6 +424,12 @@ public class GroupThread extends Thread
         }
     }
 
+    public boolean deleteGroup(String groupname, UserToken token)
+    {
+        // TODO implement this
+        return false;
+    }
+
     private ArrayList<String> listMembers(String groupName, UserToken yourToken)
     {
         // Member of group
@@ -443,6 +480,47 @@ public class GroupThread extends Thread
             return false; // Group does not exist or requester is not owner
         }
 
+    }
+
+    public boolean deleteUserFromGroup(String username, String groupname, UserToken token)
+    {
+        // Owner of group (HOPEFULLY)
+        String requester = token.getSubject();
+
+        // Check to make sure the group is NOT THE ADMIN GROUP AND
+        // make sure user being removed is not the OWNER OF THE ADMIN GROUP
+        // It's okay if we're removing a user from the Admin group as long as it's not the owner
+        // It's also okay if we're the owner of the admin group as long as we're not removing
+        // the owner of the admin group itself
+        if( !(my_gs.groupList.getGroup(groupname).equals("ADMIN") &&
+            my_gs.groupList.getGroup("ADMIN").getOwnerName().equals(username)) )
+        {
+            // Check if group exists & requester is owner
+            if( my_gs.groupList.checkGroup(groupname) &&
+                my_gs.groupList.getGroup(groupname).isOwner(requester))
+            {
+                // Check if user exists && IS a member of the group
+                if( my_gs.userList.checkUser(username) &&
+                    my_gs.groupList.getGroup(groupname).isMember(username))
+                {
+                    return  my_gs.userList.removeGroup(username, groupname) &&
+                            my_gs.groupList.getGroup(groupname).removeMember(username);
+                }
+                else
+                {
+                    return false;   // User name to add to group does not exist
+                                    // OR User is not a member of the group
+                }
+            }
+            else
+            {
+                return false; // Group does not exist or requester is not owner
+            }
+        }
+        else
+        {
+            return false; //
+        }
     }
 
 }

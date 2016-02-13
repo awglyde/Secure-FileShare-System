@@ -48,12 +48,13 @@ public class GroupList implements java.io.Serializable
         return this.getGroup(groupName).getOwnerName();
     }
 
-    public synchronized void removeMember(String userName, String groupName)
+    public synchronized boolean removeMember(String userName, String groupName)
     {
-        this.getGroup(groupName).removeMember(userName);
+        boolean ret = this.getGroup(groupName).removeMember(userName);
         if (this.getGroup(groupName).getOwnerName().equals(userName))
-            this.deleteGroup(groupName);
+            ret &= this.deleteGroup(groupName);
 
+        return ret;
     }
 
     public synchronized ArrayList<String> getMembers(String groupName)
@@ -90,15 +91,16 @@ public class GroupList implements java.io.Serializable
             return this.groupMembers.add(member);
         }
 
-        public void removeMember(String member)
+        public boolean removeMember(String member)
         {
             if(!this.groupMembers.isEmpty())
             {
                 if(this.groupMembers.contains(member))
                 {
-                    this.groupMembers.remove(this.groupMembers.indexOf(member));
+                    return this.groupMembers.remove(member);
                 }
             }
+            return false;
         }
 
         public boolean isOwner(String userName)

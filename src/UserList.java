@@ -51,19 +51,19 @@ public class UserList implements java.io.Serializable
         return this.list.get(user).addGroup(groupname);
     }
 
-    public synchronized void removeGroup(String user, String groupname)
+    public synchronized boolean removeGroup(String user, String groupname)
     {
-        this.list.get(user).removeGroup(groupname);
+        return this.list.get(user).removeGroup(groupname);
     }
 
-    public synchronized void addOwnership(String user, String groupname)
+    public synchronized boolean addOwnership(String user, String groupname)
     {
-        this.list.get(user).addOwnership(groupname);
+        return this.list.get(user).addOwnership(groupname);
     }
 
-    public synchronized void removeOwnership(String user, String groupname)
+    public synchronized boolean removeOwnership(String user, String groupname)
     {
-        this.list.get(user).removeOwnership(groupname);
+        return this.list.get(user).removeOwnership(groupname);
     }
 
     // Method removes association from all users with this group
@@ -112,31 +112,34 @@ public class UserList implements java.io.Serializable
             return this.groups.add(group);
         }
 
-        public void removeGroup(String group)
+        public boolean removeGroup(String group)
         {
             if(!this.groups.isEmpty())
             {
                 if(this.groups.contains(group))
                 {
-                    this.groups.remove(this.groups.indexOf(group));
+                    return this.groups.remove(group);
                 }
             }
+
+            return false;
         }
 
-        public void addOwnership(String group)
+        public boolean addOwnership(String group)
         {
-            this.ownership.add(group);
+            return this.ownership.add(group);
         }
 
-        public void removeOwnership(String group)
+        public boolean removeOwnership(String group)
         {
             if(!this.ownership.isEmpty())
             {
                 if(this.ownership.contains(group))
                 {
-                    this.ownership.remove(this.ownership.indexOf(group));
+                    return this.ownership.remove(group);
                 }
             }
+            return false;
         }
 
     }

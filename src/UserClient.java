@@ -89,6 +89,7 @@ public class UserClient
                         }
                         selectedAdminOption = true;
                         break;
+                        // TODO: ONLY OWNER OF ADMIN GROUP CAN DELETE OTHER ADMIN
                     case "7": // Delete a user
                         System.out.println("Enter username of user to delete: ");
                         String userToDelete = inputValidation(in.readLine());
@@ -143,6 +144,21 @@ public class UserClient
                     }
                     break;
                 case "4": // Remove a user from a group
+                    System.out.println("Enter a group name that you're an owner of: ");
+                    String group = inputValidation(in.readLine());
+
+                    System.out.println("Enter the name of the user in "+group+" that you'd like to remove: ");
+                    String userToRemove = inputValidation(in.readLine());
+
+                    if (groupClient.deleteUserFromGroup(userToRemove,group, userToken))
+                        System.out.println("Successfully deleted "+userToRemove+" from "+group+"!");
+                    else
+                    {
+                        System.out.println("Deletion of "+userToRemove+" from "+group+" failed.");
+                        System.out.println("Are you sure the group exists?");
+                        System.out.println("You must be the owner of a group to remove a user from it.");
+                    }
+
                     break;
                 case "5": // List all the members of a group
                     System.out.println("Enter a group name you're a member of to list: ");
