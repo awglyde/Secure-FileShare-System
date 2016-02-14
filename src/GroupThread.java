@@ -458,7 +458,7 @@ public class GroupThread extends Thread
         String requester = token.getSubject();
 
         // Check to make sure we're not deleting the ADMIN group
-        if( !(my_gs.groupList.getGroup(groupname).equals("ADMIN")) )
+        if(!groupname.equals("ADMIN"))
         {
             // Check if group exists & requester is owner
             if( my_gs.groupList.checkGroup(groupname) &&

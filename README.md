@@ -58,6 +58,7 @@ Ethan Welsh, George Hoesch, Alex Glyde
 - Remove this user from all groups.
 - User must exist.
 - Requester must be admin.
+- User cannot delete themselves (specifically ADMIN members)
 
 ### Delete Group
 - Requester must be owner of group.
