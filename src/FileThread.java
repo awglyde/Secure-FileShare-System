@@ -29,7 +29,7 @@ public class FileThread extends Thread
                 // flushes / resets the output stream
                 output.flush();
                 output.reset();
-                
+
                 Envelope e = (Envelope) input.readObject();
                 System.out.println("Request received: " + e.getMessage());
 
@@ -246,10 +246,7 @@ public class FileThread extends Thread
 
                         try
                         {
-
-
                             File f = new File("shared_files/" + "_" + remotePath.replace('/', '_'));
-
                             if(!f.exists())
                             {
                                 System.out.printf("Error file %s missing from disk\n", "_" + remotePath.replace('/', '_'));
