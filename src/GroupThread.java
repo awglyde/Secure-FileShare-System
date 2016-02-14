@@ -357,7 +357,8 @@ public class GroupThread extends Thread
             {
                 //Does user exist and is the User the owner of ADMIN?
                 // if they are the ADMIN owner, they cannot be deleted
-                if(my_gs.userList.checkUser(username) & !my_gs.groupList.isGroupOwner(username, "ADMIN"))
+                // if the requester is trying to delete them selves do not allow it - leaves program in odd state with requester still logged in
+                if(my_gs.userList.checkUser(username) & !my_gs.groupList.isGroupOwner(username, "ADMIN") && !username.equals(requester))
                 {
                     //User needs deleted from the groups they belong
                     ArrayList<String> deleteFromGroups = new ArrayList<String>();
@@ -547,7 +548,7 @@ public class GroupThread extends Thread
         if( !(my_gs.groupList.getGroup(groupname).equals("ADMIN") &&
             my_gs.groupList.getGroup("ADMIN").getOwnerName().equals(username)) )
         {
-            // Check if group exists & requester is owner
+            // Check if group exists & requester is owner & the requester is not trying to delete themselves
             if( my_gs.groupList.checkGroup(groupname) &&
                 my_gs.groupList.getGroup(groupname).isOwner(requester))
             {
