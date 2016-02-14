@@ -46,11 +46,20 @@ public class GroupList implements java.io.Serializable
     public synchronized boolean isGroupOwner(String userName, String groupName)
     {
         String owner = this.getGroupOwnership(groupName);
+
+        if(owner == null)
+            return false;
+
         return owner.equals(userName);
     }
 
     public synchronized String getGroupOwnership(String groupName)
     {
+        Group group = this.getGroup(groupName);
+
+        if(group == null)
+            return null;
+
         return this.getGroup(groupName).getOwnerName();
     }
 

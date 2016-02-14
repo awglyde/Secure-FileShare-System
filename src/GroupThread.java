@@ -256,7 +256,7 @@ public class GroupThread extends Thread
 
                             // If we're in the special case where the username being removed
                             // is the owner of the group they're being removed from, then delete the group
-                            if(my_gs.groupList.getGroupOwnership(groupName).equals(userName))
+                            if(my_gs.groupList.isGroupOwner(userName, groupName))
                             {
                                 if (deleteGroup(groupName, ownerToken))
                                 {
@@ -545,8 +545,7 @@ public class GroupThread extends Thread
         // It's okay if we're removing a user from the Admin group as long as it's not the owner
         // It's also okay if we're the owner of the admin group as long as we're not removing
         // the owner of the admin group itself
-        if( !(my_gs.groupList.getGroup(groupname).equals("ADMIN") &&
-            my_gs.groupList.getGroup("ADMIN").getOwnerName().equals(username)) )
+        if( !(groupname.equals("ADMIN") && my_gs.groupList.isGroupOwner(username, "ADMIN")))
         {
             // Check if group exists & requester is owner & the requester is not trying to delete themselves
             if( my_gs.groupList.checkGroup(groupname) &&

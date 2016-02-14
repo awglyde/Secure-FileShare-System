@@ -68,7 +68,7 @@ Ethan Welsh, George Hoesch, Alex Glyde
 
 ### Remove User from Group
 - Requester must be owner
-- If requester is the owner, delete the group (see delete group)
+- If requester is the owner, delete the group (see delete group). All associations must be removed.
 - User must exist
 - Group must exist
 - User must not be the owner of the ADMIN group.
