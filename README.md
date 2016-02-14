@@ -31,7 +31,7 @@ YOLO
 
 Ethan Welsh, George Hoesch, Alex Glyde
 
-# TODO 
+# TODO
     * Adding a username that already exists
     * Validating input - Entering a userName when looking for a group gives an exception
 
@@ -46,6 +46,7 @@ Ethan Welsh, George Hoesch, Alex Glyde
 - Group must exist.
 - User must not already be in group.
 - Requester must be owner of group.
+- Owner cannot add themselves to the group as a member.
 
 ### Create Group
 - Group with the same name cannot already exist.

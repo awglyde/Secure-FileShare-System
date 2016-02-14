@@ -355,8 +355,9 @@ public class GroupThread extends Thread
             //requester needs to be an administer
             if(temp.contains("ADMIN"))
             {
-                //Does user exist?
-                if(my_gs.userList.checkUser(username))
+                //Does user exist and is the User the owner of ADMIN?
+                // if they are the ADMIN owner, they cannot be deleted
+                if(my_gs.userList.checkUser(username) & !my_gs.groupList.isGroupOwner(username, "ADMIN"))
                 {
                     //User needs deleted from the groups they belong
                     ArrayList<String> deleteFromGroups = new ArrayList<String>();
@@ -513,7 +514,10 @@ public class GroupThread extends Thread
         if(my_gs.groupList.checkGroup(groupName) && my_gs.groupList.getGroup(groupName).isOwner(requester))
         {
             // Check if user exists && is not already a member of the group
-            if(!my_gs.userList.checkUser(userName) && !my_gs.groupList.getGroup(groupName).isMember(userName))
+            // Check if user is the owner of the group, if they are do not allow them to add themselves as a memeber
+            if((!my_gs.userList.checkUser(userName) ||
+               my_gs.groupList.getGroup(groupName).isMember(userName)) ||
+               my_gs.groupList.isGroupOwner(userName, groupName))
             {
                 return false; // User name to add to group does not exist
             }

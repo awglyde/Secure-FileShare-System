@@ -39,7 +39,7 @@ public class UserClient
                                             "Remove (delete) a group",
                                             "Add a user to a group",
                                             "Remove a user from a group",
-                                            "List all of the members of a group"};
+                                            "List all of the members of a group (that you are a memeber of)"};
 
         String[] adminOptions = new String[]{"Add (create) a user",
                                              "Remove (delete) a user"};
@@ -197,7 +197,8 @@ public class UserClient
                     }
                     else
                     {
-                        System.out.println("Group does not exist");
+                        System.out.println("Are you sure the group exists?");
+                        System.out.println("You are not a memeber of the group.");
                     }
                     break;
                 case "-help":
