@@ -30,10 +30,11 @@ YOLO
 ### Who do I talk to? ###
 
 Ethan Welsh, George Hoesch, Alex Glyde
+ejw45, gah33, ajw13
 
 # TODO
-    * Adding a username that already exists
     * Validating input - Entering a userName when looking for a group gives an exception
+    * Cleaning up error messages. I.e., returning one error message when a requested action fails
 
 ## Tests
 

@@ -90,7 +90,7 @@ public class UserClient
                         else
                         {
                             System.out.println("User creation failed!");
-                            System.out.println("Does this user already exist?");
+                            System.out.println("You cannot create a user with a duplicate username.");
                         }
                         selectedAdminOption = true;
                         break;
@@ -106,6 +106,7 @@ public class UserClient
                         {
                             System.out.println("User deletion failed!");
                             System.out.println("Does this user exist?");
+                            System.out.println("Are you trying to delete the owner of the admin group?");
                         }
                         selectedAdminOption = true;
                         break;
@@ -127,6 +128,7 @@ public class UserClient
                     else
                     {
                         System.out.println("Group creation failed. :(");
+                        System.out.println("There may be a group with a duplicate name.");
                     }
                     break;
                 case "2": // Delete a group
@@ -162,8 +164,11 @@ public class UserClient
                     else
                     {
                         // TODO update error warning, could fail if user doesn't exist, etc...
+                        // TODO: Ideally we'd return the SPECIFIC error from the server.
                         System.out.println("Failed to add user to group.");
-                        System.out.println("Are you sure the group exists?");
+                        System.out.println("The user may not exist.");
+                        System.out.println("The group may not exist.");
+                        System.out.println("The user may already be a member of the group");
                         System.out.println("You must be the owner of a group to add a user.");
                     }
                     break;
@@ -181,6 +186,7 @@ public class UserClient
                     {
                         System.out.println("Deletion of "+userToRemove+" from "+group+" failed.");
                         System.out.println("Are you sure the group exists?");
+                        System.out.println("Are you sure "+userToRemove+" is a member of the group?");
                         System.out.println("You must be the owner of a group to remove a user from it.");
                     }
 
@@ -198,7 +204,8 @@ public class UserClient
                     else
                     {
                         System.out.println("Are you sure the group exists?");
-                        System.out.println("You are not a memeber of the group.");
+                        System.out.println("You may not be a member of the group.");
+                        System.out.println("Contact the group owner.");
                     }
                     break;
                 case "-help":
