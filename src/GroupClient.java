@@ -7,7 +7,7 @@ public class GroupClient extends Client implements GroupClientInterface
 {
 
     public static final int SERVER_PORT = 8765;
-    
+
     public UserToken getToken(String username)
     {
         try
@@ -252,13 +252,4 @@ public class GroupClient extends Client implements GroupClientInterface
             return false;
         }
     }
-
-    // TODO: Implement these as a check against users trying to do operations they can't
-    // Such as a user who isn't the owner of a group requesting to delete a group
-    // The request to the server shouldn't even be made if they don't have the requisite privilege
-    public boolean checkYourPrivilege(Privilege privilege, String groupName, UserToken token) // before you wreck yourself
-    {
-        return false;
-    }
-
 }
