@@ -19,9 +19,9 @@ header {
       <h1>CS 1653 Project P3 Writeup</h1>
       <h2>
 <!-- BEGIN CHANGES HERE -->
-
-William Garrison
-
+George Hoesch - gah33@pitt.edu
+Alex Glyde - awg13@pitt.edu
+Ethan Welsh - ejw45@pitt.edu
 <!-- END CHANGES HERE -->
       </h2>
     </header>
@@ -44,6 +44,14 @@ why this threat is problematic and needs to be addressed, and/or diagrams
 showing how the threat might manifest in your group’s insecure
 implementation.</p>
 
+<p>Unauthorized token issuance is equivalent to users being granted unauthorized access to our servers.
+This is problematic because unauthorized users being granted access to tokens that do not belong to them
+compromises our application's ability to discern identity. This results in a potential for adversaries
+to gain access to the compromised user's groups and files. In particular, if an administrator should be
+compromised, the results are particularly egregious due to the fact that administrators have a greater
+degree of privilege.
+</p>
+
 <p>Next, provide a short description of the mechanism that you chose to
 implement to protect against this threat. For interactive protocols, it would be
 helpful to provide a diagram explaining the messages exchanged between
@@ -51,6 +59,10 @@ participating principals (use html &lt;img&gt; tag to import such images). Be
 sure to explain any cryptographic choices that your group makes: What types of
 algorithms, modes of operation, and/or key lengths did you choose? Why? If
 shared keys are needed, how are they exchanged?</p>
+
+<p>
+
+</p>
 
 <p>Finally, provide a short argument addressing why your proposed mechanism
 sufficiently addresses this particular threat. This argument should address the
@@ -80,6 +92,16 @@ party can figure out the key (security).</p>
     <section id="threat4">
       <h2>Threat T4: Information Leakage via Passive Monitoring</h2>
 <!-- BEGIN CHANGES HERE -->
+<p>Passive monitoring on data that is not obfuscated presents a risk to the confidentiality of our communications.
+	Confidentiality is important because if communications are not hidden,
+	then tokens, files, passwords, and group server actions are all transparent to any listening entity.
+	This violates the user's privacy and poses security risks to the integrity of the system.
+	In particular, monitoring of tokens is especially problematic for reasons previously mentioned in T1.
+</p>
+
+<p>
+
+</p>
 
 <p>Repeat the steps as for Threat T1.</p>
 
@@ -103,4 +125,3 @@ well.</p>
     </section>
   </body>
 </html>
-
