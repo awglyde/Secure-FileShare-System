@@ -38,12 +38,6 @@ your group has decided to use to address threats T1–T4.</p>
       <h2>Threat T1: Unauthorized Token Issuance</h2>
 <!-- BEGIN CHANGES HERE -->
 
-<p>Begin this section by describing threat T1. This may include describing
-examples of the threat being exploited by an adversary, a short discussion of
-why this threat is problematic and needs to be addressed, and/or diagrams
-showing how the threat might manifest in your group’s insecure
-implementation.</p>
-
 <p>Unauthorized token issuance is equivalent to users being granted unauthorized access to our servers.
 This is problematic because unauthorized users being granted access to tokens that do not belong to them
 compromises our application's ability to discern identity. This results in a potential for adversaries
@@ -52,15 +46,8 @@ compromised, the results are particularly egregious due to the fact that adminis
 degree of privilege.
 </p>
 
-<p>Next, provide a short description of the mechanism that you chose to
-implement to protect against this threat. For interactive protocols, it would be
-helpful to provide a diagram explaining the messages exchanged between
-participating principals (use html &lt;img&gt; tag to import such images). Be
-sure to explain any cryptographic choices that your group makes: What types of
-algorithms, modes of operation, and/or key lengths did you choose? Why? If
-shared keys are needed, how are they exchanged?</p>
-
-<img src="../doc/authentication.png">
+<img src="../doc/authentication.png" style="width:1000px;">
+<br /><br />
 <p>
 	The client uses the server's public key to encrypt a challenge R, along with a shared AES-256 key.
 	The server responds to the challenge with some computation on R encrypted with the new shared AES key.
@@ -75,13 +62,6 @@ shared keys are needed, how are they exchanged?</p>
 	Furthermore, it is used pervasively in industry.
 	We chose the RSA public key crypto system because its suitable for key-exchange.
 </p>
-
-<p>Finally, provide a short argument addressing why your proposed mechanism
-sufficiently addresses this particular threat. This argument should address the
-correctness of your approach, as well as its overall security. For example, if
-your mechanism involves a key agreement or key exchange protocol, you should
-argue that both parties agree on the same key (correctnes) and that no other
-party can figure out the key (security).</p>
 
 <p>
 	Our mechanism addresses the proposed threat because we only issue tokens to users who are
@@ -100,17 +80,57 @@ party can figure out the key (security).</p>
     </section>
     <section id="threat2">
       <h2>Threat T2: Token Modification/Forgery</h2>
-<!-- BEGIN CHANGES HERE -->
 
-<p>Repeat the steps as for Threat T1.</p>
+<!-- BEGIN CHANGES HERE -->
+<p>
+	The threat of token modification or forgery is seen when an adversary receives a token with a certain set of permissions,
+	but modifies the token to receive more permissions than their user is actually granted in the system.
+	This threat is problematic because if an adversary is able to successfully modify a token, they can effectively grant themselves
+	arbitrary permissions, such as access to the administrator group, owner of the administrator group, and unrestricted access to arbitrary groups and files.
+	This compromises the confidentiality and potentially the integrity of our file sharing system.
+</p>
+
+<p>
+	The mechanism that we chose to implement to protect against this threat can be viewed in the diagram below T1.
+	We require that the server sign each token that it grants to users, along with encrypting that token using a shared AES
+	key transmitted during the authentication period. This insures that no passively listening adversaries can see the token,
+	and furthermore it prevents the user themselves from modifying the token. Any time an action is requested by the user,
+	the server will validate that the token is signed by the group server using the group server's public key.
+</p>
+
+<p>
+	Our mechanism sufficiently addresses this particular threat because it prevents modification of tokens by users,
+	and prevents passively listening adversaries from acquiring an unencrypted token.
+</p>
 
 <!-- END CHANGES HERE -->
     </section>
     <section id="threat3">
       <h2>Threat T3: Unauthorized File Servers</h2>
+
 <!-- BEGIN CHANGES HERE -->
 
-<p>Repeat the steps as for Threat T1.</p>
+<p>Begin this section by describing threat T1. This may include describing
+examples of the threat being exploited by an adversary, a short discussion of
+why this threat is problematic and needs to be addressed, and/or diagrams
+showing how the threat might manifest in your group’s insecure
+implementation.</p>
+
+<p>Next, provide a short description of the mechanism that you chose to
+implement to protect against this threat. For interactive protocols, it would be
+helpful to provide a diagram explaining the messages exchanged between
+participating principals (use html &lt;img&gt; tag to import such images). Be
+sure to explain any cryptographic choices that your group makes: What types of
+algorithms, modes of operation, and/or key lengths did you choose? Why? If
+shared keys are needed, how are they exchanged?</p>
+
+<p>Finally, provide a short argument addressing why your proposed mechanism
+sufficiently addresses this particular threat. This argument should address the
+correctness of your approach, as well as its overall security. For example, if
+your mechanism involves a key agreement or key exchange protocol, you should
+argue that both parties agree on the same key (correctnes) and that no other
+party can figure out the key (security).</p>
+
 
 <!-- END CHANGES HERE -->
     </section>
@@ -125,21 +145,21 @@ party can figure out the key (security).</p>
 </p>
 
 
-<p>Next, provide a short description of the mechanism that you chose to
-implement to protect against this threat. For interactive protocols, it would be
-helpful to provide a diagram explaining the messages exchanged between
-participating principals (use html &lt;img&gt; tag to import such images). Be
-sure to explain any cryptographic choices that your group makes: What types of
-algorithms, modes of operation, and/or key lengths did you choose? Why? If
-shared keys are needed, how are they exchanged?</p>
-
 <p>
-
+	The mechanism we chose to implement to protect against this threat can be viewed in the diagram below T1.
+	We chose to use a shared AES-256 key as we believed it to currently be the standard in secure data transmission.
+	We exchanged shared AES keys via the server and client's public RSA keys. The client generates
+	a shared AES key and shares it with the server after encrypting it with the group server's public key,
+	as can be seen in T1.
+</p>
 <p>
-
+	Our proposed mechanism sufficiently addresses the threat because at no point would an adversary be able to access a shared key.
+	The shared keys are transmitted using RSA encryption at the authentication stage.
+	Furthermore, passively monitoring adversaries would only see encrypted information being communicated between the server's and client.
+	Because of this, all communications are hidden from outside observers.
+	This ensures that file contents remain private, and that tokens cannot be stolen in transit.
 </p>
 
-<p>Repeat the steps as for Threat T1.</p>
 
 <!-- END CHANGES HERE -->
     </section>
