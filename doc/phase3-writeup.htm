@@ -60,8 +60,20 @@ sure to explain any cryptographic choices that your group makes: What types of
 algorithms, modes of operation, and/or key lengths did you choose? Why? If
 shared keys are needed, how are they exchanged?</p>
 
+<img src="../doc/authentication.png">
 <p>
-
+	The client uses the server's public key to encrypt a challenge R, along with a shared AES-256 key.
+	The server responds to the challenge with some computation on R encrypted with the new shared AES key.
+	Next, the user sends back their password encrypted with the shared AES key.
+	The server checks this password against its salted, SHA-2 hash database of passwords.
+	The user is given three attempts to provide a correct password before their account is locked temporarily
+	until they contact an administrator in person.
+	This mechanism was chosen to prevent an adversary from attempting to brute-force a user's password.
+	If the user's password is validated, the server encrypts the user's token with the shared AES key
+	after signing it with RSA and sends it.
+	We chose AES-256 because of its suitability for transmitting data quickly and securely.
+	Furthermore, it is used pervasively in industry.
+	We chose the RSA public key crypto system because its suitable for key-exchange.
 </p>
 
 <p>Finally, provide a short argument addressing why your proposed mechanism
@@ -71,6 +83,19 @@ your mechanism involves a key agreement or key exchange protocol, you should
 argue that both parties agree on the same key (correctnes) and that no other
 party can figure out the key (security).</p>
 
+<p>
+	Our mechanism addresses the proposed threat because we only issue tokens to users who are
+	authenticated via their password which is securely stored on the group server's database.
+	The security of our token issuance is equivalent to the security of user's password.
+	For this reason, we need to take care to ensure that passwords avoid being compromised,
+	are updated frequently, and meet some basic complexity requirements.
+</p>
+<p>
+	In our authentication system, an adversary could foreseeably reach the
+	stage where the user is prompted for their password.
+	This is why we added a limit on the number of times a user can enter their password incorrectly.
+	This prevents brute force attacks and adds to the security of our mechanism.
+</p>
 <!-- END CHANGES HERE -->
     </section>
     <section id="threat2">
@@ -98,6 +123,17 @@ party can figure out the key (security).</p>
 	This violates the user's privacy and poses security risks to the integrity of the system.
 	In particular, monitoring of tokens is especially problematic for reasons previously mentioned in T1.
 </p>
+
+
+<p>Next, provide a short description of the mechanism that you chose to
+implement to protect against this threat. For interactive protocols, it would be
+helpful to provide a diagram explaining the messages exchanged between
+participating principals (use html &lt;img&gt; tag to import such images). Be
+sure to explain any cryptographic choices that your group makes: What types of
+algorithms, modes of operation, and/or key lengths did you choose? Why? If
+shared keys are needed, how are they exchanged?</p>
+
+<p>
 
 <p>
 
