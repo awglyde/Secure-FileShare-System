@@ -6,17 +6,15 @@ import java.util.List;
 
 public class UserClient
 {
-
-    static String serverName = "localhost";
     static GroupClient groupClient = new GroupClient();
     static FileClient fileClient = new FileClient();
     static String username = "";
     static UserToken userToken = null;
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-    public static void connectGroupServer() throws IOException
+    public static void connectGroupServer(String groupServerName, int groupPort) throws IOException
     {
-        groupClient.connect(serverName,  GroupClient.SERVER_PORT);
+        groupClient.connect(groupServerName,  groupPort);
         if (groupClient.isConnected())
         {
             groupOptions();
@@ -220,12 +218,13 @@ public class UserClient
         }
     }
 
-    public static void connectFileServer() throws IOException
+    public static void connectFileServer(String groupSeverName, int groupPort,
+                                         String fileServerName, int filePort) throws IOException
     {
-        fileClient.connect(serverName,  FileClient.SERVER_PORT);
+        fileClient.connect(fileServerName,  filePort);
         if (fileClient.isConnected())
         {
-            fileOptions();
+            fileOptions(groupSeverName, groupPort);
         }
         else
         {
@@ -234,7 +233,7 @@ public class UserClient
 
         fileClient.disconnect();
     }
-    public static void fileOptions() throws IOException
+    public static void fileOptions(String groupSeverName, int groupPort) throws IOException
     {
         String choice = "";
         System.out.println("Welcome to the File Server! Please choose from the list of options.\n\n");
@@ -249,7 +248,7 @@ public class UserClient
         {
             // reset the group client to reset the state of objects on the stream
             fileClient.reset();
-            userToken = getToken(username);
+            userToken = getToken(groupSeverName, groupPort, username);
 
             for (int i = 0; i < menuOptions.length; i++)
             {
@@ -336,9 +335,9 @@ public class UserClient
         }
     }
 
-    public static Token getToken(String username)
+    public static Token getToken(String groupSeverName, int groupPort, String username)
     {
-        groupClient.connect(serverName,  GroupClient.SERVER_PORT);
+        groupClient.connect(groupSeverName,  groupPort);
         Token newToken = (Token) groupClient.getToken(username);
 
         if (groupClient.isConnected())
@@ -349,7 +348,7 @@ public class UserClient
         return newToken;
     }
 
-    public static void chooseServer() throws IOException
+    public static void chooseServer(String groupServerName, int groupPort, String fileServerName, int filePort) throws IOException
     {
 
         try
@@ -367,12 +366,12 @@ public class UserClient
                 {
                     case "1":
                         System.out.println("Group Server");
-                        connectGroupServer();
+                        connectGroupServer(groupServerName, groupPort);
 
                         break;
                     case "2":
                         System.out.println("File Server");
-                        connectFileServer();
+                        connectFileServer(groupServerName, groupPort, fileServerName, filePort);
 
                         break;
                     case "0":
@@ -405,15 +404,37 @@ public class UserClient
 
     public static void main(String args[]) throws IOException
     {
-        System.out.println("Enter username to login: ");
+        String groupServerName = "localhost";
+        int groupPort = GroupClient.SERVER_PORT;
+
+        String fileServerName = "localhost";
+        int filePort = FileClient.SERVER_PORT;
 
         try
         {
+            // if we pass in more than 1 parameter, set the values for each parameter
+            if(args.length > 0)
+            {
+                groupServerName = args[0];
+                groupPort = Integer.parseInt(args[1]);
+                fileServerName = args[2];
+                filePort = Integer.parseInt(args[3]);
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println("Invalid Program Parameters. Please try again.");
+        }
+
+        try
+        {
+            System.out.println("Enter username to login: ");
+
             username = inputValidation(in.readLine());
-            userToken = getToken(username);
+            userToken = getToken(groupServerName, groupPort, username);
             if (userToken != null) {
                 System.out.println("Token acquired!");
-                chooseServer();
+                chooseServer(groupServerName, groupPort, fileServerName, filePort);
             }
             else
                 System.out.println("Your username was not recognized. Contact administrator");

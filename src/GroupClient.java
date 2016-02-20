@@ -5,7 +5,6 @@ import java.util.List;
 
 public class GroupClient extends Client implements GroupClientInterface
 {
-
     public static final int SERVER_PORT = 8765;
 
     public UserToken getToken(String username)

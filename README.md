@@ -16,12 +16,14 @@ CS1653 - Applied Cryptography
 
 4. To run the code you must run the Group Server and the File Server. To do that use the following commands:
 
-    ``` java RunGroupServer ```  
-    ``` java RunFileServer ```
+    ``` java RunGroupServer [(optional) Port Number] ```  
+    ``` java RunFileServer [(optional) Port Number] ```
 
-5. Then run the User Client to utilize the Group Server and File Server. Follow the prompt.
+5. Then run the User Client to utilize the Group Server and File Server. Follow the prompt:
 
-    ``` java UserClient ```
+    ``` java UserClient [groupServerIP] [groupServerPort] [fileServerIP] [fileServerPort] ```
+
+    If no arguments are passed in, default values will be taken.
 
 ### Contribution guidelines ###
 
