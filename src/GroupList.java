@@ -12,7 +12,6 @@ public class GroupList implements java.io.Serializable
     private static final long serialVersionUID = 7660378893561417352L;
     private Hashtable<String, Group> list = new Hashtable<String, Group>();
 
-
     public synchronized void addGroup(String owner, String groupName)
     {
         Group newGroup = new Group(owner);
