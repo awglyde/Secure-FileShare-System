@@ -133,13 +133,14 @@ degree of privilege.
       <h2>Threat T3: Unauthorized File Servers</h2>
 
 <!-- BEGIN CHANGES HERE -->
-
-An example of unauthorized file servers manifesting themselves in our insecure implementation
-would be a user accidentally connecting to a file server they had thought was legitimate.
-This would pose a risk because the user could potentially upload sensitive files and information
-to a malicious server.
-In addition to this, the user will probably think that files hosted on this unauthorized server are legitimate.
-This might lead to the user downloading files containing malicious payloads, such as viruses, malware, etc.
+<p>
+	An example of unauthorized file servers manifesting themselves in our insecure implementation
+	would be a user accidentally connecting to a file server they had thought was legitimate.
+	This would pose a risk because the user could potentially upload sensitive files and information
+	to a malicious server.
+	In addition to this, the user will probably think that files hosted on this unauthorized server are legitimate.
+	This might lead to the user downloading files containing malicious payloads, such as viruses, malware, etc.
+</p>
 
 <br /><br />
 <img src="../doc/t3.png" style="width:750px;">
@@ -167,13 +168,15 @@ This might lead to the user downloading files containing malicious payloads, suc
 	encrypted with the shared AES key.
 </p>
 
-We know based on the assumptions of our system that the public keys of the file servers
-in our system are known and legitimate.
-Thus, since initial communication and shared key exchange is done using encryption with these public keys,
-we can be certain that the shared key will only be known to the client and the respective file server.
-The random number R serves as a challenge to the file server and allows us to verify
-it is legitimate. We can be sure of this because the file server and the client are the only ones
-with access to their respective private keys. Furthermore, th
+<p>
+	We know based on the assumptions of our system that the public keys of the file servers
+	in our system are known and legitimate.
+	Thus, since initial communication and shared key exchange is done using encryption with these public keys,
+	we can be certain that the shared key will only be known to the client and the respective file server.
+	The random number R serves as a challenge to the file server and allows us to verify
+	it is legitimate. We can be sure of this because the file server and the client are the only ones
+	with access to their respective private keys. Furthermore, th
+</p>
 
 <!-- END CHANGES HERE -->
     </section>
