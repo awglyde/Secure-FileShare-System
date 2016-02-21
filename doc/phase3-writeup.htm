@@ -45,6 +45,14 @@ the IT department to get the user an account.
 All of the public keys and IPs of file servers will be posted on the
 Department's SSL/TLS secured HTTPS website.
 
+<br/> <br/>
+<p>
+    For the passing of information to be secure we exchange a shared AES key
+    between the client and the group/file server using RSA encryption. For the
+    rest of the session (the period of time a user is connect to a server) all
+    communication is encrypted using that AES Key.
+</p>
+
 <!-- END CHANGES HERE -->
     </section>
     <section id="threat1">
@@ -59,13 +67,14 @@ compromised, the results are particularly egregious due to the fact that adminis
 degree of privilege.
 </p>
 
-<img src="../doc/t1.png" style="width:1000px;">
+<img src="../doc/t1.png" style="width:750px;">
 <br /><br />
 <p>
-	The client uses the server's public key to encrypt a challenge R, along with a shared AES-256 key.
-	The server responds to the challenge with some computation on R encrypted with the new shared AES key.
-	Next, the user sends back their password encrypted with the shared AES key.
-	The server checks this password against its salted, SHA-2 hash database of passwords.
+	The client uses the server's public key to encrypt a challenge R, along with their own public key K_c.
+	The server generates a new shared AES key K_AES and performs some computation on R.
+	It then encrypts both the new shared key K_AES and R+1 and sends them back to the client.
+	Next, the user sends back their username and password encrypted with the shared AES key.
+	The server checks this password against its salted, SHA-512 database of passwords.
 	The user is given three attempts to provide a correct password before their account is locked temporarily
 	until they contact an administrator in person.
 	This mechanism was chosen to prevent an adversary from attempting to brute-force a user's password.
@@ -96,16 +105,18 @@ degree of privilege.
 
 <!-- BEGIN CHANGES HERE -->
 <p>
-	The threat of token modification or forgery is seen when an adversary receives a token with a certain set of permissions,
-	but modifies the token to receive more permissions than their user is actually granted in the system.
-	This threat is problematic because if an adversary is able to successfully modify a token, they can effectively grant themselves
-	arbitrary permissions, such as access to the administrator group, owner of the administrator group, and unrestricted access to arbitrary groups and files.
+	The threat of token modification or forgery is seen when a user receives a token with a certain set of permissions,
+	but modifies the token to receive more permissions than they were originally granted.
+	This threat is problematic because if a server accepts a token that has been modified by a malicious client,
+	the malicious client can then effectively grant themselves arbitrary permissions,
+	such as access to the administrator group, owner of the administrator group, and unrestricted access to arbitrary groups and files.
 	This compromises the confidentiality and potentially the integrity of our file sharing system.
 </p>
 
 <p>
 	The mechanism that we chose to implement to protect against this threat can be viewed in the diagram below T1.
-	We require that the server sign each token that it grants to users, along with encrypting that token using a shared AES
+	We require that the group server sign and encrypt each token that it grants to users,
+	along with encrypting that token using a shared AES
 	key transmitted during the authentication period. This insures that no passively listening adversaries can see the token,
 	and furthermore it prevents the user themselves from modifying the token. Any time an action is requested by the user,
 	the server will validate that the token is signed by the group server using the group server's public key.
@@ -123,28 +134,46 @@ degree of privilege.
 
 <!-- BEGIN CHANGES HERE -->
 
-<p>Begin this section by describing threat T1. This may include describing
-examples of the threat being exploited by an adversary, a short discussion of
-why this threat is problematic and needs to be addressed, and/or diagrams
-showing how the threat might manifest in your group’s insecure
-implementation.</p>
+An example of unauthorized file servers manifesting themselves in our insecure implementation
+would be a user accidentally connecting to a file server they had thought was legitimate.
+This would pose a risk because the user could potentially upload sensitive files and information
+to a malicious server.
+In addition to this, the user will probably think that files hosted on this unauthorized server are legitimate.
+This might lead to the user downloading files containing malicious payloads, such as viruses, malware, etc.
 
-<img src="../doc/t1.png" style="width:1000px;">
-<p>Next, provide a short description of the mechanism that you chose to
-implement to protect against this threat. For interactive protocols, it would be
-helpful to provide a diagram explaining the messages exchanged between
-participating principals (use html &lt;img&gt; tag to import such images). Be
-sure to explain any cryptographic choices that your group makes: What types of
-algorithms, modes of operation, and/or key lengths did you choose? Why? If
-shared keys are needed, how are they exchanged?</p>
+<br /><br />
+<img src="../doc/t3.png" style="width:750px;">
+<br /><br />
+<p>
+	To protect against a user connecting to an unauthorized file server, we first make the assumption that
+	all authorized file servers, (since they are run by users of our system) will have their public keys
+	posted on the department's SSL/TLS secured HTTPS website. This will ensure that we know the IP address,
+	and the public key of the file server we are connecting to is legitimate.
+</p>
+<br />
+<p>
+	Now, using these assumptions, the client sends the desired file server an initial message containing
+	a random number R, the client's public key K_c, and the signed Token [T]K_g^-1 which was received
+	from the group server when the user initially connected to the system.
+	Next, the file server decrypts the user's message using its private key K_f^-1, and verifies the
+	user's token. If the verification fails, communication ceases.
+	If the verification succeeds, the file server generates and responds with a shared AES session key,
+	along with some previously agreed upon computation on R, proving it was able to decrypt
+	the initial message, showing it was the owner of K_f^-1.
+	This message containing some computation on R and K_AES is then encrypted using the clients
+	public key K_c which was sent in the first message.
+	This ensures the client is the only one who can receive the shared AES key.
+	At this point, the file server is authorized and the user can carry out operations which are
+	encrypted with the shared AES key.
+</p>
 
-<p>Finally, provide a short argument addressing why your proposed mechanism
-sufficiently addresses this particular threat. This argument should address the
-correctness of your approach, as well as its overall security. For example, if
-your mechanism involves a key agreement or key exchange protocol, you should
-argue that both parties agree on the same key (correctnes) and that no other
-party can figure out the key (security).</p>
-
+We know based on the assumptions of our system that the public keys of the file servers
+in our system are known and legitimate.
+Thus, since initial communication and shared key exchange is done using encryption with these public keys,
+we can be certain that the shared key will only be known to the client and the respective file server.
+The random number R serves as a challenge to the file server and allows us to verify
+it is legitimate. We can be sure of this because the file server and the client are the only ones
+with access to their respective private keys. Furthermore, th
 
 <!-- END CHANGES HERE -->
     </section>
@@ -175,6 +204,27 @@ party can figure out the key (security).</p>
 </p>
 
 
+<p>Begin this section by describing threat T1. This may include describing
+examples of the threat being exploited by an adversary, a short discussion of
+why this threat is problematic and needs to be addressed, and/or diagrams
+showing how the threat might manifest in your group’s insecure
+implementation.</p>
+
+<p>Next, provide a short description of the mechanism that you chose to
+implement to protect against this threat. For interactive protocols, it would be
+helpful to provide a diagram explaining the messages exchanged between
+participating principals (use html &lt;img&gt; tag to import such images). Be
+sure to explain any cryptographic choices that your group makes: What types of
+algorithms, modes of operation, and/or key lengths did you choose? Why? If
+shared keys are needed, how are they exchanged?</p>
+
+<p>Finally, provide a short argument addressing why your proposed mechanism
+sufficiently addresses this particular threat. This argument should address the
+correctness of your approach, as well as its overall security. For example, if
+your mechanism involves a key agreement or key exchange protocol, you should
+argue that both parties agree on the same key (correctnes) and that no other
+party can figure out the key (security).</p>
+
 <!-- END CHANGES HERE -->
     </section>
     <section id="discussion">
@@ -187,6 +237,7 @@ followed. Did you discuss other ideas that didn’t pan out before settling on t
 above-documented approach? Did you end up designing a really interesting
 protocol suite that addresses multiple threats at once? Use this space to show
 off your hard work!</p>
+
 
 <p>If your group did any extra credit, please discuss that in this section, as
 well.</p>
