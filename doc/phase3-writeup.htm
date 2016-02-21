@@ -31,19 +31,26 @@ Ethan Welsh - ejw45@pitt.edu
 
 <p>In this section, broadly overview the types of cryptographic techniques that
 your group has decided to use to address threats T1–T4.</p>
-System overview / Threat model:
 
-Some assumptions about our system:
-
-We are developing this secure file sharing system for use within a University's research department.
-The users who will have access (via username / password) to the system are PhD professors,
-graduate students, accelling undergraduates, and members of the university's IT department to serve as administrators.
-Professors will (typically, but not exclusively) be the owners of groups, with graduate students and accelling undergraduates
-serving as users.
-To obtain a username and password, one must go through the Professors who will contact
-the IT department to get the user an account.
-All of the public keys and IPs of file servers will be posted on the
-Department's SSL/TLS secured HTTPS website.
+<b>Some assumptions about our system:</b>
+<br />
+<p>
+	We are developing this secure file sharing system for use within a University's research department.
+	The users who will have access (via username / password) to the system are PhD professors,
+	graduate students, accelling undergraduates, and members of the university's IT department to serve as administrators.
+	Professors will (typically, but not exclusively) be the owners of groups, with graduate students and accelling undergraduates
+	serving as users.
+	To obtain a username and password, one must go through the Professors who will contact
+	the IT department to get the user an account.
+	All of the public keys and IPs of file servers will be posted on the
+	Department's SSL/TLS secured HTTPS website.
+</p>
+<br />
+<p>
+	To address the threats from T1-T4 we have implemented ubiquitous encryption for all communications
+	across our system. Key exchange is done using public key cryptography and further communications
+	are done using AES-256 on a per session basis. Login is done via a username and hashed password.
+</p>
 
 <br/> <br/>
 <p>
@@ -59,12 +66,15 @@ Department's SSL/TLS secured HTTPS website.
       <h2>Threat T1: Unauthorized Token Issuance</h2>
 <!-- BEGIN CHANGES HERE -->
 
-<p>Unauthorized token issuance is equivalent to users being granted unauthorized access to our servers.
-This is problematic because unauthorized users being granted access to tokens that do not belong to them
-compromises our application's ability to discern identity. This results in a potential for adversaries
-to gain access to the compromised user's groups and files. In particular, if an administrator should be
-compromised, the results are particularly egregious due to the fact that administrators have a greater
-degree of privilege.
+<p>
+	Unauthorized token issuance is equivalent to users being granted unauthorized access to our servers.
+	This is problematic because unauthorized users being granted access to tokens that do not belong to them
+	compromises our application's ability to discern identity. This results in a potential for adversaries
+	to gain access to the compromised user's groups and files. In particular, if an administrator should be
+	compromised, the results are particularly egregious due to the fact that administrators have a greater
+	degree of privilege.
+	In our insecure implementation we make no attempt to prevent unauthorized token issuance. Anyone with
+	an account name can receive a token.
 </p>
 
 <img src="../doc/t1.png" style="width:750px;">
@@ -111,13 +121,14 @@ degree of privilege.
 	the malicious client can then effectively grant themselves arbitrary permissions,
 	such as access to the administrator group, owner of the administrator group, and unrestricted access to arbitrary groups and files.
 	This compromises the confidentiality and potentially the integrity of our file sharing system.
+	In our insecure implementation we make no attempt to verify the validity of a token, or check to see
+	if it has been modified.
 </p>
 
 <p>
 	The mechanism that we chose to implement to protect against this threat can be viewed in the diagram below T1.
-	We require that the group server sign and encrypt each token that it grants to users,
-	along with encrypting that token using a shared AES
-	key transmitted during the authentication period. This insures that no passively listening adversaries can see the token,
+	We require that the group server sign and encrypt each token granted to users using a shared AES key
+	which is transmitted during the authentication period. This ensures that no passively listening adversaries can see the token,
 	and furthermore it prevents the user themselves from modifying the token. Any time an action is requested by the user,
 	the server will validate that the token is signed by the group server using the group server's public key.
 </p>
@@ -173,6 +184,9 @@ degree of privilege.
 	in our system are known and legitimate.
 	Thus, since initial communication and shared key exchange is done using encryption with these public keys,
 	we can be certain that the shared key will only be known to the client and the respective file server.
+	We can be sure both parties agree on the same key as it is generated by the file server, encrypted
+	with the client's public key (which is sent in the first message) and then sent to the client.
+	This ensures both correctness and security.
 </p>
 
 <!-- END CHANGES HERE -->
@@ -185,6 +199,8 @@ degree of privilege.
 	then tokens, files, passwords, and group server actions are all transparent to any listening entity.
 	This violates the user's privacy and poses security risks to the integrity of the system.
 	In particular, monitoring of tokens is especially problematic for reasons previously mentioned in T1.
+	In our insecure implementation we do not make any attempt to encrypt or obfuscate communications
+	so all information would be leaked.
 </p>
 
 
@@ -202,7 +218,6 @@ degree of privilege.
 	Because of this, all communications are hidden from outside observers.
 	This ensures that file contents remain private, and that tokens cannot be stolen in transit.
 </p>
-
 
 <p>Begin this section by describing threat T1. This may include describing
 examples of the threat being exploited by an adversary, a short discussion of
