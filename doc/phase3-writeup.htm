@@ -45,14 +45,6 @@ the IT department to get the user an account.
 All of the public keys and IPs of file servers will be posted on the
 Department's SSL/TLS secured HTTPS website.
 
-<br/> <br/>
-<p>
-    For the passing of information to be secure we exchange a shared AES key
-    between the client and the group/file server using RSA encryption. For the
-    rest of the session (the period of time a user is connect to a server) all
-    communication is encrypted using that AES Key. 
-</p>
-
 <!-- END CHANGES HERE -->
     </section>
     <section id="threat1">
@@ -67,7 +59,7 @@ compromised, the results are particularly egregious due to the fact that adminis
 degree of privilege.
 </p>
 
-<img src="../doc/authentication.png" style="width:1000px;">
+<img src="../doc/t1.png" style="width:1000px;">
 <br /><br />
 <p>
 	The client uses the server's public key to encrypt a challenge R, along with a shared AES-256 key.
@@ -77,8 +69,8 @@ degree of privilege.
 	The user is given three attempts to provide a correct password before their account is locked temporarily
 	until they contact an administrator in person.
 	This mechanism was chosen to prevent an adversary from attempting to brute-force a user's password.
-	If the user's password is validated, the server encrypts the user's token with the shared AES key
-	after signing it with RSA and sends it.
+	If the user's password is validated, the server signs the user's token T using its private key (K_g)^-1
+	then encrypts it with the shared AES key and sends it to the user.
 	We chose AES-256 because of its suitability for transmitting data quickly and securely.
 	Furthermore, it is used pervasively in industry.
 	We chose the RSA public key crypto system because its suitable for key-exchange.
@@ -137,6 +129,7 @@ why this threat is problematic and needs to be addressed, and/or diagrams
 showing how the threat might manifest in your group’s insecure
 implementation.</p>
 
+<img src="../doc/t1.png" style="width:1000px;">
 <p>Next, provide a short description of the mechanism that you chose to
 implement to protect against this threat. For interactive protocols, it would be
 helpful to provide a diagram explaining the messages exchanged between
