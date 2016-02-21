@@ -199,8 +199,8 @@ header {
 <p>
 	The mechanism we chose to implement to protect against this threat can be viewed in the diagram below T1.
 	We chose to use a shared AES-256 key as we believed it to currently be the standard in secure data transmission.
-	We exchanged shared AES keys via the server and client's public RSA keys. The client generates
-	a shared AES key and shares it with the server after encrypting it with the group server's public key,
+	We exchanged shared AES keys via the server and client's public RSA keys. In particular, the server generates
+	a shared AES key and shares it with the client after encrypting it with the clients public key,
 	as can be seen in T1.
 </p>
 <p>
