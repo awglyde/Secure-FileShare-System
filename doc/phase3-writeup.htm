@@ -218,6 +218,22 @@ header {
 <!-- BEGIN CHANGES HERE -->
 
 <!-- END CHANGES HERE -->
+
+    </section>
+    <section id="concerns">
+      <h2>Concerns / Issues</h2>
+
+      <p>
+          What happens if an attacker records arbitrary messages from the user AFTER authentication
+          and replays them to the server, faking the users IP. Couldn't they effectively
+          "replay" any command the user makes?
+      </p>
+
+      <p>
+          What happens if a user becomes malicious and begins deleting files on the server?
+          Even if an administrator revokes privileges the user remains logged in.
+          How to solve this? Token expiration system?
+      </p>
 <!--
 <p>Conclude with a paragraph or two discussing the interplay between your
 proposed mechanisms, and commenting on the design process that your group
