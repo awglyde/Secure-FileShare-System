@@ -273,4 +273,38 @@ party can figure out the key (security).</p>
     </section>
   </body>
 </html>
+
+Avoid a centralized list of all file servers
+Not reasonable to assume there's one single place you can go for every file server
+
+So every user who runs a file server puts the key on their HTTPS website
+
+Get away from centralized list of file servers
+
+Don't necessarily need to give a token when user logs in to group server
+Only need it for file server
+
+More detail on the password situation. What's stored on the group server
+If I create a user where did that user get a password
+
+What salting scheme. How long are the salts (salt length), are they concatenated. How are they stored
+Are they stored along the password
+
+The size of R, how it's generated, where it's stored
+
+Need details on the signed token. This is an object with some fields.
+•	Trying to sign an object with a bunch of fields
+•	Need to hash a list of groups, i.e. trying to sign an arbitrary length of groups. Hash the groups?
+•	Make a toString method and then hash the toString
+
+Rename "requests" with R in them as "challenges"
+
+Specify where the file server gets the public key of the group server, why, how, where??????
+
+Specify how the client connects to a file server and how the clients machine knows the public key of the file server
+(Config file? Or SSH?)
+
+Want tokens to expire at some point. Not quite token modification. Using token from a year ago. Not the intended use.
+Token expiration
+
 -->
