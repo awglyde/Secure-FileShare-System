@@ -38,8 +38,9 @@ header {
 	serving as users.
 	To obtain a username and password, one must go through the Professors who will contact
 	the IT department to get the user an account.
-	All of the public keys and IPs of file servers will be posted on the
-	Department's SSL/TLS secured HTTPS website.
+    When a user wants to run a file server,
+    they post the public key and IP of the file server on their personal SSL/TLS secured HTTPS website
+    within the department's page.
 </p>
 <p>
 	To address the threats from T1-T4 we have implemented ubiquitous encryption for all communications
@@ -152,11 +153,18 @@ header {
 <p>
 	To protect against a user connecting to an unauthorized file server, we first make the assumption that
 	all authorized file servers, (since they are run by users of our system) will have their public keys
-	posted on the department's SSL/TLS secured HTTPS website. This will ensure that we know the IP address,
+	posted on owner of the file server's SSL/TLS secured HTTPS website within the Department.
+    This will ensure that we know the IP address (and the user connecting can verify it manually),
 	and the public key of the file server we are connecting to is legitimate.
 </p>
 <p>
-	Now, using these assumptions, the client sends the desired file server an initial message containing
+    So, the client first pings the file server. The file server responds
+    with a fingerprint of its public key, which the client checks against an existing mapping
+    of file servers it has connected to. If the client has seen the public key before, the message
+    is omitted. If the client has not seen the public key before, the server prompts the client
+    if it this public key is correct (Similar to SSH's method).
+    If the client accepts the public key, we continue; if not, communication ceases.
+	Next, the client sends the desired file server an initial message containing
 	a random number R, the client's public key K_c, and the signed Token [T]K_g^-1 which was received
 	from the group server when the user initially connected to the system.
 	Next, the file server decrypts the user's message using its private key K_f^-1, and verifies the
