@@ -66,5 +66,10 @@ public class Token implements UserToken, java.io.Serializable
             return false;
     }
 
+    public String toString()
+    {
+        return null;
+    }
+
 
 }
