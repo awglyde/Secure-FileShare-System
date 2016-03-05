@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.security.Key;
 import java.security.SecureRandom;
+import javax.crypto.*;
 
 public class GroupClient extends Client implements GroupClientInterface
 {
@@ -93,6 +94,7 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("DUSER");
             message.addObject(username); //Add user name
             message.addObject(token);  //Add requester's token
+
             output.writeObject(message);
 
             response = (Envelope) input.readObject();
@@ -284,10 +286,10 @@ public class GroupClient extends Client implements GroupClientInterface
         return null;
     }
 
-	public boolean authChallenge()
+	public boolean authChallenge(EncryptionSuite userKeys)
 	{
 		SecureRandom prng = new SecureRandom();
-		int challenge = prng.next(128);
+		int challenge = prng.nextInt(128);
 		// 1) Generate a challenge.
 		// 2) Encrypt challenge & user's public key with GS public key
 		// 3) Receive completed challenge and shared AES key
@@ -298,9 +300,12 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to return its public key
             message = new Envelope("AUTHCHALLENGE");
-            output.writeObject(message);
+			message.addObject(challenge);
+			message.addObject(this.serverKeys.getEncryptionKey());
 
-            response = (Envelope) input.readObject();
+            output.writeObject(this.serverKeys.getEncryptedMessage(message));
+            response = userKeys.getDecryptedMessage((Envelope)input.readObject());
+
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -331,9 +336,10 @@ public class GroupClient extends Client implements GroupClientInterface
 		this.serverKeys.setEncryptionKey(groupServerPublicKey);
         // Generate new object for encryption / decryption with gs public key
         System.out.println(this.serverKeys.encryptionKeyToString());
-		if (this.authChallenge() && this.authLogin())
+		if (this.authChallenge(userKeys) && this.authLogin())
 			return true;
 		else
 			return false;
 	}
+
 }

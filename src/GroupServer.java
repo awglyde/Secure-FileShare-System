@@ -20,8 +20,8 @@ public class GroupServer extends Server
     public static final int SERVER_PORT = 8765;
     public UserList userList;
     public GroupList groupList;
-    private EncryptionSuite groupServerKeys;
-    private EncryptionSuite sessionKey = null;
+    protected EncryptionSuite groupServerKeys;
+    protected EncryptionSuite sessionKey = null;
 
     public GroupServer() throws Exception
     {

@@ -6,6 +6,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.SealedObject;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -23,11 +24,13 @@ import java.util.Base64.Encoder;
 public class EncryptionSuite
 {
 
-    public static final String ENCRYPTION_AES = "AES";
+    public static final String ENCRYPTION_AES = "AES/CBC/PKCS5Padding";
     public static final String ENCRYPTION_BLOWFISH = "Blowfish";
     public static final String ENCRYPTION_RSA = "RSA";
     public static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
     public static final String PROVIDER = "BC";
+	public static final int encrypt = Cipher.ENCRYPT_MODE;
+	public static final int decrypt = Cipher.DECRYPT_MODE;
     private String algorithmName = "";
     private int keyLength = 256;
     private Key encryptionKey = null;
@@ -155,6 +158,21 @@ public class EncryptionSuite
         return outputBytes;
     }
 
+    public Cipher getCipher(int mode) throws Exception
+    {
+        Key key = null;
+        if (mode == Cipher.ENCRYPT_MODE)
+            key = this.encryptionKey;
+        else
+            key = this.decryptionKey;
+
+		// ADD INITIALZIATION VECTOR
+        Cipher cipher = Cipher.getInstance(this.algorithmName, PROVIDER);
+        cipher.init(mode, key);
+
+		return cipher;
+    }
+
     public String encryptionKeyToString()
     {
         String stringKey = "";
@@ -164,4 +182,26 @@ public class EncryptionSuite
             stringKey = encoder.encodeToString(this.encryptionKey.getEncoded());
         return stringKey;
     }
+
+	public Envelope getEncryptedMessage(Envelope message) throws Exception
+	{
+		SealedObject encMessage = new SealedObject(message, this.getCipher(encrypt));
+		Envelope wrappedEncMessage = new Envelope("ENCRYPTEDENV");
+		wrappedEncMessage.addObject(encMessage);
+
+		return wrappedEncMessage;
+	}
+
+	public Envelope getDecryptedMessage(Envelope encMessage) throws Exception
+	{
+		if (encMessage.getMessage().equals("ENCRYPTEDENV"))
+		{
+			SealedObject encResponse = (SealedObject)encMessage.getObjContents().get(0);
+			return (Envelope)encResponse.getObject(this.getCipher(decrypt));
+		}
+		else
+		{
+			return null;
+		}
+	}
 }

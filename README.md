@@ -107,3 +107,10 @@ TOMORROW MORNING:
 
 * Add encryption suite objects to Client object?
 * Potentially leverage Client object to reuse code
+
+1) Add contents of message to Envelope 1
+2) Wrap 1 in SealedObject 2
+3) Wrap 2 in an Envelope
+4) Send to server
+5) Server sends SealedObject to handler function, decrypts sealed object
+6) 
