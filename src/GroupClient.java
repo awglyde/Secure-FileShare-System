@@ -283,13 +283,27 @@ public class GroupClient extends Client implements GroupClientInterface
         return null;
     }
 
-	public boolean authenticateGroupServer()
+	public boolean auth_stageOne()
+	{
+		// 1) Generate a challenge.
+		// 2) Encrypt challenge & user's public key with GS public key
+		// 3) Receive completed challenge and shared AES key
+		// 4)
+
+		return false;
+	}
+
+	public boolean authenticateGroupServer(EncryptionSuite userKeys)
 	{
         // Get group server public key
         Key groupServerPublicKey = this.getGroupServerPublicKey();
 		this.serverKeys.setEncryptionKey(groupServerPublicKey);
         // Generate new object for encryption / decryption with gs public key
         System.out.println(this.serverKeys.encryptionKeyToString());
+		if (this.auth_stageOne())
+		{
+
+		}
 
 		return false;
 	}

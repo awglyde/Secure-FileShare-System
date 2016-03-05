@@ -19,7 +19,7 @@ public class UserClient
         groupClient.connect(groupServerName,  groupPort);
         if (groupClient.isConnected())
         {
-			if (groupClient.authenticateGroupServer())
+			if (groupClient.authenticateGroupServer(userKeys))
 			{
 	            System.out.println("Enter username to login: ");
 	            username = inputValidation(in.readLine());
