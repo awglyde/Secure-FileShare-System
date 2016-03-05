@@ -4,31 +4,31 @@ import java.io.InputStreamReader;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.security.SecureRandom;
 
 public class UserClient
 {
-    static GroupClient groupClient = new GroupClient();
-    static FileClient fileClient = new FileClient();
+	static GroupClient groupClient;
+	static FileClient fileClient;
     static String username = "";
     static UserToken userToken = null;
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-    public static void connectGroupServer(String groupServerName, int groupPort) throws Exception
+    public static void connectGroupServer(String groupServerName, int groupPort, EncryptionSuite userKeys) throws Exception
     {
         groupClient.connect(groupServerName,  groupPort);
         if (groupClient.isConnected())
         {
-            // Generate users private / public key pair
-            EncryptionSuite userKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+			if (groupClient.authenticateGroupServer())
+			{
+	            System.out.println("Enter username to login: ");
+	            username = inputValidation(in.readLine());
 
-            // Get group server public key
-            Key groupServerPublicKey = groupClient.getGroupServerPublicKey();
-
-            // Generate new object for encryption / decryption with gs public key
-            EncryptionSuite groupCom = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
-            System.out.println(groupCom.encryptionKeyToString());
-
-            groupOptions();
+	            groupOptions();
+			}
+			{
+				System.out.println("Failed to authenticate group server. :(");
+			}
         }
         else
         {
@@ -43,7 +43,8 @@ public class UserClient
         String choice = "";
         System.out.println("Welcome to the group server! Please choose from the list of options.\n\n");
 
-        String[] menuOptions = new String[]{"Disconnect from group server",
+        String[] menuOptions = new String[]{"Retrieve a token",
+											"Disconnect from group server",
                                             "Add (create) a group",
                                             "Remove (delete) a group",
                                             "Add a user to a group",
@@ -65,6 +66,7 @@ public class UserClient
             }
 
             // print admin options if they are an admin
+			// TODO: CHANGE THIS TO USE USERNAME, NOT TOKEN
             if (userToken.isAdmin())
             {
                 for(int i = 0; i < adminOptions.length; i++){
@@ -89,7 +91,7 @@ public class UserClient
             if(userToken.isAdmin()){
                 switch(choice)
                 {
-                    case "6": // Create a user
+                    case "7": // Create a user
                         System.out.println("Enter username of new user to create: ");
                         String newUserName = inputValidation(in.readLine());
                         if (groupClient.createUser(newUserName, userToken))
@@ -103,8 +105,7 @@ public class UserClient
                         }
                         selectedAdminOption = true;
                         break;
-                        // TODO: ONLY OWNER OF ADMIN GROUP CAN DELETE OTHER ADMIN
-                    case "7": // Delete a user
+                    case "8": // Delete a user
                         System.out.println("Enter username of user to delete: ");
                         String userToDelete = inputValidation(in.readLine());
                         if (groupClient.deleteUser(userToDelete, userToken))
@@ -127,7 +128,10 @@ public class UserClient
             {
                 case "0":
                     return;
-                case "1": // Create a group
+				case "1":
+        			userToken = (Token) groupClient.getToken(username);
+					break;
+                case "2": // Create a group
                     System.out.println("Enter a group name: ");
                     String newGroupName = inputValidation(in.readLine());
                     if (groupClient.createGroup(newGroupName, userToken))
@@ -140,7 +144,7 @@ public class UserClient
                         System.out.println("There may be a group with a duplicate name.");
                     }
                     break;
-                case "2": // Delete a group
+                case "3": // Delete a group
                     System.out.println("Enter a group name to delete: ");
                     String groupToDelete = inputValidation(in.readLine());
 
@@ -156,7 +160,7 @@ public class UserClient
                     }
 
                     break;
-                case "3": // Add a user to a group
+                case "4": // Add a user to a group
                     // GET the owner of the group specified
                     // Make sure the userToken matches the owner of the group
                     // then add the user to the group
@@ -181,7 +185,7 @@ public class UserClient
                         System.out.println("You must be the owner of a group to add a user.");
                     }
                     break;
-                case "4": // Remove a user from a group
+                case "5": // Remove a user from a group
 
                     System.out.println("Enter a group name that you're an owner of: ");
                     String group = inputValidation(in.readLine());
@@ -200,7 +204,7 @@ public class UserClient
                     }
 
                     break;
-                case "5": // List all the members of a group
+                case "6": // List all the members of a group
                     System.out.println("Enter a group name you're a member of to list: ");
                     String groupName = inputValidation(in.readLine());
                     List<String> groupMembers = groupClient.listMembers(groupName, userToken);
@@ -230,7 +234,8 @@ public class UserClient
     }
 
     public static void connectFileServer(String groupSeverName, int groupPort,
-                                         String fileServerName, int filePort) throws IOException
+                                         String fileServerName, int filePort,
+										 EncryptionSuite userKeys) throws IOException
     {
         fileClient.connect(fileServerName,  filePort);
         if (fileClient.isConnected())
@@ -259,7 +264,9 @@ public class UserClient
         {
             // reset the group client to reset the state of objects on the stream
             fileClient.reset();
-            userToken = getToken(groupSeverName, groupPort, username);
+
+			// TODO: CHECK IF TOKEN IS EXPIRED INSTEAD OF GETTING A NEW TOKEN EVERY TIME
+            // userToken = getToken(groupSeverName, groupPort, username);
 
             for (int i = 0; i < menuOptions.length; i++)
             {
@@ -346,21 +353,11 @@ public class UserClient
         }
     }
 
-    public static Token getToken(String groupSeverName, int groupPort, String username)
-    {
-        groupClient.connect(groupSeverName,  groupPort);
-        Token newToken = (Token) groupClient.getToken(username);
-
-        if (groupClient.isConnected())
-            groupClient.disconnect();
-        else
-            System.out.println("System error. Group Server is not running.");
-
-        return newToken;
-    }
-
     public static void chooseServer(String groupServerName, int groupPort, String fileServerName, int filePort) throws Exception
     {
+
+        // Generate users private / public key pair
+        EncryptionSuite userKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
 
         try
         {
@@ -377,12 +374,12 @@ public class UserClient
                 {
                     case "1":
                         System.out.println("Group Server");
-                        connectGroupServer(groupServerName, groupPort);
+                        connectGroupServer(groupServerName, groupPort, userKeys);
 
                         break;
                     case "2":
                         System.out.println("File Server");
-                        connectFileServer(groupServerName, groupPort, fileServerName, filePort);
+                        connectFileServer(groupServerName, groupPort, fileServerName, filePort, userKeys);
 
                         break;
                     case "0":
@@ -413,14 +410,17 @@ public class UserClient
         return input;
     }
 
-    public static void main(String args[]) throws IOException
+    public static void main(String args[]) throws Exception
     {
+
+	    groupClient = new GroupClient();
+	    fileClient = new FileClient();
+
         String groupServerName = "localhost";
         int groupPort = GroupClient.SERVER_PORT;
 
         String fileServerName = "localhost";
         int filePort = FileClient.SERVER_PORT;
-
 
         try
         {
@@ -440,19 +440,7 @@ public class UserClient
 
         try
         {
-
-
-
-            System.out.println("Enter username to login: ");
-
-            username = inputValidation(in.readLine());
-            userToken = getToken(groupServerName, groupPort, username);
-            if (userToken != null) {
-                System.out.println("Token acquired!");
-                chooseServer(groupServerName, groupPort, fileServerName, filePort);
-            }
-            else
-                System.out.println("Your username was not recognized. Contact administrator");
+            chooseServer(groupServerName, groupPort, fileServerName, filePort);
         }
         catch(Exception e)
         {

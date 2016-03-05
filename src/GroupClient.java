@@ -8,6 +8,11 @@ public class GroupClient extends Client implements GroupClientInterface
 {
     public static final int SERVER_PORT = 8765;
 
+	public GroupClient() throws Exception
+	{
+		super();
+	}
+
     public UserToken getToken(String username)
     {
         try
@@ -277,4 +282,15 @@ public class GroupClient extends Client implements GroupClientInterface
         }
         return null;
     }
+
+	public boolean authenticateGroupServer()
+	{
+        // Get group server public key
+        Key groupServerPublicKey = this.getGroupServerPublicKey();
+		this.serverKeys.setEncryptionKey(groupServerPublicKey);
+        // Generate new object for encryption / decryption with gs public key
+        System.out.println(this.serverKeys.encryptionKeyToString());
+
+		return false;
+	}
 }

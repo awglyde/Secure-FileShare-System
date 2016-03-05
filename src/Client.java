@@ -12,6 +12,12 @@ public abstract class Client
     protected Socket sock;
     protected ObjectOutputStream output;
     protected ObjectInputStream input;
+	public EncryptionSuite serverKeys;
+	public Client () throws Exception
+	{
+		serverKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, null, null);
+	}
+
     public static enum Privilege {
         USER,
         GROUPMEMBER,

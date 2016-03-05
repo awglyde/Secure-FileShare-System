@@ -28,7 +28,7 @@ public class EncryptionSuite
     public static final String ENCRYPTION_RSA = "RSA";
     public static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
     public static final String PROVIDER = "BC";
-    private String encryptionAlgorithm = "";
+    private String algorithmName = "";
     private int keyLength = 256;
     private Key encryptionKey = null;
     private Key decryptionKey = null;
@@ -36,7 +36,7 @@ public class EncryptionSuite
     public EncryptionSuite (String algorithmName, Key publicKey, Key privateKey) throws Exception
     {
         Security.addProvider(new BouncyCastleProvider());
-        this.encryptionAlgorithm = algorithmName;
+        this.algorithmName = algorithmName;
         this.setEncryptionKey(publicKey);
         this.setDecryptionKey(privateKey);
     }
@@ -44,7 +44,7 @@ public class EncryptionSuite
     public EncryptionSuite (String algorithmName, Key symmetricKey) throws Exception
     {
         Security.addProvider(new BouncyCastleProvider());
-        this.encryptionAlgorithm = algorithmName;
+        this.algorithmName = algorithmName;
         this.setEncryptionKey(symmetricKey);
         this.setDecryptionKey(symmetricKey);
     }
@@ -52,13 +52,17 @@ public class EncryptionSuite
     public EncryptionSuite (String algorithmName) throws Exception
     {
         Security.addProvider(new BouncyCastleProvider());
-        this.encryptionAlgorithm = algorithmName;
-        if (this.encryptionAlgorithm.equals(ENCRYPTION_AES))
+        this.algorithmName = algorithmName;
+        if (this.algorithmName.equals(ENCRYPTION_AES))
             generateKey();
         else
             generateKeyPair();
     }
 
+	public EncryptionSuite () throws Exception
+	{
+        Security.addProvider(new BouncyCastleProvider());
+	}
 
     public Key getEncryptionKey()
     {
@@ -80,13 +84,24 @@ public class EncryptionSuite
         this.decryptionKey = key;
     }
 
+	public String getAlgorithmName()
+	{
+		return this.algorithmName;
+	}
+
+	public void setAlgorithmName(String algorithmName)
+	{
+		this.algorithmName = algorithmName;
+	}
+
+
     /*
         Generates and returns a secret key based off the algorithm passed in and
         the size of the key requested.
     */
     private void generateKey() throws Exception
     {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance(this.encryptionAlgorithm, PROVIDER);
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(this.algorithmName, PROVIDER);
         keyGenerator.init(this.keyLength);
         this.encryptionKey = keyGenerator.generateKey();
         this.decryptionKey = this.encryptionKey;
@@ -97,7 +112,7 @@ public class EncryptionSuite
     */
     public void generateKeyPair() throws Exception
     {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(this.encryptionAlgorithm, PROVIDER);
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(this.algorithmName, PROVIDER);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         this.encryptionKey = (Key)keyPair.getPublic();
         this.decryptionKey = (Key)keyPair.getPrivate();
@@ -131,7 +146,7 @@ public class EncryptionSuite
         else
             key = this.decryptionKey;
 
-        Cipher cipher = Cipher.getInstance(this.encryptionAlgorithm, PROVIDER);
+        Cipher cipher = Cipher.getInstance(this.algorithmName, PROVIDER);
         cipher.init(mode, key);
 
         byte[] outputBytes = new byte[cipher.getOutputSize(inputBytes.length)];

@@ -10,6 +10,11 @@ public class FileClient extends Client implements FileClientInterface
 {
     public static final int SERVER_PORT = 4321;
 
+	public FileClient() throws Exception
+	{
+		super();
+	}
+
     public boolean delete(String filename, UserToken token)
     {
         String remotePath;
