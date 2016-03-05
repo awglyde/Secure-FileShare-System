@@ -14,19 +14,38 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.Security;
 import java.util.Scanner;
+import java.io.File;
+import java.util.HashMap;
+
 
 public class EncryptionSuite
 {
 
-    private static final String ENCRYPTION_AES = "AES";
-    private static final String ENCRYPTION_BLOWFISH = "Blowfish";
-    private static final String ENCRYPTION_RSA = "RSA";
-    private static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
-    private static final String PROVIDER = "BC";
+    public static final String ENCRYPTION_AES = "AES";
+    public static final String ENCRYPTION_BLOWFISH = "Blowfish";
+    public static final String ENCRYPTION_RSA = "RSA";
+    public static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
+    public static final String PROVIDER = "BC";
     private String encryptionAlgorithm = "";
     private int keyLength = 256;
     private Key encryptionKey = null;
     private Key decryptionKey = null;
+
+    public EncryptionSuite (String algorithmName, Key publicKey, Key privateKey) throws Exception
+    {
+        Security.addProvider(new BouncyCastleProvider());
+        this.encryptionAlgorithm = algorithmName;
+        this.setEncryptionKey(publicKey);
+        this.setDecryptionKey(privateKey);
+    }
+
+    public EncryptionSuite (String algorithmName, Key symmetricKey) throws Exception
+    {
+        Security.addProvider(new BouncyCastleProvider());
+        this.encryptionAlgorithm = algorithmName;
+        this.setEncryptionKey(symmetricKey);
+        this.setDecryptionKey(symmetricKey);
+    }
 
     public EncryptionSuite (String algorithmName) throws Exception
     {
@@ -37,6 +56,7 @@ public class EncryptionSuite
         else
             generateKeyPair();
     }
+
 
     public Key getEncryptionKey()
     {
@@ -57,7 +77,7 @@ public class EncryptionSuite
     {
         this.decryptionKey = key;
     }
-    
+
     /*
         Generates and returns a secret key based off the algorithm passed in and
         the size of the key requested.

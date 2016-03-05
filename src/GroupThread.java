@@ -39,8 +39,13 @@ public class GroupThread extends Thread
                 Envelope message = (Envelope) input.readObject();
                 System.out.println("Request received: " + message.getMessage());
                 Envelope response;
-
-                if(message.getMessage().equals("GET"))//Client wants a token
+                if (message.getMessage().equals("GPUBLICKEY"))
+                {
+                    respone = new Envelope("OK");
+                    response.addObject(my_gs.groupServerKeys.getEncryptionKey());
+                    output.writeObject(response);
+                }
+                else if(message.getMessage().equals("GET"))//Client wants a token
                 {
                     String username = (String) message.getObjContents().get(0); //Get the username
                     if(username == null)

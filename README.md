@@ -86,3 +86,10 @@ ejw45, gah33, awg13
 
 ### List Files
 - User can only see files of groups they are in.
+
+### TODO:
+* Add a token expiration time
+    Method called isExpired that we'll call every so often. Store the date it was created
+* Make user request token after logging in to group server rather than always being given one
+* Have user enter a password to log in to the group server
+* Write a handler to request Group Server's public key for both file server and user client

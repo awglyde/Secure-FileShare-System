@@ -19,6 +19,7 @@ public class GroupServer extends Server
     public static final int SERVER_PORT = 8765;
     public UserList userList;
     public GroupList groupList;
+    private EncryptionSuite groupServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
 
     public GroupServer()
     {
@@ -32,6 +33,7 @@ public class GroupServer extends Server
 
     public void start()
     {
+
         // Overwrote server.start() because if no user file exists, initial admin account needs to be created
 
         String userFile = "UserList.bin";

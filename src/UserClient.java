@@ -410,6 +410,7 @@ public class UserClient
         String fileServerName = "localhost";
         int filePort = FileClient.SERVER_PORT;
 
+
         try
         {
             // if we pass in more than 1 parameter, set the values for each parameter
@@ -428,6 +429,17 @@ public class UserClient
 
         try
         {
+            // Generate users private / public key pair
+            EncryptionSuite userKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+
+            // Get group server public key
+            Key groupServerPublicKey = groupClient.getGroupServerPublicKey();
+
+            // Generate new object for encryption / decryption with gs public key
+            EncryptionSuite groupCom = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey);
+
+
+
             System.out.println("Enter username to login: ");
 
             username = inputValidation(in.readLine());
@@ -439,9 +451,11 @@ public class UserClient
             else
                 System.out.println("Your username was not recognized. Contact administrator");
         }
-        catch(IOException e)
+        catch(Exception e)
         {
-            System.out.println("Error parsing username. Exiting...");
+            System.out.println("Failed to connect to group server\n"+
+                                "Possibly invalid username,\n"+
+                                "or failed to get group server public key.");
         }
 
 

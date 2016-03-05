@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.List;
+import java.security.Key;
 
 public class GroupClient extends Client implements GroupClientInterface
 {
@@ -250,5 +251,30 @@ public class GroupClient extends Client implements GroupClientInterface
             e.printStackTrace(System.err);
             return false;
         }
+    }
+
+    public Key getGroupServerPublicKey()
+    {
+        try
+        {
+            Envelope message = null, response = null;
+            //Tell the server to return its public key
+            message = new Envelope("GPUBLICKEY");
+            output.writeObject(message);
+
+            response = (Envelope) input.readObject();
+            //If server indicates success, return true
+            if(response.getMessage().equals("OK"))
+            {
+                return (Key)response.getObjContents().get(0);
+            }
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return null;
+        }
+        return null;
     }
 }
