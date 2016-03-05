@@ -6,7 +6,10 @@ import java.net.Socket;
 
 public class FileServer extends Server
 {
-
+    private static final String ENCRYPTION_AES = "AES";
+    private static final String ENCRYPTION_BLOWFISH = "Blowfish";
+    private static final String ENCRYPTION_RSA = "RSA";
+    private static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
     public static final int SERVER_PORT = 4321;
     public static FileList fileList;
 

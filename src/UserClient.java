@@ -6,6 +6,10 @@ import java.util.List;
 
 public class UserClient
 {
+    private static final String ENCRYPTION_AES = "AES";
+    private static final String ENCRYPTION_BLOWFISH = "Blowfish";
+    private static final String ENCRYPTION_RSA = "RSA";
+    private static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
     static GroupClient groupClient = new GroupClient();
     static FileClient fileClient = new FileClient();
     static String username = "";
