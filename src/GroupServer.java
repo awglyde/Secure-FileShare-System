@@ -20,17 +20,19 @@ public class GroupServer extends Server
     public static final int SERVER_PORT = 8765;
     public UserList userList;
     public GroupList groupList;
-    private EncryptionSuite groupServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+    private EncryptionSuite groupServerKeys;
     private EncryptionSuite sessionKey = null;
 
-    public GroupServer()
+    public GroupServer() throws Exception
     {
         super(SERVER_PORT, "ALPHA");
+        groupServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
     }
 
-    public GroupServer(int _port)
+    public GroupServer(int _port) throws Exception
     {
         super(_port, "ALPHA");
+        groupServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
     }
 
     public Key getPublicKey()

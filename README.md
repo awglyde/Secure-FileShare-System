@@ -93,3 +93,5 @@ ejw45, gah33, awg13
 * Make user request token after logging in to group server rather than always being given one
 * Have user enter a password to log in to the group server
 * Write a handler to request Group Server's public key for both file server and user client
+* Don't pass the token around in the Group Server. Pass the Username itself instead as a String
+* Have a login function. Requestor will be w
