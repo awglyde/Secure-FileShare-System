@@ -16,11 +16,6 @@ import java.util.Scanner;
 
 public class GroupServer extends Server
 {
-
-    private static final String ENCRYPTION_AES = "AES";
-    private static final String ENCRYPTION_BLOWFISH = "Blowfish";
-    private static final String ENCRYPTION_RSA = "RSA";
-    private static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
     public static final int SERVER_PORT = 8765;
     public UserList userList;
     public GroupList groupList;
