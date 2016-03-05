@@ -301,7 +301,7 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to return its public key
             message = new Envelope("AUTHCHALLENGE");
 			message.addObject(challenge);
-			message.addObject(this.serverKeys.getEncryptionKey());
+			// message.addObject(this.serverKeys.getEncryptionKey());
 
             output.writeObject(this.serverKeys.getEncryptedMessage(message));
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());

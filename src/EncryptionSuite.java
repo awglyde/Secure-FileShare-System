@@ -32,7 +32,7 @@ public class EncryptionSuite
 	public static final int encrypt = Cipher.ENCRYPT_MODE;
 	public static final int decrypt = Cipher.DECRYPT_MODE;
     private String algorithmName = "";
-    private int keyLength = 256;
+    private int keyLength = 128;
     private Key encryptionKey = null;
     private Key decryptionKey = null;
 

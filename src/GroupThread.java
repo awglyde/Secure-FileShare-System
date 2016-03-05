@@ -35,8 +35,9 @@ public class GroupThread extends Thread
                 // flushes / resets the output stream
                 output.flush();
                 output.reset();
-
                 Envelope message = (Envelope) input.readObject();
+				if (message.getMessage().equals("ENCRYPTEDENV"))
+            		message = my_gs.groupServerKeys.getDecryptedMessage(message);
                 System.out.println("Request received: " + message.getMessage());
                 Envelope response;
                 if (message.getMessage().equals("GPUBLICKEY"))
