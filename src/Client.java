@@ -13,9 +13,11 @@ public abstract class Client
     protected ObjectOutputStream output;
     protected ObjectInputStream input;
 	public EncryptionSuite serverKeys;
+	public EncryptionSuite sharedKey;
 	public Client () throws Exception
 	{
 		serverKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, null, null);
+		sharedKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, null, null);
 	}
 
     public static enum Privilege {

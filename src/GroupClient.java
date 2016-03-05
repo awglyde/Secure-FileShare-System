@@ -3,6 +3,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.security.Key;
+import java.security.SecureRandom;
 
 public class GroupClient extends Client implements GroupClientInterface
 {
@@ -283,13 +284,43 @@ public class GroupClient extends Client implements GroupClientInterface
         return null;
     }
 
-	public boolean auth_stageOne()
+	public boolean authChallenge()
 	{
+		SecureRandom prng = new SecureRandom();
+
 		// 1) Generate a challenge.
 		// 2) Encrypt challenge & user's public key with GS public key
 		// 3) Receive completed challenge and shared AES key
-		// 4)
+		// 4) Store new shared key in sharedKey ES object
 
+        try
+        {
+            Envelope message = null, response = null;
+            //Tell the server to return its public key
+            message = new Envelope("AUTHCHALLENGE");
+            output.writeObject(message);
+
+            response = (Envelope) input.readObject();
+            //If server indicates success, return true
+            if(response.getMessage().equals("OK"))
+            {
+                return false;
+            }
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return false;
+        }
+
+		return false;
+	}
+
+	public boolean authLogin()
+	{
+		// 1) Enter username and password (SECURELY. SANITIZE INPUTS)
+		// 2) Successfully logged in. Able to access group server
 		return false;
 	}
 
@@ -300,11 +331,9 @@ public class GroupClient extends Client implements GroupClientInterface
 		this.serverKeys.setEncryptionKey(groupServerPublicKey);
         // Generate new object for encryption / decryption with gs public key
         System.out.println(this.serverKeys.encryptionKeyToString());
-		if (this.auth_stageOne())
-		{
-
-		}
-
-		return false;
+		if (this.authChallenge() && this.authLogin())
+			return true;
+		else
+			return false;
 	}
 }

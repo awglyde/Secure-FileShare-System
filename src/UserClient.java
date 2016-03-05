@@ -4,7 +4,6 @@ import java.io.InputStreamReader;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
-import java.security.SecureRandom;
 
 public class UserClient
 {
