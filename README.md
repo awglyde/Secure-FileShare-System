@@ -95,3 +95,15 @@ ejw45, gah33, awg13
 * Write a handler to request Group Server's public key for both file server and user client
 * Don't pass the token around in the Group Server. Pass the Username itself instead as a String
 * Have a login function. Requestor will be w
+
+TOMORROW MORNING:
+* Determine right application flow
+    1. Connect to Group Server (no token yet)
+    2. Get Group Server's public key
+    3. Send user's challenge and public key
+    4. Receive Decrypt completed challenge and shared key with user's private key
+    5. Encrypt username and password, send to group server
+    6. Successfully logged in to group server. can do group server things
+
+* Add encryption suite objects to Client object?
+* Potentially leverage Client object to reuse code

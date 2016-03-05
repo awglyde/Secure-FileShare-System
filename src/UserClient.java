@@ -4,6 +4,9 @@ import java.io.InputStreamReader;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Base64;
+import java.util.Base64.Encoder;
+import java.util.*;
 
 public class UserClient
 {
@@ -13,11 +16,29 @@ public class UserClient
     static UserToken userToken = null;
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-    public static void connectGroupServer(String groupServerName, int groupPort) throws IOException
+    public static void connectGroupServer(String groupServerName, int groupPort) throws Exception
     {
         groupClient.connect(groupServerName,  groupPort);
         if (groupClient.isConnected())
         {
+
+            // Generate users private / public key pair
+            EncryptionSuite userKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+
+            // Get group server public key
+            Key groupServerPublicKey = groupClient.getGroupServerPublicKey();
+            // CREATE NEW KEY
+            // GET ENCODED VERSION OF KEY (THIS CAN BE STORED IN A DB)
+
+            String stringKey = "";
+            Encoder encoder = Base64.getEncoder();
+
+            if (groupServerPublicKey != null)
+                stringKey = encoder.encodeToString(groupServerPublicKey.getEncoded());
+            System.out.println(stringKey);
+
+            // Generate new object for encryption / decryption with gs public key
+            EncryptionSuite groupCom = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
             groupOptions();
         }
         else
@@ -349,7 +370,7 @@ public class UserClient
         return newToken;
     }
 
-    public static void chooseServer(String groupServerName, int groupPort, String fileServerName, int filePort) throws IOException
+    public static void chooseServer(String groupServerName, int groupPort, String fileServerName, int filePort) throws Exception
     {
 
         try
@@ -430,14 +451,6 @@ public class UserClient
 
         try
         {
-            // Generate users private / public key pair
-            EncryptionSuite userKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
-
-            // Get group server public key
-            Key groupServerPublicKey = groupClient.getGroupServerPublicKey();
-
-            // Generate new object for encryption / decryption with gs public key
-            EncryptionSuite groupCom = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey);
 
 
 
@@ -458,7 +471,6 @@ public class UserClient
                                 "Possibly invalid username,\n"+
                                 "or failed to get group server public key.");
         }
-
 
         in.close();
     }

@@ -16,6 +16,8 @@ import java.security.Security;
 import java.util.Scanner;
 import java.io.File;
 import java.util.HashMap;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 
 
 public class EncryptionSuite
@@ -136,5 +138,15 @@ public class EncryptionSuite
         int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
         cipher.doFinal(outputBytes, outputLength);
         return outputBytes;
+    }
+
+    public String encryptionKeyToString()
+    {
+        String stringKey = "";
+        Encoder encoder = Base64.getEncoder();
+
+        if (this.encryptionKey != null)
+            stringKey = encoder.encodeToString(this.encryptionKey.getEncoded());
+        return stringKey;
     }
 }
