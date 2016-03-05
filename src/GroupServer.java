@@ -10,6 +10,7 @@
  */
 
 import java.io.*;
+import java.security.Key;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
@@ -20,6 +21,7 @@ public class GroupServer extends Server
     public UserList userList;
     public GroupList groupList;
     private EncryptionSuite groupServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+    private EncryptionSuite sessionKey = null;
 
     public GroupServer()
     {
@@ -29,6 +31,22 @@ public class GroupServer extends Server
     public GroupServer(int _port)
     {
         super(_port, "ALPHA");
+    }
+
+    public Key getPublicKey()
+    {
+        return groupServerKeys.getEncryptionKey();
+    }
+
+    public Key getSessionKey()
+    {
+        if(sessionKey != null)
+        {
+            return sessionKey.getEncryptionKey();
+        } else
+        {
+            return null;
+        }
     }
 
     public void start()
