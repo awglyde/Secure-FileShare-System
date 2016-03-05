@@ -4,9 +4,6 @@ import java.io.InputStreamReader;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Base64;
-import java.util.Base64.Encoder;
-import java.util.*;
 
 public class UserClient
 {
@@ -21,24 +18,16 @@ public class UserClient
         groupClient.connect(groupServerName,  groupPort);
         if (groupClient.isConnected())
         {
-
             // Generate users private / public key pair
             EncryptionSuite userKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
 
             // Get group server public key
             Key groupServerPublicKey = groupClient.getGroupServerPublicKey();
-            // CREATE NEW KEY
-            // GET ENCODED VERSION OF KEY (THIS CAN BE STORED IN A DB)
-
-            String stringKey = "";
-            Encoder encoder = Base64.getEncoder();
-
-            if (groupServerPublicKey != null)
-                stringKey = encoder.encodeToString(groupServerPublicKey.getEncoded());
-            System.out.println(stringKey);
 
             // Generate new object for encryption / decryption with gs public key
             EncryptionSuite groupCom = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
+            System.out.println(groupCom.encryptionKeyToString());
+
             groupOptions();
         }
         else
