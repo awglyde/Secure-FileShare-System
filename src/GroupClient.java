@@ -287,7 +287,7 @@ public class GroupClient extends Client implements GroupClientInterface
 	public boolean authChallenge()
 	{
 		SecureRandom prng = new SecureRandom();
-
+		int challenge = prng.next(128);
 		// 1) Generate a challenge.
 		// 2) Encrypt challenge & user's public key with GS public key
 		// 3) Receive completed challenge and shared AES key
