@@ -13,7 +13,7 @@ public abstract class Client
     protected ObjectOutputStream output;
     protected ObjectInputStream input;
 	public EncryptionSuite serverKeys;
-	public EncryptionSuite sharedKey;
+	public EncryptionSuite sessionKey;
 
     public static enum Privilege {
         USER,

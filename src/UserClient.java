@@ -47,7 +47,7 @@ public class UserClient
                                             "Remove (delete) a group",
                                             "Add a user to a group",
                                             "Remove a user from a group",
-                                            "List all of the members of a group (that you are a memeber of)"};
+                                            "List all of the members of a group (that you are a member of)"};
 
         String[] adminOptions = new String[]{"Add (create) a user",
                                              "Remove (delete) a user"};
@@ -64,7 +64,6 @@ public class UserClient
             }
 
             // print admin options if they are an admin
-			// TODO: CHANGE THIS TO USE USERNAME, NOT TOKEN
             if (groupClient.isAdmin(userName))
             {
                 for(int i = 0; i < adminOptions.length; i++){

@@ -87,27 +87,6 @@ ejw45, gah33, awg13
 ### TODO:
 * Add a token expiration time
     Method called isExpired that we'll call every so often. Store the date it was created
-* Make user request token after logging in to group server rather than always being given one
-* Have user enter a password to log in to the group server
-* Write a handler to request Group Server's public key for both file server and user client
-* Don't pass the token around in the Group Server. Pass the Username itself instead as a String
-* Have a login function. Requestor will be w
-
-TOMORROW MORNING:
-* Determine right application flow
-    1. Connect to Group Server (no token yet)
-    2. Get Group Server's public key
-    3. Send user's challenge and public key
-    4. Receive Decrypt completed challenge and shared key with user's private key
-    5. Encrypt username and password, send to group server
-    6. Successfully logged in to group server. can do group server things
-
-* Add encryption suite objects to Client object?
-* Potentially leverage Client object to reuse code
-
-1) Add contents of message to Envelope 1
-2) Wrap 1 in SealedObject 2
-3) Wrap 2 in an Envelope
-4) Send to server
-5) Server sends SealedObject to handler function, decrypts sealed object
-6)
+* Check for token expiration time
+* Add File Server authentication protocol
+* Create a list of session keys. Somehow keep track of them.
