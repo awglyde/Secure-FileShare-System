@@ -19,8 +19,10 @@ public class FileServer extends Server
         super(_port, "FilePile");
     }
 
-    public void start()
+    public void start() throws Exception
     {
+
+        System.out.println("File Server Online");
         String fileFile = "FileList.bin";
         ObjectInputStream fileStream;
 

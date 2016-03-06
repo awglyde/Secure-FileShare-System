@@ -12,9 +12,11 @@ public class UserList implements java.io.Serializable
     private static final long serialVersionUID = 7600343803563417992L;
     private Hashtable<String, User> list = new Hashtable<String, User>();
 
-    public synchronized void addUser(String username)
+    public synchronized void addUser(String username, byte[] saltedPwHash, byte[] salt)
     {
         User newUser = new User();
+        newUser.setPasswordHash(saltedPwHash);
+        newUser.setPasswordSalt(salt);
         this.list.put(username, newUser);
     }
 
@@ -34,6 +36,11 @@ public class UserList implements java.io.Serializable
         {
             return false;
         }
+    }
+
+    public synchronized User getUser(String username)
+    {
+        return this.list.get(username);
     }
 
     public synchronized ArrayList<String> getUserGroups(String username)

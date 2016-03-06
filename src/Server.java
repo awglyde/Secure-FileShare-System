@@ -10,7 +10,7 @@ public abstract class Server
         this.name = _serverName;
     }
 
-    abstract void start();
+    abstract void start() throws Exception;
 
     public int getPort()
     {

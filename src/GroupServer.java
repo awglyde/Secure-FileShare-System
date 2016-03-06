@@ -54,17 +54,18 @@ public class GroupServer extends Server
         }
     }
 
-    public void start()
+    public void start() throws Exception
     {
 
         // Overwrote server.start() because if no user file exists, initial admin account needs to be created
-
+        System.out.println("Group Server Online");
         String userFile = "UserList.bin";
         String groupFile = "GroupList.bin";
         Scanner console = new Scanner(System.in);
         ObjectInputStream userStream;
         ObjectInputStream groupStream;
         String username = "";
+        String password = "";
 
         //This runs a thread that saves the lists on program exit
         Runtime runtime = Runtime.getRuntime();
@@ -83,10 +84,18 @@ public class GroupServer extends Server
             System.out.println("No users currently exist. Your account will be the administrator.");
             System.out.print("Enter your username: ");
             username = console.next();
+            System.out.print("Enter your password: ");
+            password = console.next();
 
             //Create a new list, add current user to the ADMIN group. They now own the ADMIN group.
             this.userList = new UserList();
-            this.userList.addUser(username);
+
+            // Generate salt
+            byte[] tempSalt = this.groupServerKeys.generateSalt();
+            // salt and hash the password
+            byte[] saltedPwHash = this.groupServerKeys.saltAndHashPassword(password, tempSalt);
+            // Add user with their hashed and salted password
+            this.userList.addUser(username, saltedPwHash, tempSalt);
             this.userList.addGroup(username, "ADMIN");
             this.userList.addOwnership(username, "ADMIN");
         }

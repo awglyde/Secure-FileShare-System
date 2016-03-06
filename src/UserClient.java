@@ -20,7 +20,7 @@ public class UserClient
         {
 			if (groupClient.authenticateGroupServer(userKeys))
 			{
-                System.out.println("Authenticated group server successfully!");
+                System.out.println("Logged in and authenticated group server successfully!");
 	            groupOptions();
 			}
 			{
@@ -93,7 +93,7 @@ public class UserClient
                         String newUserName = inputValidation(in.readLine());
                         System.out.println("Enter password for "+newUserName);
                         String password = inputValidation(in.readLine());
-                        if (groupClient.createUser(newUserName, userToken))
+                        if (groupClient.createUser(newUserName, password, username))
                         {
                             System.out.println("User created successfully!");
                         }

@@ -50,7 +50,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
     }
 
-    public boolean createUser(String username, UserToken token)
+    public boolean createUser(String username, String password, String requester)
     {
         try
         {
@@ -58,7 +58,8 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to create a user
             message = new Envelope("CUSER");
             message.addObject(username); //Add user name string
-            message.addObject(token); //Add the requester's token
+            message.addObject(password); //Add the requester's token
+            message.addObject(requester); //Add the requester's token
             output.writeObject(message);
 
             response = (Envelope) input.readObject();
@@ -310,7 +311,16 @@ public class GroupClient extends Client implements GroupClientInterface
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
-                Integer completedChallenge = (Integer)response.getObjContents().get(0); // User's completed challenge H(R)
+                byte[] completedChallenge = (byte[])response.getObjContents().get(0); // User's completed challenge H(R)
+                if (userKeys.verifyChallenge(challenge, completedChallenge))
+                {
+                    System.out.println("Group Server successfully completed challenge!");
+                }
+                else
+                {
+                    System.out.println("Server failed to complete challenge! Session may have been hijacked!");
+                    return false;
+                }
                 Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
 		        this.sharedKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
                 System.out.println("\n\nShared Key From Group Server: \n\n"+this.sharedKey.encryptionKeyToString());
@@ -340,7 +350,7 @@ public class GroupClient extends Client implements GroupClientInterface
         {
             Envelope message = null, response = null;
             //Tell the server to return its public key
-            message = new Envelope("AUTHCHALLENGE");
+            message = new Envelope("AUTHLOGIN");
 			message.addObject(UserClient.username);
             message.addObject(password);
             output.writeObject(this.sharedKey.getEncryptedMessage(message));
@@ -350,10 +360,10 @@ public class GroupClient extends Client implements GroupClientInterface
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
-                int completedChallenge = (int)response.getObjContents().get(0); // User's completed challenge H(R)
-                Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
-		        this.sharedKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
-                System.out.println("\n\nShared Key From Group Server: \n\n"+this.sharedKey.encryptionKeyToString());
+                // int completedChallenge = (int)response.getObjContents().get(0); // User's completed challenge H(R)
+                // Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
+		        // this.sharedKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
+                // System.out.println("\n\nShared Key From Group Server: \n\n"+this.sharedKey.encryptionKeyToString());
                 return true;
             }
         }
@@ -374,7 +384,8 @@ public class GroupClient extends Client implements GroupClientInterface
 		// this.serverKeys.setEncryptionKey(groupServerPublicKey);
         this.serverKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
         // Generate new object for encryption / decryption with gs public key
-        System.out.println(this.serverKeys.encryptionKeyToString());
+        System.out.println("Group Server Public Key: \n\n"+
+                            this.serverKeys.encryptionKeyToString());
 		if (this.authChallenge(userKeys) && this.authLogin())
 			return true;
 		else

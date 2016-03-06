@@ -18,6 +18,7 @@ import java.security.Security;
 import java.security.SecureRandom;
 import java.util.Scanner;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Base64;
 import java.util.Base64.Encoder;
@@ -168,6 +169,26 @@ public class EncryptionSuite
         return salt;
     }
 
+    public byte[] saltAndHashPassword(String password, byte[] tempSalt) throws Exception
+    {
+        // Concatenate salt and password
+        String pwAndSalt = password+new String(tempSalt, "UTF-8");
+        return this.hashBytes(pwAndSalt.getBytes());
+    }
+
+    public boolean verifyUserPassword(String password, byte[] saltedPwHash, byte[] salt) throws Exception
+    {
+        return Arrays.equals(this.saltAndHashPassword(password, salt), saltedPwHash);
+    }
+
+    public boolean verifyChallenge(byte[] challenge, byte[] completedChallenge) throws Exception
+    {
+        if (Arrays.equals(this.hashBytes(challenge), completedChallenge))
+            return true;
+        else
+            return false;
+    }
+
     /*
         Encrypts or Decrypts an input stream based on the algorithm passed in and the
         mode determined.
@@ -235,4 +256,6 @@ public class EncryptionSuite
 			return null;
 		}
 	}
+
+
 }

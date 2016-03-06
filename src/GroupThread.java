@@ -57,6 +57,7 @@ public class GroupThread extends Thread
 
                 if (message.getMessage().equals("GPUBLICKEY"))
                 {
+                    // TODO: ERROR CHECKING
                     my_gs.clientCodeToKey.put((Integer)message.getObjContents().get(0).hashCode(),
                                                 (Key)message.getObjContents().get(0));
                     response = new Envelope("OK");
@@ -65,6 +66,7 @@ public class GroupThread extends Thread
                 }
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {
+                    // TODO: ERROR CHECKING
                     byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
                     Integer clientPubHash = (Integer)message.getObjContents().get(1); // Hash of users pub key
 
@@ -87,6 +89,37 @@ public class GroupThread extends Thread
                     // Encrypting it all and sending it along
                     output.writeObject(clientKeys.getEncryptedMessage(response));
                 }
+                else if (message.getMessage().equals("AUTHLOGIN"))
+                {
+                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking first param isn't null
+                        if(message.getObjContents().get(0) != null)
+                        {
+                            // Checking second param isn't null
+                            if(message.getObjContents().get(1) != null)
+                            {
+                                String username = (String) message.getObjContents().get(0); //Extract the username
+                                String password = (String) message.getObjContents().get(1); //Extract the password
+
+                                if(my_gs.sessionKey.verifyUserPassword(password,
+                                                                        my_gs.userList.getUser(username).getPasswordHash(),
+                                                                        my_gs.userList.getUser(username).getPasswordSalt()))
+                                {
+                                    response = new Envelope("OK"); //Success
+                                }
+                            }
+                        }
+                    }
+
+                    output.writeObject(response);
+                }
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {
                     String username = (String) message.getObjContents().get(0); //Get the username
@@ -108,7 +141,7 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("CUSER")) //Client wants to create a user
                 {
-                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() < 3) // If we don't get a token and a name, fail
                     {
                         response = new Envelope("FAIL");
                     }
@@ -123,9 +156,10 @@ public class GroupThread extends Thread
                             if(message.getObjContents().get(1) != null)
                             {
                                 String username = (String) message.getObjContents().get(0); //Extract the username
-                                UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract the token
-
-                                if(createUser(username, yourToken))
+                                String password = (String) message.getObjContents().get(1); //Extract the password
+                                String requester = (String) message.getObjContents().get(2); //Extract the requester
+                                // TODO: GET PASSWORD & WE DONT NEED TOKEN ANYMORE
+                                if(createUser(username, password, requester))
                                 {
                                     response = new Envelope("OK"); //Success
                                 }
@@ -356,9 +390,8 @@ public class GroupThread extends Thread
 
 
     //Method to create a user
-    private boolean createUser(String username, UserToken yourToken)
+    private boolean createUser(String username, String password, String requester) throws Exception
     {
-        String requester = yourToken.getSubject();
 
         //Check if requester exists
         if(my_gs.userList.checkUser(requester))
@@ -375,7 +408,12 @@ public class GroupThread extends Thread
                 }
                 else
                 {
-                    my_gs.userList.addUser(username);
+                    // Generate salt
+                    byte[] tempSalt = my_gs.sessionKey.generateSalt();
+                    // salt and hash the password
+                    byte[] saltedPwHash = my_gs.sessionKey.saltAndHashPassword(password, tempSalt);
+                    // Add user with their hashed and salted password
+                    my_gs.userList.addUser(username, saltedPwHash, tempSalt);
                     return true;
                 }
             }

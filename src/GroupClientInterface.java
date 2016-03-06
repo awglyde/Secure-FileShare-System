@@ -43,7 +43,7 @@ public interface GroupClientInterface
      * @param token    The token of the user requesting the create operation
      * @return true if the new user was created, false otherwise
      */
-    public boolean createUser(final String username, final UserToken token);
+    public boolean createUser(final String username, final String password, final String requester);
 
 
     /**
