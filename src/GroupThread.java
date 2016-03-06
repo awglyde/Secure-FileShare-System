@@ -72,7 +72,7 @@ public class GroupThread extends Thread
 		                    my_gs.clientCodeToKey.put((Integer)message.getObjContents().get(0).hashCode(),
 		                                                (Key)message.getObjContents().get(0));
 		                    response = new Envelope("OK");
-							// Add the server's public key to the envelope and send it back. 
+							// Add the server's public key to the envelope and send it back.
 		                    response.addObject(my_gs.getPublicKey());
 						}
 					}
@@ -428,13 +428,17 @@ public class GroupThread extends Thread
     }
 
     //Method to create tokens
-    private UserToken createToken(String username)
+    private UserToken createToken(String username) throws Exception
     {
         //Check that user exists
         if(my_gs.userList.checkUser(username))
         {
             //Issue a new token with server's name, user's name, and user's groups
-            UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username));
+            UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username), my_gs.groupServerKeys.getEncryptionKey());
+			// Hash token, sign hash. Add signed   hash to token
+			byte[] tokenHash = my_gs.groupServerKeys.hashBytes(yourToken.toString().getBytes());
+			byte[] signedTokenHash = my_gs.groupServerKeys.generateSignature(tokenHash);
+			yourToken.setSignedHash(signedTokenHash);
             return yourToken;
         }
         else

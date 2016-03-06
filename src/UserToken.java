@@ -1,4 +1,5 @@
 import java.util.List;
+import java.security.Key;
 
 /**
  * A simple interface to the token data structure that will be
@@ -47,5 +48,21 @@ public interface UserToken
     * This method returns whether or not the user is ADMIN
     */
     public boolean isAdmin();
+
+
+    /*
+    * This method checks to see whether or not the token is expired
+    */
+    public boolean isExpired();
+
+	public void setSignedHash(byte[] signedHash);
+
+	public byte[] getSignedHash();
+
+	public Key getSignerPublicKey();
+
+	public String signerPublicKeyToString();
+
+    public String toString();
 
 }   //-- end interface UserToken
