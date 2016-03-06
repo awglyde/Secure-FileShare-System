@@ -91,6 +91,8 @@ public class UserClient
                     case "7": // Create a user
                         System.out.println("Enter username of new user to create: ");
                         String newUserName = inputValidation(in.readLine());
+                        System.out.println("Enter password for "+newUserName);
+                        String password = inputValidation(in.readLine());
                         if (groupClient.createUser(newUserName, userToken))
                         {
                             System.out.println("User created successfully!");

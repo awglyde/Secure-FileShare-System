@@ -7,6 +7,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SealedObject;
+import java.security.MessageDigest;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -14,6 +15,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.Security;
+import java.security.SecureRandom;
 import java.util.Scanner;
 import java.io.File;
 import java.util.HashMap;
@@ -28,11 +30,13 @@ public class EncryptionSuite
     public static final String ENCRYPTION_BLOWFISH = "Blowfish";
     public static final String ENCRYPTION_RSA = "RSA";
     public static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
+    public static final String HASH_ALGORITHM = "SHA-256";
     public static final String PROVIDER = "BC";
 	public static final int encrypt = Cipher.ENCRYPT_MODE;
 	public static final int decrypt = Cipher.DECRYPT_MODE;
     private String algorithmName = "";
-    private int keyLength = 128;
+    private int rsaKeyLength = 2048;
+    private int aesKeyLength = 128;
     private Key encryptionKey = null;
     private Key decryptionKey = null;
 
@@ -105,7 +109,7 @@ public class EncryptionSuite
     private void generateKey() throws Exception
     {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(this.algorithmName, PROVIDER);
-        keyGenerator.init(this.keyLength);
+        keyGenerator.init(this.aesKeyLength);
         this.encryptionKey = keyGenerator.generateKey();
         this.decryptionKey = this.encryptionKey;
     }
@@ -116,7 +120,7 @@ public class EncryptionSuite
     public void generateKeyPair() throws Exception
     {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(this.algorithmName, PROVIDER);
-        keyPairGenerator.initialize(4096);
+        keyPairGenerator.initialize(rsaKeyLength);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         this.encryptionKey = (Key)keyPair.getPublic();
         this.decryptionKey = (Key)keyPair.getPrivate();
@@ -136,6 +140,23 @@ public class EncryptionSuite
         signature.initVerify((PublicKey)this.encryptionKey);
         signature.update(messageBytes);
         return signature.verify(signatureBytes);
+    }
+
+    public byte[] hashString(String string) throws Exception
+    {
+        MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM);
+
+        md.update(string.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        byte[] digest = md.digest();
+        return digest;
+    }
+
+    public byte[] generateSalt() throws Exception
+    {
+        SecureRandom prng = new SecureRandom();
+        byte[] salt = new byte[11];
+        prng.nextBytes(salt);
+        return salt;
     }
 
     /*
