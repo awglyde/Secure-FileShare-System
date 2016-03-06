@@ -58,8 +58,8 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to create a user
             message = new Envelope("CUSER");
             message.addObject(username); //Add user name string
-            message.addObject(password); //Add the requester's token
-            message.addObject(requester); //Add the requester's token
+            message.addObject(password); //Add the new user's password
+            message.addObject(requester); //Add the requester
             output.writeObject(message);
 
             response = (Envelope) input.readObject();
@@ -360,10 +360,6 @@ public class GroupClient extends Client implements GroupClientInterface
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
-                // int completedChallenge = (int)response.getObjContents().get(0); // User's completed challenge H(R)
-                // Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
-		        // this.sharedKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
-                // System.out.println("\n\nShared Key From Group Server: \n\n"+this.sharedKey.encryptionKeyToString());
                 return true;
             }
         }

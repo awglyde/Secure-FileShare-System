@@ -107,11 +107,17 @@ public class GroupThread extends Thread
                             {
                                 String username = (String) message.getObjContents().get(0); //Extract the username
                                 String password = (String) message.getObjContents().get(1); //Extract the password
-
+                                System.out.println("Username: "+username+"\nPassword: "+password);
+                                System.out.println("Verify Key Result: "+
+                                                    my_gs.sessionKey.verifyUserPassword(password,
+                                                    my_gs.userList.getUser(username).getPasswordHash(),
+                                                    my_gs.userList.getUser(username).getPasswordSalt()));
                                 if(my_gs.sessionKey.verifyUserPassword(password,
                                                                         my_gs.userList.getUser(username).getPasswordHash(),
                                                                         my_gs.userList.getUser(username).getPasswordSalt()))
                                 {
+
+                                    System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD!");
                                     response = new Envelope("OK"); //Success
                                 }
                             }

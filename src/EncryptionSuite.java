@@ -178,6 +178,10 @@ public class EncryptionSuite
 
     public boolean verifyUserPassword(String password, byte[] saltedPwHash, byte[] salt) throws Exception
     {
+        System.out.println("Password: "+password);
+        System.out.println("Salted & Hashed Password: \n\n\n"+new String(this.saltAndHashPassword(password, salt), "UTF-8"));
+        System.out.println("\n\n\nSalted & Hashed Password (ON SERVER): \n\n\n"+new String(saltedPwHash, "UTF-8"));
+
         return Arrays.equals(this.saltAndHashPassword(password, salt), saltedPwHash);
     }
 
