@@ -41,8 +41,8 @@ public class UserClient
         String choice = "";
         System.out.println("Welcome to the group server! Please choose from the list of options.\n\n");
 
-        String[] menuOptions = new String[]{"Retrieve a token",
-											"Disconnect from group server",
+        String[] menuOptions = new String[]{"Disconnect from group server",
+											"Retrieve a token",
                                             "Add (create) a group",
                                             "Remove (delete) a group",
                                             "Add a user to a group",
@@ -129,6 +129,7 @@ public class UserClient
                     return;
 				case "1":
         			userToken = (Token) groupClient.getToken(userName);
+					System.out.println("User Token: "+userToken.toString());
 					break;
                 case "2": // Create a group
                     System.out.println("Enter a group name: ");

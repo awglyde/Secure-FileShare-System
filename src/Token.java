@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
+import java.util.Calendar;
 
 public class Token implements UserToken, java.io.Serializable
 {
@@ -7,12 +9,18 @@ public class Token implements UserToken, java.io.Serializable
     private String issuer;
     private String subject;
     private ArrayList<String> groups;
+    private Date expirationDate;
 
     public Token(String issuer, String subject, ArrayList<String> groups)
     {
         this.issuer = issuer;
         this.subject = subject;
         this.groups = groups;
+        Calendar cal = Calendar.getInstance();
+        Date date = new Date();
+        cal.setTime(date);
+        cal.add(Calendar.HOUR, 6);
+        this.expirationDate = cal.getTime();
     }
 
     /**
@@ -66,10 +74,22 @@ public class Token implements UserToken, java.io.Serializable
             return false;
     }
 
-    public String toString()
+    // TODO: TEST
+    public boolean isExpired()
     {
-        return null;
+        if ( ( this.expirationDate.getTime() - new Date().getTime() ) <= 0 )
+            return true;
+        else
+            return false;
     }
 
+    public String toString()
+    {
+        return this.issuer+System.lineSeparator()+
+                this.subject+System.lineSeparator()+
+                String.join(",", this.groups)+System.lineSeparator()+
+                this.expirationDate.toString();
+
+    }
 
 }
