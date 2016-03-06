@@ -87,6 +87,8 @@ public class UserList implements java.io.Serializable
         private static final long serialVersionUID = -6699986336399821598L;
         private ArrayList<String> groups;
         private ArrayList<String> ownership;
+        private byte[] passwordHash = null;
+        private byte[] passwordSalt = null;
 
         String username = "";
         Token userToken = null;
@@ -95,6 +97,26 @@ public class UserList implements java.io.Serializable
         {
             this.groups = new ArrayList<String>();
             this.ownership = new ArrayList<String>();
+        }
+
+        public byte[] getPasswordHash()
+        {
+            return this.passwordHash;
+        }
+
+        public void setPasswordHash(byte[] hash)
+        {
+            this.passwordHash = hash;
+        }
+
+        public byte[] getPasswordSalt()
+        {
+            return this.passwordHash;
+        }
+
+        public void setPasswordSalt(byte[] salt)
+        {
+            this.passwordSalt = salt;
         }
 
         public ArrayList<String> getGroups()
