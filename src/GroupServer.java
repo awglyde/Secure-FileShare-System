@@ -14,6 +14,7 @@ import java.security.Key;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
+import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -61,7 +62,8 @@ public class GroupServer extends Server
         System.out.println("Group Server Online");
         String userFile = "UserList.bin";
         String groupFile = "GroupList.bin";
-        Scanner console = new Scanner(System.in);
+        // Scanner console = new Scanner(System.in);
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         ObjectInputStream userStream;
         ObjectInputStream groupStream;
         String username = "";
@@ -83,9 +85,9 @@ public class GroupServer extends Server
             System.out.println("UserList File Does Not Exist. Creating UserList...");
             System.out.println("No users currently exist. Your account will be the administrator.");
             System.out.print("Enter your username: ");
-            username = console.next();
+            username = in.readLine();
             System.out.print("Enter your password: ");
-            password = console.next();
+            password = in.readLine();
 
             //Create a new list, add current user to the ADMIN group. They now own the ADMIN group.
             this.userList = new UserList();
