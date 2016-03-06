@@ -35,7 +35,7 @@ public class EncryptionSuite
 	public static final int encrypt = Cipher.ENCRYPT_MODE;
 	public static final int decrypt = Cipher.DECRYPT_MODE;
     private String algorithmName = "";
-    private int rsaKeyLength = 2048;
+    private int rsaKeyLength = 4096;
     private int aesKeyLength = 128;
     private Key encryptionKey = null;
     private Key decryptionKey = null;
