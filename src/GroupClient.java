@@ -285,8 +285,11 @@ public class GroupClient extends Client implements GroupClientInterface
 	public boolean authChallenge(EncryptionSuite userKeys) throws Exception
 	{
 		SecureRandom prng = new SecureRandom();
-        int challenge = prng.nextInt(Integer.MAX_VALUE);
-        System.out.println("User's challenge R: "+challenge);
+        byte[] challenge = new byte[16];
+        prng.nextBytes(challenge);
+        //int challenge = prng.nextInt(Integer.MAX_VALUE);
+
+        System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
 		// 1) Generate a challenge.
 		// 2) Encrypt challenge & user's public key HASHCODE with GS public key
 		// 3) Receive completed challenge and shared AES key
@@ -307,7 +310,7 @@ public class GroupClient extends Client implements GroupClientInterface
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
-                int completedChallenge = (int)response.getObjContents().get(0); // User's completed challenge H(R)
+                Integer completedChallenge = (Integer)response.getObjContents().get(0); // User's completed challenge H(R)
                 Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
 		        this.sharedKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
                 System.out.println("\n\nShared Key From Group Server: \n\n"+this.sharedKey.encryptionKeyToString());

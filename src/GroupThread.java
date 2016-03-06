@@ -65,12 +65,12 @@ public class GroupThread extends Thread
                 }
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {
-                    int challenge = (int)message.getObjContents().get(0); // User's challenge R
+                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
                     Integer clientPubHash = (Integer)message.getObjContents().get(1); // Hash of users pub key
 
                     // Retrieving the client's public key from our hashmap
                     Key clientPubKey = my_gs.clientCodeToKey.get(clientPubHash);
-                    System.out.println("User's challenge R: "+challenge);
+                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
                     // Generating a new AES session key
                     my_gs.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
 
@@ -81,7 +81,7 @@ public class GroupThread extends Thread
                     // Constructing the envelope
                     response = new Envelope("OK");
                     // Adding completed challenge
-                    response.addObject(((Integer)challenge).hashCode());
+                    response.addObject(my_gs.sessionKey.hashBytes(challenge));
                     // Adding new AES session key
                     response.addObject(my_gs.sessionKey.getEncryptionKey());
                     // Encrypting it all and sending it along

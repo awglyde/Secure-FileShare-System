@@ -151,6 +151,15 @@ public class EncryptionSuite
         return digest;
     }
 
+    public byte[] hashBytes(byte[] bytes) throws Exception
+    {
+        MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
+
+        md.update(bytes); // Change this to "UTF-16" if needed
+        byte[] digest = md.digest();
+        return digest;
+    }
+
     public byte[] generateSalt() throws Exception
     {
         SecureRandom prng = new SecureRandom();
