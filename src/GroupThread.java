@@ -57,35 +57,68 @@ public class GroupThread extends Thread
 
                 if (message.getMessage().equals("GPUBLICKEY"))
                 {
-                    // TODO: ERROR CHECKING
-                    my_gs.clientCodeToKey.put((Integer)message.getObjContents().get(0).hashCode(),
-                                                (Key)message.getObjContents().get(0));
-                    response = new Envelope("OK");
-                    response.addObject(my_gs.getPublicKey());
+                    if(message.getObjContents().size() < 1) // Make sure message size >= 1
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking first param isn't null
+                        if(message.getObjContents().get(0) != null)
+                        {
+							// Map the client's key to the hash of their key, so we know who we're talking to in the future
+		                    my_gs.clientCodeToKey.put((Integer)message.getObjContents().get(0).hashCode(),
+		                                                (Key)message.getObjContents().get(0));
+		                    response = new Envelope("OK");
+							// Add the server's public key to the envelope and send it back. 
+		                    response.addObject(my_gs.getPublicKey());
+						}
+					}
+
                     output.writeObject(response);
                 }
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {
-                    // TODO: ERROR CHECKING
-                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
-                    Integer clientPubHash = (Integer)message.getObjContents().get(1); // Hash of users pub key
+					EncryptionSuite clientKeys = null;
+                    if(message.getObjContents().size() < 2) // If we don't get a challenge and a public key hash, fail
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
 
-                    // Retrieving the client's public key from our hashmap
-                    Key clientPubKey = my_gs.clientCodeToKey.get(clientPubHash);
-                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
-                    // Generating a new AES session key
-                    my_gs.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+                        // Checking first param isn't null
+                        if(message.getObjContents().get(0) != null)
+                        {
+                            // Checking second param isn't null
+                            if(message.getObjContents().get(1) != null)
+                            {
+			                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
+			                    Integer clientPubHash = (Integer)message.getObjContents().get(1); // Hash of users pub key
 
-                    System.out.println("\n\nNew Shared Key: \n\n"+my_gs.sessionKey.encryptionKeyToString());
-                    // Making a temporary client key ES object to encrypt the session key with
-                    EncryptionSuite clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
+			                    // Retrieving the client's public key from our hashmap
+			                    Key clientPubKey = my_gs.clientCodeToKey.get(clientPubHash);
+			                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
+			                    // Generating a new AES session key
+			                    my_gs.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
 
-                    // Constructing the envelope
-                    response = new Envelope("OK");
-                    // Adding completed challenge
-                    response.addObject(my_gs.sessionKey.hashBytes(challenge));
-                    // Adding new AES session key
-                    response.addObject(my_gs.sessionKey.getEncryptionKey());
+			                    System.out.println("\n\nNew Shared Key: \n\n"+my_gs.sessionKey.encryptionKeyToString());
+			                    // Making a temporary client key ES object to encrypt the session key with
+			                    clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
+
+			                    // Constructing the envelope
+			                    response = new Envelope("OK");
+			                    // Adding completed challenge
+			                    response.addObject(my_gs.sessionKey.hashBytes(challenge));
+			                    // Adding new AES session key
+			                    response.addObject(my_gs.sessionKey.getEncryptionKey());
+							}
+						}
+					}
+
                     // Encrypting it all and sending it along
                     output.writeObject(clientKeys.getEncryptedMessage(response));
                 }
@@ -180,7 +213,7 @@ public class GroupThread extends Thread
                                 String username = (String) message.getObjContents().get(0); //Extract the username
                                 String password = (String) message.getObjContents().get(1); //Extract the password
                                 String requester = (String) message.getObjContents().get(2); //Extract the requester
-                                
+
                                 if(createUser(username, password, requester))
                                 {
                                     response = new Envelope("OK"); //Success
