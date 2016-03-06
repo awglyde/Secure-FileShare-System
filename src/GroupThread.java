@@ -119,7 +119,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(response);
+                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {
