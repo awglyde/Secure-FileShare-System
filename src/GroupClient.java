@@ -10,11 +10,6 @@ public class GroupClient extends Client implements GroupClientInterface
 {
     public static final int SERVER_PORT = 8765;
 
-	public GroupClient() throws Exception
-	{
-		super();
-	}
-
     public UserToken getToken(String username)
     {
         try
@@ -261,13 +256,14 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public Key getGroupServerPublicKey()
+    public Key getGroupServerPublicKey(EncryptionSuite userKeys)
     {
         try
         {
             Envelope message = null, response = null;
             //Tell the server to return its public key
             message = new Envelope("GPUBLICKEY");
+            message.addObject(userKeys.getEncryptionKey());
             output.writeObject(message);
 
             response = (Envelope) input.readObject();
@@ -286,12 +282,13 @@ public class GroupClient extends Client implements GroupClientInterface
         return null;
     }
 
-	public boolean authChallenge(EncryptionSuite userKeys)
+	public boolean authChallenge(EncryptionSuite userKeys) throws Exception
 	{
 		SecureRandom prng = new SecureRandom();
-		int challenge = prng.nextInt(128);
+        int challenge = prng.nextInt(Integer.MAX_VALUE);
+        System.out.println("User's challenge R: "+challenge);
 		// 1) Generate a challenge.
-		// 2) Encrypt challenge & user's public key with GS public key
+		// 2) Encrypt challenge & user's public key HASHCODE with GS public key
 		// 3) Receive completed challenge and shared AES key
 		// 4) Store new shared key in sharedKey ES object
 
@@ -301,15 +298,20 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to return its public key
             message = new Envelope("AUTHCHALLENGE");
 			message.addObject(challenge);
-			// message.addObject(this.serverKeys.getEncryptionKey());
+            message.addObject(userKeys.getEncryptionKey().hashCode());
 
             output.writeObject(this.serverKeys.getEncryptedMessage(message));
+
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
-                return false;
+                int completedChallenge = (int)response.getObjContents().get(0); // User's completed challenge H(R)
+                Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
+		        this.sharedKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
+                System.out.println("\n\nShared Key From Group Server: \n\n"+this.sharedKey.encryptionKeyToString());
+                return true;
             }
         }
         catch(Exception e)
@@ -322,18 +324,52 @@ public class GroupClient extends Client implements GroupClientInterface
 		return false;
 	}
 
-	public boolean authLogin()
+	public boolean authLogin() throws Exception
 	{
 		// 1) Enter username and password (SECURELY. SANITIZE INPUTS)
+
+	    System.out.println("Enter username to login: ");
+	    UserClient.username = UserClient.inputValidation(UserClient.in.readLine());
+        System.out.println("Enter Password: ");
+	    String password = UserClient.inputValidation(UserClient.in.readLine());
+
+        try
+        {
+            Envelope message = null, response = null;
+            //Tell the server to return its public key
+            message = new Envelope("AUTHCHALLENGE");
+			message.addObject(UserClient.username);
+            message.addObject(password);
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
+
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
+
+            //If server indicates success, return true
+            if(response.getMessage().equals("OK"))
+            {
+                int completedChallenge = (int)response.getObjContents().get(0); // User's completed challenge H(R)
+                Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
+		        this.sharedKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
+                System.out.println("\n\nShared Key From Group Server: \n\n"+this.sharedKey.encryptionKeyToString());
+                return true;
+            }
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return false;
+        }
 		// 2) Successfully logged in. Able to access group server
 		return false;
 	}
 
-	public boolean authenticateGroupServer(EncryptionSuite userKeys)
+	public boolean authenticateGroupServer(EncryptionSuite userKeys) throws Exception
 	{
         // Get group server public key
-        Key groupServerPublicKey = this.getGroupServerPublicKey();
-		this.serverKeys.setEncryptionKey(groupServerPublicKey);
+        Key groupServerPublicKey = this.getGroupServerPublicKey(userKeys);
+		// this.serverKeys.setEncryptionKey(groupServerPublicKey);
+        this.serverKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
         // Generate new object for encryption / decryption with gs public key
         System.out.println(this.serverKeys.encryptionKeyToString());
 		if (this.authChallenge(userKeys) && this.authLogin())

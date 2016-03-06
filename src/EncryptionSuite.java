@@ -24,7 +24,7 @@ import java.util.Base64.Encoder;
 public class EncryptionSuite
 {
 
-    public static final String ENCRYPTION_AES = "AES/CBC/PKCS5Padding";
+    public static final String ENCRYPTION_AES = "AES";
     public static final String ENCRYPTION_BLOWFISH = "Blowfish";
     public static final String ENCRYPTION_RSA = "RSA";
     public static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
@@ -116,6 +116,7 @@ public class EncryptionSuite
     public void generateKeyPair() throws Exception
     {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(this.algorithmName, PROVIDER);
+        keyPairGenerator.initialize(4096);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         this.encryptionKey = (Key)keyPair.getPublic();
         this.decryptionKey = (Key)keyPair.getPrivate();
@@ -186,7 +187,7 @@ public class EncryptionSuite
 	public Envelope getEncryptedMessage(Envelope message) throws Exception
 	{
 		SealedObject encMessage = new SealedObject(message, this.getCipher(encrypt));
-		Envelope wrappedEncMessage = new Envelope("ENCRYPTEDENV");
+		Envelope wrappedEncMessage = new Envelope("ENCRYPTEDENV"+this.algorithmName);
 		wrappedEncMessage.addObject(encMessage);
 
 		return wrappedEncMessage;
@@ -194,7 +195,7 @@ public class EncryptionSuite
 
 	public Envelope getDecryptedMessage(Envelope encMessage) throws Exception
 	{
-		if (encMessage.getMessage().equals("ENCRYPTEDENV"))
+		if (encMessage.getMessage().equals("ENCRYPTEDENV"+this.algorithmName))
 		{
 			SealedObject encResponse = (SealedObject)encMessage.getObjContents().get(0);
 			return (Envelope)encResponse.getObject(this.getCipher(decrypt));

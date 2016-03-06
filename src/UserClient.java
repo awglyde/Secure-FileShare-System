@@ -20,9 +20,7 @@ public class UserClient
         {
 			if (groupClient.authenticateGroupServer(userKeys))
 			{
-	            System.out.println("Enter username to login: ");
-	            username = inputValidation(in.readLine());
-
+                System.out.println("Authenticated group server successfully!");
 	            groupOptions();
 			}
 			{

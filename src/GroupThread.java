@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.security.Key;
 
 public class GroupThread extends Thread
 {
@@ -35,16 +36,56 @@ public class GroupThread extends Thread
                 // flushes / resets the output stream
                 output.flush();
                 output.reset();
+
+                // Receives message. Potentially encrypted or unencrypted
                 Envelope message = (Envelope) input.readObject();
-				if (message.getMessage().equals("ENCRYPTEDENV"))
+				if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_RSA))
+                {
+                    // Decrypt message with group server's private key
             		message = my_gs.groupServerKeys.getDecryptedMessage(message);
+                }
+                else if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
+                {
+                    // Decrypt message with shared AES key
+                    // TODO: MAKE A LIST OF SHARED AES KEYS MAPPED TO.. WHAT? USERNAME?
+            		message = my_gs.sessionKey.getDecryptedMessage(message);
+                }
+
                 System.out.println("Request received: " + message.getMessage());
+
                 Envelope response;
+
                 if (message.getMessage().equals("GPUBLICKEY"))
                 {
+                    my_gs.clientCodeToKey.put((Integer)message.getObjContents().get(0).hashCode(),
+                                                (Key)message.getObjContents().get(0));
                     response = new Envelope("OK");
                     response.addObject(my_gs.getPublicKey());
                     output.writeObject(response);
+                }
+                else if (message.getMessage().equals("AUTHCHALLENGE"))
+                {
+                    int challenge = (int)message.getObjContents().get(0); // User's challenge R
+                    Integer clientPubHash = (Integer)message.getObjContents().get(1); // Hash of users pub key
+
+                    // Retrieving the client's public key from our hashmap
+                    Key clientPubKey = my_gs.clientCodeToKey.get(clientPubHash);
+                    System.out.println("User's challenge R: "+challenge);
+                    // Generating a new AES session key
+                    my_gs.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+
+                    System.out.println("\n\nNew Shared Key: \n\n"+my_gs.sessionKey.encryptionKeyToString());
+                    // Making a temporary client key ES object to encrypt the session key with
+                    EncryptionSuite clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
+
+                    // Constructing the envelope
+                    response = new Envelope("OK");
+                    // Adding completed challenge
+                    response.addObject(((Integer)challenge).hashCode());
+                    // Adding new AES session key
+                    response.addObject(my_gs.sessionKey.getEncryptionKey());
+                    // Encrypting it all and sending it along
+                    output.writeObject(clientKeys.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {

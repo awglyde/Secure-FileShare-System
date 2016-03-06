@@ -21,15 +21,12 @@ CS1653 - Applied Cryptography
 
 4. To run the code you must run the Group Server and the File Server. To do that use the following commands:
 
-    ``` java RunGroupServer [(optional) Port Number] ```  
-    ``` java RunFileServer [(optional) Port Number] ```
-	java -cp ../resources/bcprov-jdk15on-154.jar:. RunFileServer [options]
-	java -cp ../resources/bcprov-jdk15on-154.jar:. RunGroupServer [options]
-	java -cp ../resources/bcprov-jdk15on-154.jar:. UserClient [options]
+	``` java -cp ../resources/bcprov-jdk15on-154.jar:. RunGroupServer [(optional) Port Number] ```
+	``` java -cp ../resources/bcprov-jdk15on-154.jar:. RunFileServer [(optional) Port Number] ```
 
 5. Then run the User Client to utilize the Group Server and File Server. Follow the prompt:
 
-    ``` java UserClient [groupServerIP] [groupServerPort] [fileServerIP] [fileServerPort] ```
+	``` java -cp ../resources/bcprov-jdk15on-154.jar:. UserClient [groupServerIP] [groupServerPort] [fileServerIP] [fileServerPort] ```
 
     If no arguments are passed in, default values will be taken.
 
@@ -113,4 +110,4 @@ TOMORROW MORNING:
 3) Wrap 2 in an Envelope
 4) Send to server
 5) Server sends SealedObject to handler function, decrypts sealed object
-6) 
+6)

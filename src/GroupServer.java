@@ -14,6 +14,8 @@ import java.security.Key;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 public class GroupServer extends Server
 {
@@ -21,6 +23,7 @@ public class GroupServer extends Server
     public UserList userList;
     public GroupList groupList;
     protected EncryptionSuite groupServerKeys;
+    HashMap<Integer, Key> clientCodeToKey =  new HashMap<Integer, Key>();
     protected EncryptionSuite sessionKey = null;
 
     public GroupServer() throws Exception
