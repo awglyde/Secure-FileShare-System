@@ -441,15 +441,6 @@ public class GroupThread extends Thread
                         deleteOwnedGroup.add(my_gs.userList.getUserOwnership(username).get(index));
                     }
 
-                    //Delete owned groups
-                    // I think our userList.removeAssociation removes group owner association as well
-                    /*for(int index = 0; index < deleteOwnedGroup.size(); index++)
-                    {
-                        //Use the delete group method. Token must be created for this action
-                        // TODO:
-                        // deleteGroup(deleteOwnedGroup.get(index), new Token(my_gs.name, username, deleteOwnedGroup));
-                    }*/
-
                     //Delete the user from the user list
                     my_gs.userList.deleteUser(username);
 

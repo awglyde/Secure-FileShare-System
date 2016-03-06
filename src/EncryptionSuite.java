@@ -144,7 +144,7 @@ public class EncryptionSuite
 
     public byte[] hashString(String string) throws Exception
     {
-        MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM);
+        MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
 
         md.update(string.getBytes("UTF-8")); // Change this to "UTF-16" if needed
         byte[] digest = md.digest();
