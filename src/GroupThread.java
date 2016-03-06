@@ -207,9 +207,9 @@ public class GroupThread extends Thread
                             if(message.getObjContents().get(1) != null)
                             {
                                 String username = (String) message.getObjContents().get(0); //Extract the username
-                                UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract the token
+                                String requester = (String) message.getObjContents().get(1); //Extract the requester
 
-                                if(deleteUser(username, yourToken))
+                                if(deleteUser(username, requester))
                                 {
                                     response = new Envelope("OK"); //Success
                                 }
@@ -235,10 +235,10 @@ public class GroupThread extends Thread
                             // Checking second param isn't null
                             if(message.getObjContents().get(1) != null)
                             {
-                                String groupname = (String) message.getObjContents().get(0); //Extract the username
-                                UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract the token
+                                String groupName = (String) message.getObjContents().get(0); //Extract the username
+                                String requester = (String) message.getObjContents().get(1); //Extract the requester
 
-                                if(createGroup(groupname, yourToken))
+                                if(createGroup(groupName, requester))
                                 {
                                     response = new Envelope("OK"); //Success
                                 }
@@ -264,10 +264,10 @@ public class GroupThread extends Thread
                             // Checking second param isn't null
                             if(message.getObjContents().get(1) != null)
                             {
-                                String groupname = (String) message.getObjContents().get(0); //Extract the username
-                                UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract the token
+                                String groupName = (String) message.getObjContents().get(0); //Extract the username
+                                String requester = (String) message.getObjContents().get(1); //Extract the requester
 
-                                if(deleteGroup(groupname, yourToken))
+                                if(deleteGroup(groupName, requester))
                                 {
                                     response = new Envelope("OK"); //Success
                                 }
@@ -294,9 +294,9 @@ public class GroupThread extends Thread
                             if(message.getObjContents().get(1) != null)
                             {
                                 String groupname = (String) message.getObjContents().get(0); //Extract the username
-                                UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract the token
+                                String requester = (String) message.getObjContents().get(1); //Extract the requester
 
-                                ArrayList<String> members = listMembers(groupname, yourToken);
+                                ArrayList<String> members = listMembers(groupname, requester);
                                 if(members != null)
                                 {
                                     response = new Envelope("OK"); //Success
@@ -326,9 +326,9 @@ public class GroupThread extends Thread
                             // Checking second param isn't null
                             String userName = (String) message.getObjContents().get(0); //Extract the userName
                             String groupName = (String) message.getObjContents().get(1); //Extract the groupName
-                            UserToken ownerToken = (UserToken) message.getObjContents().get(2); //Extract the owner token
+                            String requester = (String) message.getObjContents().get(2); //Extract the requester
 
-                            if(addUserToGroup(userName, groupName, ownerToken))
+                            if(addUserToGroup(userName, groupName, requester))
                             {
                                 response = new Envelope("OK"); //Success
                             }
@@ -355,18 +355,18 @@ public class GroupThread extends Thread
                             // Checking second param isn't null
                             String userName = (String) message.getObjContents().get(0); //Extract the userName
                             String groupName = (String) message.getObjContents().get(1); //Extract the groupName
-                            UserToken ownerToken = (UserToken) message.getObjContents().get(2); //Extract the owner token
+                            String requester = (String) message.getObjContents().get(2); //Extract the requester
 
                             // If we're in the special case where the username being removed
                             // is the owner of the group they're being removed from, then delete the group
                             if(my_gs.groupList.isGroupOwner(userName, groupName))
                             {
-                                if (deleteGroup(groupName, ownerToken))
+                                if (deleteGroup(groupName, requester))
                                 {
                                     response = new Envelope("OK"); // success
                                 }
                             }
-                            else if(deleteUserFromGroup(userName, groupName, ownerToken))
+                            else if(deleteUserFromGroup(userName, groupName, requester))
                             {
                                 response = new Envelope("OK"); //Success
                             }
@@ -451,10 +451,8 @@ public class GroupThread extends Thread
     }
 
     //Method to delete a user
-    private boolean deleteUser(String username, UserToken yourToken)
+    private boolean deleteUser(String username, String requester)
     {
-        String requester = yourToken.getSubject();
-
         //Does requester exist?
         if(my_gs.userList.checkUser(requester))
         {
@@ -523,10 +521,8 @@ public class GroupThread extends Thread
         }
     }
 
-    private boolean createGroup(String groupName, UserToken yourToken)
+    private boolean createGroup(String groupName, String requester)
     {
-        // creator of group
-        String requester = yourToken.getSubject();
 
         //Check if requester exists (creator of group)
         if(my_gs.userList.checkUser(requester))
@@ -550,21 +546,19 @@ public class GroupThread extends Thread
         }
     }
 
-    public boolean deleteGroup(String groupname, UserToken token)
+    public boolean deleteGroup(String groupName, String requester)
     {
-        // Owner of group (HOPEFULLY)
-        String requester = token.getSubject();
 
         // Check to make sure we're not deleting the ADMIN group
-        if(!groupname.equals("ADMIN"))
+        if(!groupName.equals("ADMIN"))
         {
             // Check if group exists & requester is owner
-            if( my_gs.groupList.checkGroup(groupname) &&
-                my_gs.groupList.getGroup(groupname).isOwner(requester))
+            if( my_gs.groupList.checkGroup(groupName) &&
+                my_gs.groupList.getGroup(groupName).isOwner(requester))
             {
                 // Removes members association with the group being deleted
-                my_gs.userList.removeAssociation(groupname);
-                return my_gs.groupList.deleteGroup(groupname);
+                my_gs.userList.removeAssociation(groupName);
+                return my_gs.groupList.deleteGroup(groupName);
             }
             else
             {
@@ -578,11 +572,8 @@ public class GroupThread extends Thread
 
     }
 
-    private ArrayList<String> listMembers(String groupName, UserToken yourToken)
+    private ArrayList<String> listMembers(String groupName, String requester)
     {
-        // Member of group
-        String requester = yourToken.getSubject();
-
         //Check if requester exists (creator of group)
         if(my_gs.userList.checkUser(requester))
         {
@@ -604,10 +595,8 @@ public class GroupThread extends Thread
 
     }
 
-    public boolean addUserToGroup(String userName, String groupName, UserToken ownerToken)
+    public boolean addUserToGroup(String userName, String groupName, String requester)
     {
-        // Owner of group (HOPEFULLY)
-        String requester = ownerToken.getSubject();
 
         //Check if group exists & requester is owner
         if(my_gs.groupList.checkGroup(groupName) && my_gs.groupList.getGroup(groupName).isOwner(requester))
@@ -633,11 +622,8 @@ public class GroupThread extends Thread
 
     }
 
-    public boolean deleteUserFromGroup(String username, String groupname, UserToken token)
+    public boolean deleteUserFromGroup(String username, String groupname, String requester)
     {
-        // Owner of group (HOPEFULLY)
-        String requester = token.getSubject();
-
         // Check to make sure the group is NOT THE ADMIN GROUP AND
         // make sure user being removed is not the OWNER OF THE ADMIN GROUP
         // It's okay if we're removing a user from the Admin group as long as it's not the owner

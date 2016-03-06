@@ -28,22 +28,22 @@ public interface GroupClientInterface
      * Method used to get a token from the group server.  Right now,
      * there are no security checks.
      *
-     * @param username The user whose token is being requested
-     * @return A UserToken describing the permissions of "username."
+     * @param userName The user whose token is being requested
+     * @return A UserToken describing the permissions of "userName."
      * If this user does not exist, a null value will be returned.
      */
-    public UserToken getToken(final String username);
+    public UserToken getToken(final String userName);
 
 
     /**
      * Creates a new user.  This method should only succeed if the
      * user invoking it is a member of the special group "ADMIN".
      *
-     * @param username The name of the user to create
+     * @param userName The name of the user to create
      * @param token    The token of the user requesting the create operation
      * @return true if the new user was created, false otherwise
      */
-    public boolean createUser(final String username, final String password, final String requester);
+    public boolean createUser(final String userName, final String password, final String requester);
 
 
     /**
@@ -51,33 +51,33 @@ public interface GroupClientInterface
      * invoking it is a member of the special group "ADMIN".  Deleting
      * a user should also remove him or her from all existing groups.
      *
-     * @param username The name of the user to delete
+     * @param userName The name of the user to delete
      * @param token    The token of the user requesting the delete operation
      * @return true if the user was deleted, false otherwise
      */
-    public boolean deleteUser(final String username, final UserToken token);
+    public boolean deleteUser(final String userName, final String requester);
 
 
     /**
      * Creates a new group.  Any user may create a group, provided
      * that it does not already exist.
      *
-     * @param groupname The name of the group to create
+     * @param groupName The name of the group to create
      * @param token     The token of the user requesting the create operation
      * @return true if the new group was created, false otherwise
      */
-    public boolean createGroup(final String groupname, final UserToken token);
+    public boolean createGroup(final String groupName, final String requester);
 
 
     /**
      * Deletes a group.  This method should only succeed if the user
      * invoking it is the user that originally created the group.
      *
-     * @param groupname The name of the group to delete
+     * @param groupName The name of the group to delete
      * @param token     The token of the user requesting the delete operation
      * @return true if the group was deleted, false otherwise
      */
-    public boolean deleteGroup(final String groupname, final UserToken token);
+    public boolean deleteGroup(final String groupName, final String requester);
 
 
     /**
@@ -89,7 +89,7 @@ public interface GroupClientInterface
      * @param token The token of the user requesting the create operation
      * @return true if the user was added, false otherwise
      */
-    public boolean addUserToGroup(final String user, final String group, final UserToken token);
+    public boolean addUserToGroup(final String user, final String group, final String requester);
 
 
     /**
@@ -101,7 +101,7 @@ public interface GroupClientInterface
      * @param token The token of the user requesting the remove operation
      * @return true if the user was removed, false otherwise
      */
-    public boolean deleteUserFromGroup(final String user, final String group, final UserToken token);
+    public boolean deleteUserFromGroup(final String user, final String group, final String requester);
 
 
     /**
@@ -115,6 +115,6 @@ public interface GroupClientInterface
      * a group has no members, while a null return indicates
      * an error.
      */
-    public List<String> listMembers(final String group, final UserToken token);
+    public List<String> listMembers(final String group, final String requester);
 
 }   //-- end interface GroupClientInterface

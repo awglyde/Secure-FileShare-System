@@ -36,13 +36,14 @@ public class FileServer extends Server
         {
             FileInputStream fis = new FileInputStream(fileFile);
             fileStream = new ObjectInputStream(fis);
-            this.fileList = (FileList) fileStream.readObject();
+            // this.fileList?
+            fileList = (FileList) fileStream.readObject();
         }
         catch(FileNotFoundException e)
         {
             System.out.println("FileList Does Not Exist. Creating FileList...");
-
-            this.fileList = new FileList();
+            // this.fileList?
+            fileList = new FileList();
 
         }
         catch(IOException | ClassNotFoundException e)

@@ -10,7 +10,7 @@ public class GroupClient extends Client implements GroupClientInterface
 {
     public static final int SERVER_PORT = 8765;
 
-    public UserToken getToken(String username)
+    public UserToken getToken(String userName)
     {
         try
         {
@@ -19,11 +19,11 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Tell the server to return a token.
             message = new Envelope("GET");
-            message.addObject(username); //Add user name string
-            output.writeObject(message);
+            message.addObject(userName); //Add user name string
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
             //Get the response from the server
-             response = (Envelope) input.readObject();
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
 
             //Successful response
             if(response.getMessage().equals("OK"))
@@ -50,19 +50,20 @@ public class GroupClient extends Client implements GroupClientInterface
 
     }
 
-    public boolean createUser(String username, String password, String requester)
+    public boolean createUser(String userName, String password, String requester)
     {
         try
         {
             Envelope message = null, response = null;
             //Tell the server to create a user
             message = new Envelope("CUSER");
-            message.addObject(username); //Add user name string
+            message.addObject(userName); //Add user name string
             message.addObject(password); //Add the new user's password
             message.addObject(requester); //Add the requester
-            output.writeObject(message);
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
-            response = (Envelope) input.readObject();
+            //Get the response from the server
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -80,7 +81,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean deleteUser(String username, UserToken token)
+    public boolean deleteUser(String userName, String requester)
     {
         try
         {
@@ -88,12 +89,13 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Tell the server to delete a user
             message = new Envelope("DUSER");
-            message.addObject(username); //Add user name
-            message.addObject(token);  //Add requester's token
+            message.addObject(userName); //Add user name
+            message.addObject(requester);  //Add requester's token
 
-            output.writeObject(message);
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
-            response = (Envelope) input.readObject();
+            //Get the response from the server
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -111,18 +113,19 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean createGroup(String groupname, UserToken token)
+    public boolean createGroup(String groupName, String userName)
     {
         try
         {
             Envelope message = null, response = null;
             //Tell the server to create a group
             message = new Envelope("CGROUP");
-            message.addObject(groupname); //Add the group name string
-            message.addObject(token); //Add the requester's token
-            output.writeObject(message);
+            message.addObject(groupName); //Add the group name string
+            message.addObject(userName); //Add the requester's userName
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
-            response = (Envelope) input.readObject();
+            //Get the response from the server
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -140,18 +143,19 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean deleteGroup(String groupname, UserToken token)
+    public boolean deleteGroup(String groupName, String requester)
     {
         try
         {
             Envelope message = null, response = null;
             //Tell the server to delete a group
             message = new Envelope("DGROUP");
-            message.addObject(groupname); //Add group name string
-            message.addObject(token); //Add requester's token
-            output.writeObject(message);
+            message.addObject(groupName); //Add group name string
+            message.addObject(requester); //Add requester's token
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
-            response = (Envelope) input.readObject();
+            //Get the response from the server
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -169,7 +173,7 @@ public class GroupClient extends Client implements GroupClientInterface
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> listMembers(String group, UserToken token)
+    public List<String> listMembers(String group, String requester)
     {
         try
         {
@@ -177,10 +181,11 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to return the member list
             message = new Envelope("LMEMBERS");
             message.addObject(group); //Add group name string
-            message.addObject(token); //Add requester's token
-            output.writeObject(message);
+            message.addObject(requester); //Add requester's token
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
-            response = (Envelope) input.readObject();
+            //Get the response from the server
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return the member list
             if(response.getMessage().equals("OK"))
@@ -199,19 +204,20 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean addUserToGroup(String username, String groupname, UserToken token)
+    public boolean addUserToGroup(String userName, String groupName, String requester)
     {
         try
         {
             Envelope message = null, response = null;
             //Tell the server to add a user to the group
             message = new Envelope("AUSERTOGROUP");
-            message.addObject(username); //Add user name string
-            message.addObject(groupname); //Add group name string
-            message.addObject(token); //Add requester's token
-            output.writeObject(message);
+            message.addObject(userName); //Add user name string
+            message.addObject(groupName); //Add group name string
+            message.addObject(requester); //Add requester's token
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
-            response = (Envelope) input.readObject();
+            //Get the response from the server
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -228,19 +234,20 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean deleteUserFromGroup(String username, String groupname, UserToken token)
+    public boolean deleteUserFromGroup(String userName, String groupName, String requester)
     {
         try
         {
             Envelope message = null, response = null;
             //Tell the server to remove a user from the group
             message = new Envelope("RUSERFROMGROUP");
-            message.addObject(username); //Add user name string
-            message.addObject(groupname); //Add group name string
-            message.addObject(token); //Add requester's token
-            output.writeObject(message);
+            message.addObject(userName); //Add user name string
+            message.addObject(groupName); //Add group name string
+            message.addObject(requester); //Add requester's token
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
-            response = (Envelope) input.readObject();
+            //Get the response from the server
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -339,10 +346,10 @@ public class GroupClient extends Client implements GroupClientInterface
 
 	public boolean authLogin() throws Exception
 	{
-		// 1) Enter username and password (SECURELY. SANITIZE INPUTS)
+		// 1) Enter userName and password (SECURELY. SANITIZE INPUTS)
 
-	    System.out.println("Enter username to login: ");
-	    UserClient.username = UserClient.inputValidation(UserClient.in.readLine());
+	    System.out.println("Enter userName to login: ");
+	    UserClient.userName = UserClient.inputValidation(UserClient.in.readLine());
         System.out.println("Enter Password: ");
 	    String password = UserClient.inputValidation(UserClient.in.readLine());
 
@@ -351,7 +358,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to return its public key
             message = new Envelope("AUTHLOGIN");
-			message.addObject(UserClient.username);
+			message.addObject(UserClient.userName);
             message.addObject(password);
             output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
@@ -388,13 +395,13 @@ public class GroupClient extends Client implements GroupClientInterface
 			return false;
 	}
 
-    public boolean isAdmin(String username)
+    public boolean isAdmin(String userName)
     {
         try
         {
             Envelope message = null, response = null;
             message = new Envelope("ISADMIN");
-			message.addObject(username);
+			message.addObject(userName);
             output.writeObject(this.sharedKey.getEncryptedMessage(message));
 
             response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());

@@ -9,7 +9,7 @@ public class UserClient
 {
 	static GroupClient groupClient;
 	static FileClient fileClient;
-    static String username = "";
+    static String userName = "";
     static UserToken userToken = null;
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -65,7 +65,7 @@ public class UserClient
 
             // print admin options if they are an admin
 			// TODO: CHANGE THIS TO USE USERNAME, NOT TOKEN
-            if (groupClient.isAdmin(username))
+            if (groupClient.isAdmin(userName))
             {
                 for(int i = 0; i < adminOptions.length; i++){
                     System.out.println((i+menuOptions.length) + ". \t" + adminOptions[i]);
@@ -73,7 +73,7 @@ public class UserClient
 
             }
 
-            System.out.print(username+" >> ");
+            System.out.print(userName+" >> ");
 
             try
             {
@@ -86,29 +86,29 @@ public class UserClient
 
             // Options for Admins Only
             boolean selectedAdminOption = false;
-            if(groupClient.isAdmin(username)){
+            if(groupClient.isAdmin(userName)){
                 switch(choice)
                 {
                     case "7": // Create a user
-                        System.out.println("Enter username of new user to create: ");
+                        System.out.println("Enter userName of new user to create: ");
                         String newUserName = inputValidation(in.readLine());
                         System.out.println("Enter password for "+newUserName);
                         String password = inputValidation(in.readLine());
-                        if (groupClient.createUser(newUserName, password, username))
+                        if (groupClient.createUser(newUserName, password, userName))
                         {
                             System.out.println("User created successfully!");
                         }
                         else
                         {
                             System.out.println("User creation failed!");
-                            System.out.println("You cannot create a user with a duplicate username.");
+                            System.out.println("You cannot create a user with a duplicate userName.");
                         }
                         selectedAdminOption = true;
                         break;
                     case "8": // Delete a user
-                        System.out.println("Enter username of user to delete: ");
+                        System.out.println("Enter userName of user to delete: ");
                         String userToDelete = inputValidation(in.readLine());
-                        if (groupClient.deleteUser(userToDelete, userToken))
+                        if (groupClient.deleteUser(userToDelete, userName))
                         {
                             System.out.println("User deleted successfully!");
                         }
@@ -129,12 +129,12 @@ public class UserClient
                 case "0":
                     return;
 				case "1":
-        			userToken = (Token) groupClient.getToken(username);
+        			userToken = (Token) groupClient.getToken(userName);
 					break;
                 case "2": // Create a group
                     System.out.println("Enter a group name: ");
                     String newGroupName = inputValidation(in.readLine());
-                    if (groupClient.createGroup(newGroupName, userToken))
+                    if (groupClient.createGroup(newGroupName, userName))
                     {
                         System.out.println("Group "+newGroupName+" created successfully!");
                     }
@@ -148,7 +148,7 @@ public class UserClient
                     System.out.println("Enter a group name to delete: ");
                     String groupToDelete = inputValidation(in.readLine());
 
-                    if (groupClient.deleteGroup(groupToDelete, userToken))
+                    if (groupClient.deleteGroup(groupToDelete, userName))
                     {
                         System.out.println("Group "+groupToDelete+" deleted successfully!");
                     }
@@ -170,7 +170,7 @@ public class UserClient
                     System.out.println("Enter a group to add "+userToAdd+" to: ");
                     String groupToAddUserTo = inputValidation(in.readLine());
 
-                    if (groupClient.addUserToGroup(userToAdd, groupToAddUserTo, userToken))
+                    if (groupClient.addUserToGroup(userToAdd, groupToAddUserTo, userName))
                     {
                         System.out.println(userToAdd+" added successfully to "+groupToAddUserTo+".");
                     }
@@ -193,7 +193,7 @@ public class UserClient
                     System.out.println("Enter the name of the user in "+group+" that you'd like to remove: ");
                     String userToRemove = inputValidation(in.readLine());
 
-                    if (groupClient.deleteUserFromGroup(userToRemove,group, userToken))
+                    if (groupClient.deleteUserFromGroup(userToRemove,group, userName))
                         System.out.println("Successfully deleted "+userToRemove+" from "+group+"!");
                     else
                     {
@@ -207,7 +207,7 @@ public class UserClient
                 case "6": // List all the members of a group
                     System.out.println("Enter a group name you're a member of to list: ");
                     String groupName = inputValidation(in.readLine());
-                    List<String> groupMembers = groupClient.listMembers(groupName, userToken);
+                    List<String> groupMembers = groupClient.listMembers(groupName, userName);
                     if (groupMembers != null)
                     {
                         System.out.println(groupName+": ");
@@ -266,13 +266,13 @@ public class UserClient
             fileClient.reset();
 
 			// TODO: CHECK IF TOKEN IS EXPIRED INSTEAD OF GETTING A NEW TOKEN EVERY TIME
-            // userToken = getToken(groupSeverName, groupPort, username);
+            // userToken = getToken(groupSeverName, groupPort, userName);
 
             for (int i = 0; i < menuOptions.length; i++)
             {
                 System.out.println(i+". \t"+menuOptions[i]);
             }
-            System.out.print(username+" >> ");
+            System.out.print(userName+" >> ");
 
             try
             {
@@ -366,7 +366,7 @@ public class UserClient
                 System.out.println("1. \tGroup Server");
                 System.out.println("2. \tFile Server");
                 System.out.println("0. \tExit");
-                System.out.print(username+" >> ");
+                System.out.print(userName+" >> ");
 
                 String choice = inputValidation(in.readLine());
 
@@ -445,7 +445,7 @@ public class UserClient
         catch(Exception e)
         {
             System.out.println("Failed to connect to group server\n"+
-                                "Possibly invalid username,\n"+
+                                "Possibly invalid userName,\n"+
                                 "or failed to get group server public key.");
         }
 
