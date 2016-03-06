@@ -43,6 +43,16 @@ public class UserList implements java.io.Serializable
         return this.list.get(username);
     }
 
+    public synchronized byte[] getPasswordHash(String username)
+    {
+        return this.getUser(username).getPasswordHash();
+    }
+
+    public synchronized byte[] getPasswordSalt(String username)
+    {
+        return this.getUser(username).getPasswordSalt();
+    }
+
     public synchronized ArrayList<String> getUserGroups(String username)
     {
         return this.list.get(username).getGroups();

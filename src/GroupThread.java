@@ -110,11 +110,11 @@ public class GroupThread extends Thread
                                 System.out.println("Username: "+username+"\nPassword: "+password);
                                 System.out.println("Verify Key Result: "+
                                                     my_gs.sessionKey.verifyUserPassword(password,
-                                                    my_gs.userList.getUser(username).getPasswordHash(),
-                                                    my_gs.userList.getUser(username).getPasswordSalt()));
+                                                    my_gs.userList.getPasswordHash(username),
+                                                    my_gs.userList.getPasswordSalt(username)));
                                 if(my_gs.sessionKey.verifyUserPassword(password,
-                                                                        my_gs.userList.getUser(username).getPasswordHash(),
-                                                                        my_gs.userList.getUser(username).getPasswordSalt()))
+                                                                        my_gs.userList.getPasswordHash(username),
+                                                                        my_gs.userList.getPasswordSalt(username)))
                                 {
 
                                     System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD!");
