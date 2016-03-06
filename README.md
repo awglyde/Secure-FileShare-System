@@ -88,5 +88,9 @@ ejw45, gah33, awg13
 * Add a token expiration time
     Method called isExpired that we'll call every so often. Store the date it was created
 * Check for token expiration time
+* Sign token from group server
 * Add File Server authentication protocol
-* Create a list of session keys. Somehow keep track of them.
+* Create a list of session keys. Somehow keep track of them. Do we need to do this?
+    * Client starts. User logs in. User gets a session key
+* Verify token is signed by group server on File Server
+* Update writeup, update diagrams with new implementation
