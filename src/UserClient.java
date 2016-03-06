@@ -23,6 +23,7 @@ public class UserClient
                 System.out.println("Logged in and authenticated group server successfully!");
 	            groupOptions();
 			}
+			else
 			{
 				System.out.println("Failed to authenticate group server. :(");
 			}
@@ -64,7 +65,7 @@ public class UserClient
 
             // print admin options if they are an admin
 			// TODO: CHANGE THIS TO USE USERNAME, NOT TOKEN
-            if (userToken.isAdmin())
+            if (groupClient.isAdmin(username))
             {
                 for(int i = 0; i < adminOptions.length; i++){
                     System.out.println((i+menuOptions.length) + ". \t" + adminOptions[i]);
@@ -85,7 +86,7 @@ public class UserClient
 
             // Options for Admins Only
             boolean selectedAdminOption = false;
-            if(userToken.isAdmin()){
+            if(groupClient.isAdmin(username)){
                 switch(choice)
                 {
                     case "7": // Create a user

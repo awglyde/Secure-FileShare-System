@@ -388,4 +388,30 @@ public class GroupClient extends Client implements GroupClientInterface
 			return false;
 	}
 
+    public boolean isAdmin(String username)
+    {
+        try
+        {
+            Envelope message = null, response = null;
+            message = new Envelope("ISADMIN");
+			message.addObject(username);
+            output.writeObject(this.sharedKey.getEncryptedMessage(message));
+
+            response = this.sharedKey.getDecryptedMessage((Envelope)input.readObject());
+
+            //If server indicates success, return true
+            if(response.getMessage().equals("OK"))
+            {
+                return true;
+            }
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return false;
+        }
+		return false;
+    }
+
 }

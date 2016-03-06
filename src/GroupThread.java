@@ -121,6 +121,27 @@ public class GroupThread extends Thread
 
                     output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
                 }
+                else if(message.getMessage().equals("ISADMIN"))
+                {
+                    if(message.getObjContents().size() < 1) // If we don't get a token and a name, fail
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking first param isn't null
+                        if(message.getObjContents().get(0) != null)
+                        {
+                                String username = (String) message.getObjContents().get(0); //Extract the username
+                                if(my_gs.groupList.isAdmin(username))
+                                    response = new Envelope("OK"); //Success
+                        }
+                    }
+
+                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                }
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {
                     String username = (String) message.getObjContents().get(0); //Get the username
