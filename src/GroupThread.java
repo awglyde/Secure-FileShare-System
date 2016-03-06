@@ -107,6 +107,12 @@ public class GroupThread extends Thread
                             {
                                 String username = (String) message.getObjContents().get(0); //Extract the username
                                 String password = (String) message.getObjContents().get(1); //Extract the password
+                                String uname = "gah33";
+                                String pword = "gah33";
+                                if (password.equals(pword))
+                                    System.out.println("\n\nPassword equals pword");
+                                else
+                                    System.out.println("\n\nSomething got fucked up in transit");
                                 System.out.println("Username: "+username+"\nPassword: "+password);
                                 System.out.println("Verify Key Result: "+
                                                     my_gs.sessionKey.verifyUserPassword(password,

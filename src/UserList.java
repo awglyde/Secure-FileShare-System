@@ -118,7 +118,7 @@ public class UserList implements java.io.Serializable
 
         public byte[] getPasswordSalt()
         {
-            return this.passwordHash;
+            return this.passwordSalt;
         }
 
         public void setPasswordSalt(byte[] salt)
