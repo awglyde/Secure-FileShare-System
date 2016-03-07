@@ -287,6 +287,11 @@ public class UserClient
                 System.out.println("Error parsing input. Exiting...");
             }
 
+			if(userToken != null && userToken.isExpired())
+			{
+				System.out.println("User Token is expired. Contact the Group Server to recieve a new token.");
+			}
+
             switch(choice)
             {
                 case "0":
