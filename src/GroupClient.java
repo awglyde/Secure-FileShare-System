@@ -302,13 +302,14 @@ public class GroupClient extends Client implements GroupClientInterface
         try
         {
             Envelope message = null, response = null;
-            //Tell the server to return its public key
             message = new Envelope("AUTHCHALLENGE");
 			message.addObject(challenge);
+            
+            // TODO: Should we use our EncryptionSuite hash method?
             message.addObject(userKeys.getEncryptionKey().hashCode());
 
             // 2) Encrypt challenge & user's public key HASHCODE with GS public key
-            output.writeObject(this.serverKeys.getEncryptedMessage(message));
+            output.writeObject(this.groupServerPublicKey.getEncryptedMessage(message));
 
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
@@ -384,11 +385,11 @@ public class GroupClient extends Client implements GroupClientInterface
 	{
         // Get group server public key
         Key groupServerPublicKey = this.getGroupServerPublicKey(userKeys);
-		// this.serverKeys.setEncryptionKey(groupServerPublicKey);
-        this.serverKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
+		// this.groupServerPublicKey.setEncryptionKey(groupServerPublicKey);
+        this.groupServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
         // Generate new object for encryption / decryption with gs public key
         System.out.println("Group Server Public Key: \n\n"+
-                            this.serverKeys.encryptionKeyToString());
+                            this.groupServerPublicKey.encryptionKeyToString());
 		if (this.authChallenge(userKeys) && this.authLogin())
 			return true;
 		else

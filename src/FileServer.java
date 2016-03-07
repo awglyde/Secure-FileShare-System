@@ -12,6 +12,7 @@ public class FileServer extends Server
     public static final int SERVER_PORT = 4321;
     public static FileList fileList;
     protected EncryptionSuite fileServerKeys;
+    protected EncryptionSuite groupServerPubKey;
     HashMap<Integer, Key> clientCodeToKey =  new HashMap<Integer, Key>();
     protected EncryptionSuite sessionKey = null;
 

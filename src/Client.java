@@ -12,7 +12,8 @@ public abstract class Client
     protected Socket sock;
     protected ObjectOutputStream output;
     protected ObjectInputStream input;
-	public EncryptionSuite serverKeys;
+	public EncryptionSuite groupServerPublicKey;
+    public EncryptionSuite fileServerPublicKey;
 	public EncryptionSuite sessionKey;
 
     public static enum Privilege {

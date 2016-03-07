@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.security.Key;
+import java.security.SecureRandom;
 
 public class FileClient extends Client implements FileClientInterface
 {
@@ -261,7 +262,7 @@ public class FileClient extends Client implements FileClientInterface
         return true;
     }
 
-    public Key getFileServerPublicKey(EncryptionSuite userKeys)
+    public Key getFileServerPublicKey(EncryptionSuite userKeys, UserToken userToken)
     {
         try
         {
@@ -269,6 +270,7 @@ public class FileClient extends Client implements FileClientInterface
             //Tell the server to return its public key
             message = new Envelope("GPUBLICKEY");
             message.addObject(userKeys.getEncryptionKey());
+            message.addObject(userToken.getSignerPublicKey());
             output.writeObject(message);
 
             response = (Envelope) input.readObject();
@@ -287,25 +289,79 @@ public class FileClient extends Client implements FileClientInterface
         return null;
     }
 
-	public boolean authenticateFileServer(EncryptionSuite userKeys) throws Exception
+	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken) throws Exception
+    {
+		// 1) Generate a challenge.
+		SecureRandom prng = new SecureRandom();
+        byte[] challenge = new byte[16];
+        prng.nextBytes(challenge);
+
+        System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
+
+        try
+        {
+            Envelope message = null, response = null;
+            message = new Envelope("AUTHCHALLENGE");
+            // Add challenge and client pub key hash to envelope
+			message.addObject(challenge);
+            // TODO: Should we use our EncryptionSuite hash method?
+            message.addObject(userKeys.getEncryptionKey().hashCode());
+            // Add signers public key (for convenience)
+
+            // 2) Encrypt challenge, client's pub key hash with FS public key
+            output.writeObject(this.fileServerPublicKey.getEncryptedMessage(message));
+
+            // 3) Receive completed challenge and shared AES key
+            response = userKeys.getDecryptedMessage((Envelope)input.readObject());
+
+            //If server indicates success, return true
+            if(response.getMessage().equals("OK"))
+            {
+                byte[] completedChallenge = (byte[])response.getObjContents().get(0); // User's completed challenge H(R)
+                if (userKeys.verifyChallenge(challenge, completedChallenge))
+                {
+                    System.out.println("File Server successfully completed challenge!");
+                }
+                else
+                {
+                    System.out.println("Server failed to complete challenge! Session may have been hijacked!");
+                    return false;
+                }
+
+                // 4) Store new shared key in sessionKey ES object
+                Key sessionKey = (Key)response.getObjContents().get(1); // New session key from file server
+		        this.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
+                System.out.println("\n\nShared Key From File Server: \n\n"+this.sessionKey.encryptionKeyToString());
+                return true;
+            }
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return false;
+        }
+
+		return false;
+	}
+
+	public boolean authenticateFileServer(EncryptionSuite userKeys, UserToken userToken) throws Exception
 	{
 
-        Key fileServerPublicKey = this.getFileServerPublicKey(userKeys);
-		// 1) Client encrypts
-        /*
-		// Get group server public key
-        Key groupServerPublicKey = this.getGroupServerPublicKey(userKeys);
-		// this.serverKeys.setEncryptionKey(groupServerPublicKey);
-        this.serverKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
-        // Generate new object for encryption / decryption with gs public key
-        System.out.println("Group Server Public Key: \n\n"+
-                            this.serverKeys.encryptionKeyToString());
-		if (this.authChallenge(userKeys) && this.authLogin())
+		// Get File server public key
+        Key fileServerPublicKey = this.getFileServerPublicKey(userKeys, userToken);
+        // Generate new object for encryption / decryption with fs public key
+        this.fileServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, fileServerPublicKey, null);
+        System.out.println("File Server Public Key: \n\n"+
+                            this.groupServerPublicKey.encryptionKeyToString());
+
+        System.out.println("\n\nIs this key authentic? Enter 'y' to continue, 'n' to quit.");
+        String choice = UserClient.in.readLine();
+		if (choice.equals("y") && this.authChallenge(userKeys, userToken))
 			return true;
 		else
 			return false;
-		*/
-		return false;
+
 	}
 
 }

@@ -240,7 +240,7 @@ public class UserClient
         fileClient.connect(fileServerName,  filePort);
         if (fileClient.isConnected())
         {
-			if (fileClient.authenticateFileServer(userKeys))
+			if (fileClient.authenticateFileServer(userKeys, userToken))
 			{
 				System.out.println("Successfully authenticated file server!");
             	fileOptions(groupSeverName, groupPort);

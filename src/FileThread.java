@@ -52,7 +52,7 @@ public class FileThread extends Thread
                 }
                 if(e.getMessage().equals("GPUBLICKEY"))
 				{
-                    if(e.getObjContents().size() < 1) // Make sure e size >= 1
+                    if(e.getObjContents().size() < 2) // Make sure e size >= 2
                     {
                         response = new Envelope("FAIL");
                     }
@@ -63,18 +63,68 @@ public class FileThread extends Thread
                         // Checking first param isn't null
                         if(e.getObjContents().get(0) != null)
                         {
+                            if(e.getObjContents().get(1) != null)
+                            {
 							// Map the client's key to the hash of their key, so we know who we're talking to in the future
 		                    my_fs.clientCodeToKey.put((Integer)e.getObjContents().get(0).hashCode(),
 		                                                (Key)e.getObjContents().get(0));
+
+                            // Store the group server's public key (To verify client's token)
+                            my_fs.groupServerPubKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, (Key)e.getObjContents().get(1), null);
 		                    response = new Envelope("OK");
 							// Add the server's public key to the envelope and send it back.
 							// TODO: Ask the client if this is the public key they were expecting
-		                    response.addObject(my_fs.getPublicKey());
+                            }
 						}
 					}
 
                     output.writeObject(response);
 				}
+                else if(e.getMessage().equals("AUTHCHALLENGE"))
+                {
+					EncryptionSuite clientKeys = null;
+                    // If we don't get a challenge, public key hash, and signed token hash fail
+                    if(e.getObjContents().size() < 2)
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking first param isn't null
+                        if(e.getObjContents().get(0) != null)
+                        {
+                            // Checking second param isn't null
+                            if(e.getObjContents().get(1) != null)
+                            {
+			                    byte[] challenge = (byte[])e.getObjContents().get(0); // User's challenge R
+			                    Integer clientPubHash = (Integer)e.getObjContents().get(1); // Hash of users pub key
+
+			                    // Retrieving the client's public key from our hashmap
+			                    Key clientPubKey = my_fs.clientCodeToKey.get(clientPubHash);
+			                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
+			                    // Generating a new AES session key
+			                    my_fs.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+
+			                    System.out.println("\n\nNew Shared Key: \n\n"+my_fs.sessionKey.encryptionKeyToString());
+			                    // Making a temporary client key ES object to encrypt the session key with
+			                    clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
+
+			                    // Constructing the envelope
+			                    response = new Envelope("OK");
+			                    // Adding completed challenge
+			                    response.addObject(my_fs.sessionKey.hashBytes(challenge));
+			                    // Adding new AES session key
+			                    response.addObject(my_fs.sessionKey.getEncryptionKey());
+
+							}
+						}
+					}
+
+                    // Encrypting it all and sending it along
+                    output.writeObject(clientKeys.getEncryptedMessage(response));
+                }
                 else if(e.getMessage().equals("UPLOADF"))
                 {
 
