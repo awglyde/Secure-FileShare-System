@@ -235,12 +235,16 @@ public class UserClient
 
     public static void connectFileServer(String groupSeverName, int groupPort,
                                          String fileServerName, int filePort,
-										 EncryptionSuite userKeys) throws IOException
+										 EncryptionSuite userKeys) throws Exception
     {
         fileClient.connect(fileServerName,  filePort);
         if (fileClient.isConnected())
         {
-            fileOptions(groupSeverName, groupPort);
+			if (fileClient.authenticateFileServer(userKeys))
+			{
+				System.out.println("Successfully authenticated file server!");
+            	fileOptions(groupSeverName, groupPort);
+			}
         }
         else
         {

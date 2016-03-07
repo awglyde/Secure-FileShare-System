@@ -3,11 +3,17 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.security.Key;
 
 public class FileServer extends Server
 {
     public static final int SERVER_PORT = 4321;
     public static FileList fileList;
+    protected EncryptionSuite fileServerKeys;
+    HashMap<Integer, Key> clientCodeToKey =  new HashMap<Integer, Key>();
+    protected EncryptionSuite sessionKey = null;
 
     public FileServer()
     {
@@ -17,6 +23,22 @@ public class FileServer extends Server
     public FileServer(int _port)
     {
         super(_port, "FilePile");
+    }
+
+    public Key getPublicKey()
+    {
+        return fileServerKeys.getEncryptionKey();
+    }
+
+    public Key getSessionKey()
+    {
+        if(sessionKey != null)
+        {
+            return sessionKey.getEncryptionKey();
+        } else
+        {
+            return null;
+        }
     }
 
     public void start() throws Exception
@@ -85,7 +107,7 @@ public class FileServer extends Server
             while(running)
             {
                 sock = serverSock.accept();
-                thread = new FileThread(sock);
+                thread = new FileThread(sock, this);
                 thread.start();
             }
 

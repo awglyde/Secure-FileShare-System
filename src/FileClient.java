@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.security.Key;
 
 public class FileClient extends Client implements FileClientInterface
 {
@@ -259,5 +260,52 @@ public class FileClient extends Client implements FileClientInterface
         }
         return true;
     }
+
+    public Key getFileServerPublicKey(EncryptionSuite userKeys)
+    {
+        try
+        {
+            Envelope message = null, response = null;
+            //Tell the server to return its public key
+            message = new Envelope("GPUBLICKEY");
+            message.addObject(userKeys.getEncryptionKey());
+            output.writeObject(message);
+
+            response = (Envelope) input.readObject();
+            //If server indicates success, return true
+            if(response.getMessage().equals("OK"))
+            {
+                return (Key)response.getObjContents().get(0);
+            }
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return null;
+        }
+        return null;
+    }
+
+	public boolean authenticateFileServer(EncryptionSuite userKeys) throws Exception
+	{
+
+        Key fileServerPublicKey = this.getFileServerPublicKey(userKeys);
+		// 1) Client encrypts
+        /*
+		// Get group server public key
+        Key groupServerPublicKey = this.getGroupServerPublicKey(userKeys);
+		// this.serverKeys.setEncryptionKey(groupServerPublicKey);
+        this.serverKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
+        // Generate new object for encryption / decryption with gs public key
+        System.out.println("Group Server Public Key: \n\n"+
+                            this.serverKeys.encryptionKeyToString());
+		if (this.authChallenge(userKeys) && this.authLogin())
+			return true;
+		else
+			return false;
+		*/
+		return false;
+	}
 
 }

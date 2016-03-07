@@ -88,7 +88,6 @@ ejw45, gah33, awg13
 * Add a token expiration time
     Method called isExpired that we'll call every so often. Store the date it was created
 * Check for token expiration time
-* Hash token, Sign hash of token from group server
 * Verify token is signed by group server on File Server
 * Add File Server authentication protocol
 * Create a list of session keys. Somehow keep track of them. Do we need to do this?

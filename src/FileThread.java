@@ -3,14 +3,17 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
+import java.security.Key;
 
 public class FileThread extends Thread
 {
     private final Socket socket;
+    private FileServer my_fs;
 
-    public FileThread(Socket _socket)
+    public FileThread(Socket _socket, FileServer _fs)
     {
         socket = _socket;
+        my_fs = _fs;
     }
 
     public void run()
@@ -47,7 +50,31 @@ public class FileThread extends Thread
 
                     output.writeObject(response);
                 }
-                if(e.getMessage().equals("UPLOADF"))
+                if(e.getMessage().equals("GPUBLICKEY"))
+				{
+                    if(e.getObjContents().size() < 1) // Make sure e size >= 1
+                    {
+                        response = new Envelope("FAIL");
+                    }
+                    else
+                    {
+                        response = new Envelope("FAIL");
+
+                        // Checking first param isn't null
+                        if(e.getObjContents().get(0) != null)
+                        {
+							// Map the client's key to the hash of their key, so we know who we're talking to in the future
+		                    my_fs.clientCodeToKey.put((Integer)e.getObjContents().get(0).hashCode(),
+		                                                (Key)e.getObjContents().get(0));
+		                    response = new Envelope("OK");
+							// Add the server's public key to the envelope and send it back.
+		                    response.addObject(my_fs.getPublicKey());
+						}
+					}
+
+                    output.writeObject(response);
+				}
+                else if(e.getMessage().equals("UPLOADF"))
                 {
 
                     if(e.getObjContents().size() < 3)
