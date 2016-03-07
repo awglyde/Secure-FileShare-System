@@ -68,6 +68,7 @@ public class FileThread extends Thread
 		                                                (Key)e.getObjContents().get(0));
 		                    response = new Envelope("OK");
 							// Add the server's public key to the envelope and send it back.
+							// TODO: Ask the client if this is the public key they were expecting
 		                    response.addObject(my_fs.getPublicKey());
 						}
 					}
