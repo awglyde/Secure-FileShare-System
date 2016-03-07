@@ -56,8 +56,14 @@ public class FileThread extends Thread
                     if( e.getObjContents().size() == 1 && e.getObjContents().get(0) != null)
                     {
                         UserToken yourToken = (UserToken) e.getObjContents().get(0); //Extract the token
-                        response = new Envelope("OK"); //Success
-                        response.addObject(FileServer.fileList.getUserFiles(yourToken)); // append the users files
+						// Make sure your token isn't expired and validate signed hash with group server public key
+						if (!yourToken.isExpired() && my_fs.groupServerPubKey.verifySignature(yourToken.getSignedHash(),
+																								my_fs.groupServerPubKey.hashBytes(yourToken.toString().getBytes())))
+						{
+							System.out.println("Successfully verified token!");
+	                        response = new Envelope("OK"); //Success
+	                        response.addObject(FileServer.fileList.getUserFiles(yourToken)); // append the users files
+						}
                     }
 
                     output.writeObject(my_fs.sessionKey.getEncryptedMessage(response));
