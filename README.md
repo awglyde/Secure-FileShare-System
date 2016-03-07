@@ -84,8 +84,6 @@ ejw45, gah33, awg13
 - User can only see files of groups they are in.
 
 ### TODO:
-* Check for token expiration time
-* Verify token is signed by group server on File Server on every operation
 * Create a list of session keys. Somehow keep track of them. Do we need to do this?
     * Client starts. User logs in. User gets a session key
 * Update writeup, update diagrams with new implementation
