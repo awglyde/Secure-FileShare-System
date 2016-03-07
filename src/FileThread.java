@@ -34,6 +34,18 @@ public class FileThread extends Thread
                 output.reset();
 
                 Envelope e = (Envelope) input.readObject();
+
+				if (e.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_RSA))
+                {
+                    // Decrypt message with group server's private key
+            		e = my_fs.fileServerKeys.getDecryptedMessage(e);
+                }
+                else if (e.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
+                {
+                    // Decrypt message with shared AES key
+                    // TODO: MAKE A LIST OF SHARED AES KEYS MAPPED TO.. WHAT? USERNAME?
+            		e = my_fs.sessionKey.getDecryptedMessage(e);
+                }
                 System.out.println("Request received: " + e.getMessage());
 
                 // Handler to list files that this user is allowed to see
@@ -48,9 +60,9 @@ public class FileThread extends Thread
                         response.addObject(FileServer.fileList.getUserFiles(yourToken)); // append the users files
                     }
 
-                    output.writeObject(response);
+                    output.writeObject(my_fs.sessionKey.getEncryptedMessage(response));
                 }
-                if(e.getMessage().equals("GPUBLICKEY"))
+                else if(e.getMessage().equals("GPUBLICKEY"))
 				{
                     if(e.getObjContents().size() < 2) // Make sure e size >= 2
                     {
@@ -74,6 +86,7 @@ public class FileThread extends Thread
 		                    response = new Envelope("OK");
 							// Add the server's public key to the envelope and send it back.
 							// TODO: Ask the client if this is the public key they were expecting
+		                    response.addObject(my_fs.getPublicKey());
                             }
 						}
 					}
@@ -170,15 +183,17 @@ public class FileThread extends Thread
                                 System.out.printf("Successfully created file %s\n", remotePath.replace('/', '_'));
 
                                 response = new Envelope("READY"); //Success
-                                output.writeObject(response);
+                                output.writeObject(my_fs.sessionKey.getEncryptedMessage(response));
 
                                 e = (Envelope) input.readObject();
+                                e = my_fs.sessionKey.getDecryptedMessage(e);
                                 while(e.getMessage().compareTo("CHUNK") == 0)
                                 {
                                     fos.write((byte[]) e.getObjContents().get(0), 0, (Integer) e.getObjContents().get(1));
                                     response = new Envelope("READY"); //Success
-                                    output.writeObject(response);
+                                    output.writeObject(my_fs.sessionKey.getEncryptedMessage(response));
                                     e = (Envelope) input.readObject();
+                                    e = my_fs.sessionKey.getDecryptedMessage(e);
                                 }
 
                                 if(e.getMessage().compareTo("EOF") == 0)
@@ -197,7 +212,7 @@ public class FileThread extends Thread
                         }
                     }
 
-                    output.writeObject(response);
+                    output.writeObject(my_fs.sessionKey.getEncryptedMessage(response));
                 }
                 else if(e.getMessage().compareTo("DOWNLOADF") == 0)
                 {
@@ -209,14 +224,14 @@ public class FileThread extends Thread
                     {
                         System.out.printf("Error: File %s doesn't exist\n", remotePath);
                         e = new Envelope("ERROR_FILEMISSING");
-                        output.writeObject(e);
+                        output.writeObject(my_fs.sessionKey.getEncryptedMessage(e));
 
                     }
                     else if(!t.getGroups().contains(sf.getGroup()))
                     {
                         System.out.printf("Error user %s doesn't have permission\n", t.getSubject());
                         e = new Envelope("ERROR_PERMISSION");
-                        output.writeObject(e);
+                        output.writeObject(my_fs.sessionKey.getEncryptedMessage(e));
                     }
                     else
                     {
@@ -228,7 +243,7 @@ public class FileThread extends Thread
                             {
                                 System.out.printf("Error file %s missing from disk\n", "_" + remotePath.replace('/', '_'));
                                 e = new Envelope("ERROR_NOTONDISK");
-                                output.writeObject(e);
+                                output.writeObject(my_fs.sessionKey.getEncryptedMessage(e));
 
                             }
                             else
@@ -259,9 +274,10 @@ public class FileThread extends Thread
                                     e.addObject(buf);
                                     e.addObject(new Integer(n));
 
-                                    output.writeObject(e);
+                                    output.writeObject(my_fs.sessionKey.getEncryptedMessage(e));
 
                                     e = (Envelope) input.readObject();
+                                    e = my_fs.sessionKey.getDecryptedMessage(e);
 
 
                                 }
@@ -272,9 +288,10 @@ public class FileThread extends Thread
                                 {
 
                                     e = new Envelope("EOF");
-                                    output.writeObject(e);
+                                    output.writeObject(my_fs.sessionKey.getEncryptedMessage(e));
 
                                     e = (Envelope) input.readObject();
+                                    e = my_fs.sessionKey.getDecryptedMessage(e);
                                     if(e.getMessage().compareTo("OK") == 0)
                                     {
                                         System.out.printf("File data upload successful\n");
@@ -351,7 +368,7 @@ public class FileThread extends Thread
                             e = new Envelope(e1.getMessage());
                         }
                     }
-                    output.writeObject(e);
+                    output.writeObject(my_fs.sessionKey.getEncryptedMessage(e));
 
                 }
                 else if(e.getMessage().equals("DISCONNECT"))

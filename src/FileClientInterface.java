@@ -1,4 +1,5 @@
 import java.util.List;
+import java.security.Key;
 
 /**
  * Interface describing the operations that must be supported by the
@@ -31,7 +32,7 @@ public interface FileClientInterface
      * @param token The UserToken object assigned to the user invoking this operation
      * @return A list of filenames
      */
-    public List<String> listFiles(final UserToken token);
+    public List<String> listFiles(final UserToken token) throws Exception;
 
 
     /**
@@ -46,7 +47,7 @@ public interface FileClientInterface
      * @param token      The token of the user uploading the file
      * @return true on success, false on failure
      */
-    public boolean upload(final String sourceFile, final String destFile, final String group, final UserToken token);
+    public boolean upload(final String sourceFile, final String destFile, final String group, final UserToken token) throws Exception;
 
 
     /**
@@ -58,7 +59,7 @@ public interface FileClientInterface
      * @param token      The token of the user uploading the file
      * @return true on success, false on failure
      */
-    public boolean download(final String sourceFile, final String destFile, final UserToken token);
+    public boolean download(final String sourceFile, final String destFile, final UserToken token) throws Exception;
 
 
     /**
@@ -69,7 +70,13 @@ public interface FileClientInterface
      * @param token    The token of the user requesting the delete
      * @return true on success, false on failure
      */
-    public boolean delete(final String filename, final UserToken token);
+    public boolean delete(final String filename, final UserToken token) throws Exception;
+
+    public Key getFileServerPublicKey(EncryptionSuite userKeys, UserToken userToken) throws Exception;
+
+	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken) throws Exception;
+
+	public boolean authenticateFileServer(EncryptionSuite userKeys, UserToken userToken) throws Exception;
 
 
 }  //-- end interface FileClientInterface

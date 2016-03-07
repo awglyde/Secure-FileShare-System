@@ -253,7 +253,7 @@ public class UserClient
 
         fileClient.disconnect();
     }
-    public static void fileOptions(String groupSeverName, int groupPort) throws IOException
+    public static void fileOptions(String groupSeverName, int groupPort) throws Exception
     {
         String choice = "";
         System.out.println("Welcome to the File Server! Please choose from the list of options.\n\n");

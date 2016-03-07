@@ -85,13 +85,11 @@ ejw45, gah33, awg13
 - User can only see files of groups they are in.
 
 ### TODO:
-* Add a token expiration time
-    Method called isExpired that we'll call every so often. Store the date it was created
 * Check for token expiration time
 * Verify token is signed by group server on File Server
-* Add File Server authentication protocol
 * Create a list of session keys. Somehow keep track of them. Do we need to do this?
     * Client starts. User logs in. User gets a session key
 * Update writeup, update diagrams with new implementation
 * Figure out initialization vector for encryption / decryption
 	Do we have to pass it through in the sealed object so the other side can decrypt?
+    The same RSA / AES key is generated for every single session. Need to use IV to prevent this.

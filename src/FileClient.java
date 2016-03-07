@@ -12,7 +12,7 @@ public class FileClient extends Client implements FileClientInterface
 {
     public static final int SERVER_PORT = 4321;
 
-    public boolean delete(String filename, UserToken token)
+    public boolean delete(String filename, UserToken token) throws Exception
     {
         String remotePath;
         if(filename.charAt(0) == '/')
@@ -28,8 +28,11 @@ public class FileClient extends Client implements FileClientInterface
         env.addObject(token);
         try
         {
-            output.writeObject(env);
-            env = (Envelope) input.readObject();
+
+            output.writeObject(this.sessionKey.getEncryptedMessage(env));
+
+            //Get the response from the server
+            env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
 
             if(env.getMessage().compareTo("OK") == 0)
             {
@@ -53,7 +56,7 @@ public class FileClient extends Client implements FileClientInterface
         return true;
     }
 
-    public boolean download(String sourceFile, String destFile, UserToken token)
+    public boolean download(String sourceFile, String destFile, UserToken token) throws Exception
     {
         if(sourceFile.charAt(0) == '/')
         {
@@ -73,17 +76,18 @@ public class FileClient extends Client implements FileClientInterface
                 Envelope env = new Envelope("DOWNLOADF"); //Success
                 env.addObject(sourceFile);
                 env.addObject(token);
-                output.writeObject(env);
+                output.writeObject(this.sessionKey.getEncryptedMessage(env));
 
-                env = (Envelope) input.readObject();
+                //Get the response from the server
+                env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
 
                 while(env.getMessage().compareTo("CHUNK") == 0)
                 {
                     fos.write((byte[]) env.getObjContents().get(0), 0, (Integer) env.getObjContents().get(1));
                     System.out.printf(".");
                     env = new Envelope("DOWNLOADF"); //Success
-                    output.writeObject(env);
-                    env = (Envelope) input.readObject();
+                    output.writeObject(this.sessionKey.getEncryptedMessage(env));
+                    env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
                 }
                 fos.close();
 
@@ -92,7 +96,7 @@ public class FileClient extends Client implements FileClientInterface
                     fos.close();
                     System.out.printf("\nTransfer successful file %s\n", sourceFile);
                     env = new Envelope("OK"); //Success
-                    output.writeObject(env);
+                    output.writeObject(this.sessionKey.getEncryptedMessage(env));
                 }
                 else
                 {
@@ -125,7 +129,7 @@ public class FileClient extends Client implements FileClientInterface
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> listFiles(UserToken token)
+    public List<String> listFiles(UserToken token) throws Exception
     {
         try
         {
@@ -133,9 +137,10 @@ public class FileClient extends Client implements FileClientInterface
             //Tell the server to return the member list
             message = new Envelope("LFILES");
             message.addObject(token); //Add requester's token
-            output.writeObject(message);
+            output.writeObject(this.sessionKey.getEncryptedMessage(message));
 
-            e = (Envelope) input.readObject();
+            //Get the response from the server
+            e = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return the member list
             if(e.getMessage().equals("OK"))
@@ -155,7 +160,7 @@ public class FileClient extends Client implements FileClientInterface
     }
 
     public boolean upload(String sourceFile, String destFile, String group,
-                          UserToken token)
+                          UserToken token) throws Exception
     {
 
         if(destFile.charAt(0) != '/')
@@ -172,12 +177,11 @@ public class FileClient extends Client implements FileClientInterface
             message.addObject(destFile);
             message.addObject(group);
             message.addObject(token); //Add requester's token
-            output.writeObject(message);
-
+            output.writeObject(this.sessionKey.getEncryptedMessage(message));
 
             FileInputStream fis = new FileInputStream(sourceFile);
 
-            env = (Envelope) input.readObject();
+            env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return the member list
             if(env.getMessage().equals("READY"))
@@ -216,10 +220,9 @@ public class FileClient extends Client implements FileClientInterface
                 message.addObject(buf);
                 message.addObject(new Integer(n));
 
-                output.writeObject(message);
+                output.writeObject(this.sessionKey.getEncryptedMessage(message));
 
-
-                env = (Envelope) input.readObject();
+                env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
 
 
             }
@@ -230,9 +233,9 @@ public class FileClient extends Client implements FileClientInterface
             {
 
                 message = new Envelope("EOF");
-                output.writeObject(message);
+                output.writeObject(this.sessionKey.getEncryptedMessage(message));
 
-                env = (Envelope) input.readObject();
+                env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
                 if(env.getMessage().compareTo("OK") == 0)
                 {
                     System.out.printf("\nFile data upload successful\n");
@@ -262,7 +265,7 @@ public class FileClient extends Client implements FileClientInterface
         return true;
     }
 
-    public Key getFileServerPublicKey(EncryptionSuite userKeys, UserToken userToken)
+    public Key getFileServerPublicKey(EncryptionSuite userKeys, UserToken userToken) throws Exception
     {
         try
         {
@@ -350,10 +353,11 @@ public class FileClient extends Client implements FileClientInterface
 
 		// Get File server public key
         Key fileServerPublicKey = this.getFileServerPublicKey(userKeys, userToken);
+        System.out.println("Got file server public key");
         // Generate new object for encryption / decryption with fs public key
         this.fileServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, fileServerPublicKey, null);
         System.out.println("File Server Public Key: \n\n"+
-                            this.groupServerPublicKey.encryptionKeyToString());
+                            this.fileServerPublicKey.encryptionKeyToString());
 
         System.out.println("\n\nIs this key authentic? Enter 'y' to continue, 'n' to quit.");
         String choice = UserClient.in.readLine();

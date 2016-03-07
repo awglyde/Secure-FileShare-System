@@ -16,14 +16,16 @@ public class FileServer extends Server
     HashMap<Integer, Key> clientCodeToKey =  new HashMap<Integer, Key>();
     protected EncryptionSuite sessionKey = null;
 
-    public FileServer()
+    public FileServer() throws Exception
     {
         super(SERVER_PORT, "FilePile");
+        fileServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
     }
 
-    public FileServer(int _port)
+    public FileServer(int _port) throws Exception
     {
         super(_port, "FilePile");
+        fileServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
     }
 
     public Key getPublicKey()
