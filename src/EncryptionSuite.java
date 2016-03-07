@@ -11,6 +11,9 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SealedObject;
 import java.security.MessageDigest;
+import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.KeyFactory;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -50,13 +53,15 @@ public class EncryptionSuite
         this.algorithmName = EncryptionSuite.ENCRYPTION_RSA;
 
         if(publicConfig != null || !publicConfig.equals(""))
-            this.encryptionKey = loadKey(publicConfig);
+            this.encryptionKey = (Key)loadPublicKey(publicConfig);
 
         if(privateConfig != null || !privateConfig.equals(""))
-            this.decryptionKey = loadKey(privateConfig);
+            this.decryptionKey = (Key)loadPrivateKey(privateConfig);
+
 
         // if both keys are null, generate new keys and save them to the correct files
-        if(this.encryptionKey == null && this.decryptionKey == null)
+        if((this.encryptionKey == null && this.decryptionKey == null)
+            && !(privateConfig.equals("")))
         {
             generateKeyPair();
             saveKey(publicConfig, this.encryptionKey);
@@ -291,9 +296,9 @@ public class EncryptionSuite
         fout.close();
     }
 
-    private Key loadKey(String file) throws Exception
+    private PrivateKey loadPrivateKey(String file) throws Exception
     {
-        Key key = null;
+        PrivateKey privateKey = null;
         File f = new File(file);
         if(f.exists())
         {
@@ -301,8 +306,23 @@ public class EncryptionSuite
             FileInputStream finp = new FileInputStream(f);
             finp.read(keyBytes);
             finp.close();
-            key = (Key) new SecretKeySpec(keyBytes, 0, keyBytes.length, EncryptionSuite.ENCRYPTION_RSA);
+            privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
         }
-        return key;
+        return privateKey;
+    }
+
+    private PublicKey loadPublicKey(String file) throws Exception
+    {
+        PublicKey publicKey = null;
+        File f = new File(file);
+        if(f.exists())
+        {
+            byte[] keyBytes = new byte[(int)f.length()];
+            FileInputStream finp = new FileInputStream(f);
+            finp.read(keyBytes);
+            finp.close();
+            publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyBytes));
+        }
+        return publicKey;
     }
 }

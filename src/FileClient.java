@@ -273,7 +273,6 @@ public class FileClient extends Client implements FileClientInterface
             //Tell the server to return its public key
             message = new Envelope("GPUBLICKEY");
             message.addObject(userKeys.getEncryptionKey());
-            message.addObject(userToken.getSignerPublicKey());
             output.writeObject(message);
 
             response = (Envelope) input.readObject();

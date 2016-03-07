@@ -69,7 +69,7 @@ public class FileThread extends Thread
                 }
                 else if(e.getMessage().equals("GPUBLICKEY"))
 				{
-                    if(e.getObjContents().size() < 2) // Make sure e size >= 2
+                    if(e.getObjContents().size() < 1) // Make sure e size >= 2
                     {
                         response = new Envelope("FAIL");
                     }
@@ -80,19 +80,14 @@ public class FileThread extends Thread
                         // Checking first param isn't null
                         if(e.getObjContents().get(0) != null)
                         {
-                            if(e.getObjContents().get(1) != null)
-                            {
 							// Map the client's key to the hash of their key, so we know who we're talking to in the future
 		                    my_fs.clientCodeToKey.put((Integer)e.getObjContents().get(0).hashCode(),
 		                                                (Key)e.getObjContents().get(0));
 
-                            // Store the group server's public key (To verify client's token)
-                            my_fs.groupServerPubKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, (Key)e.getObjContents().get(1), null);
 		                    response = new Envelope("OK");
 							// Add the server's public key to the envelope and send it back.
 							// TODO: Ask the client if this is the public key they were expecting
 		                    response.addObject(my_fs.getPublicKey());
-                            }
 						}
 					}
 
