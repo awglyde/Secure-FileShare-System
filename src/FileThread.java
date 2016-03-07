@@ -57,8 +57,7 @@ public class FileThread extends Thread
                     {
                         UserToken yourToken = (UserToken) e.getObjContents().get(0); //Extract the token
 						// Make sure your token isn't expired and validate signed hash with group server public key
-						if (!yourToken.isExpired() && my_fs.groupServerPubKey.verifySignature(yourToken.getSignedHash(),
-																								my_fs.groupServerPubKey.hashBytes(yourToken.toString().getBytes())))
+						if (!yourToken.isExpired() && my_fs.verifyToken(yourToken))
 						{
 							System.out.println("Successfully verified token!");
 	                        response = new Envelope("OK"); //Success

@@ -17,7 +17,7 @@ CS1653 - Applied Cryptography
     On the lab machines in 6110 from the directory cs1653-project-awg13-ejw45-gah33/src/
 
 	Compile with
-	javac -cp ../resources/bcprov-jdk15on-154.jar *.java
+	''' javac -cp ../resources/bcprov-jdk15on-154.jar *.java '''
 
 4. To run the code you must run the Group Server and the File Server. To do that use the following commands:
 

@@ -19,13 +19,21 @@ public class FileServer extends Server
     public FileServer() throws Exception
     {
         super(SERVER_PORT, "FilePile");
-        fileServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+        fileServerKeys = new EncryptionSuite("file_server_config/file_server_pub", "file_server_config/file_server_priv");
+        groupServerPubKey = new EncryptionSuite("file_server_config/group_server_pub", "");
+        System.out.println("Group Server Public Key: \n\n"+ this.groupServerPubKey.encryptionKeyToString());
+        System.out.println("File Server Public Key: \n\n"+ this.fileServerKeys.encryptionKeyToString());
     }
 
     public FileServer(int _port) throws Exception
     {
         super(_port, "FilePile");
         fileServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+    }
+
+    public boolean verifyToken(UserToken token) throws Exception
+    {
+        return  this.groupServerPubKey.verifySignature(token.getSignedHash(), this.groupServerPubKey.hashBytes(token.toString().getBytes()));
     }
 
     public Key getPublicKey()

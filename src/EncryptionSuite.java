@@ -3,6 +3,9 @@
     using AES, Blowfish, and RSA encryption.
 */
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -15,14 +18,14 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.Security;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Scanner;
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Base64;
 import java.util.Base64.Encoder;
-
 
 public class EncryptionSuite
 {
@@ -40,6 +43,26 @@ public class EncryptionSuite
     private int aesKeyLength = 128;
     private Key encryptionKey = null;
     private Key decryptionKey = null;
+
+    public EncryptionSuite (String publicConfig, String privateConfig) throws Exception
+    {
+        Security.addProvider(new BouncyCastleProvider());
+        this.algorithmName = EncryptionSuite.ENCRYPTION_RSA;
+
+        if(publicConfig != null || !publicConfig.equals(""))
+            this.encryptionKey = loadKey(publicConfig);
+
+        if(privateConfig != null || !privateConfig.equals(""))
+            this.decryptionKey = loadKey(privateConfig);
+
+        // if both keys are null, generate new keys and save them to the correct files
+        if(this.encryptionKey == null && this.decryptionKey == null)
+        {
+            generateKeyPair();
+            saveKey(publicConfig, this.encryptionKey);
+            saveKey(privateConfig, this.decryptionKey);
+        }
+    }
 
     public EncryptionSuite (String algorithmName, Key publicKey, Key privateKey) throws Exception
     {
@@ -261,5 +284,25 @@ public class EncryptionSuite
 		}
 	}
 
+    private void saveKey(String file, Key key) throws Exception
+    {
+        FileOutputStream fout = new FileOutputStream(file);
+        fout.write(key.getEncoded());
+        fout.close();
+    }
 
+    private Key loadKey(String file) throws Exception
+    {
+        Key key = null;
+        File f = new File(file);
+        if(f.exists())
+        {
+            byte[] keyBytes = new byte[(int)f.length()];
+            FileInputStream finp = new FileInputStream(f);
+            finp.read(keyBytes);
+            finp.close();
+            key = (Key) new SecretKeySpec(keyBytes, 0, keyBytes.length, EncryptionSuite.ENCRYPTION_RSA);
+        }
+        return key;
+    }
 }
