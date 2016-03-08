@@ -54,6 +54,40 @@ public class GroupClient extends Client implements GroupClientInterface
 
     }
 
+    public boolean unlockUser(String username, String password, String requester, Key publicKey)
+    {
+        try
+        {
+            Envelope message = null, response = null;
+            message = new Envelope("UNLOCKUSER");
+            message.addObject(username); //Add user name string
+            message.addObject(password);
+            message.addObject(requester); //Add the requester
+            // Get encrypted message from our EncryptionSuite
+            message = this.sessionKey.getEncryptedMessage(message);
+            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
+            message.addObject(publicKey.hashCode()); //Add user public key hash
+            output.writeObject(message);
+
+            //Get the response from the server
+            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+
+            //If server indicates success, return true
+            if(response.getMessage().equals("OK"))
+            {
+                return true;
+            }
+
+            return true;
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return false;
+        }
+    }
+
     public boolean createUser(String userName, String password, String requester, Key publicKey)
     {
         try
@@ -330,8 +364,6 @@ public class GroupClient extends Client implements GroupClientInterface
         byte[] challenge = new byte[16];
         prng.nextBytes(challenge);
 
-        System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
-
         try
         {
             Envelope message = null, response = null;
@@ -364,7 +396,6 @@ public class GroupClient extends Client implements GroupClientInterface
                 // 4) Store new shared key in sessionKey ES object
                 Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
 		        this.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
-                System.out.println("\n\nShared Key From Group Server: \n\n"+this.sessionKey.encryptionKeyToString());
                 return true;
             }
         }

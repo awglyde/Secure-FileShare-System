@@ -59,7 +59,27 @@ public class GroupThread extends Thread
 
                 Envelope response = new Envelope("FAIL");
 
-                if (message.getMessage().equals("GPUBLICKEY"))
+                if(message.getMessage().equals("UNLOCKUSER"))
+                {
+                    if(message.getObjContents().size() >= 3)
+                    {
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null
+                                                                   && message.getObjContents().get(2) != null)
+                        {
+                            String username = (String) message.getObjContents().get(0); // Extract the username
+                            String password = (String) message.getObjContents().get(1); // Extract the password
+                            String requester = (String) message.getObjContents().get(2); // Extract the requester
+                            if(unlockUser(username, password, requester, sessionKey))
+                            {
+                                response = new Envelope("OK");
+                            }
+                        }
+                    }
+
+                    // Encrypting it all and sending it along
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
+                }
+                else if (message.getMessage().equals("GPUBLICKEY"))
                 {
                     if(message.getObjContents().size() >= 1)
                     {
@@ -121,13 +141,18 @@ public class GroupThread extends Thread
                         {
                             String username = (String) message.getObjContents().get(0); //Extract the username
                             String password = (String) message.getObjContents().get(1); //Extract the password
-                            if(sessionKey.verifyUserPassword(password,
-                                                                    my_gs.userList.getPasswordHash(username),
-                                                                    my_gs.userList.getPasswordSalt(username)))
+                            if(sessionKey.verifyUserPassword(password, my_gs.userList.getPasswordHash(username), my_gs.userList.getPasswordSalt(username))
+                                && !my_gs.userList.isLocked(username))
                             {
 
                                 System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD!");
-                                response = new Envelope("OK"); //Success
+                                response = new Envelope("OK");
+                            }
+                            else
+                            {
+                                // keep track of the number of failed login attempts
+                                my_gs.userList.failedLogin(username);
+                                response = new Envelope("FAIL");
                             }
                         }
                     }
@@ -357,6 +382,37 @@ public class GroupThread extends Thread
         }
     }
 
+    // Method to unlock a users account
+    private boolean unlockUser(String username, String password, String requester, EncryptionSuite sessionKey) throws Exception
+    {
+        //Check if requester exists
+        if(my_gs.userList.checkUser(requester))
+        {
+            //Get the user's groups
+            ArrayList<String> temp = my_gs.userList.getUserGroups(requester);
+
+            // to unlock a user, the requester must be an administer
+            if(temp.contains("ADMIN"))
+            {
+                // Does the user exist
+                if(my_gs.userList.checkUser(username))
+                {
+                    // unlock the user
+                    my_gs.userList.unlockUser(username);
+
+                    //upadte their password
+                    // Generate salt
+                    byte[] tempSalt = sessionKey.generateSalt();
+                    // salt and hash the password
+                    byte[] saltedPwHash = sessionKey.saltAndHashPassword(password, tempSalt);
+                    // Add user with their hashed and salted password
+                    my_gs.userList.addUser(username, saltedPwHash, tempSalt);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     //Method to create a user
     private boolean createUser(String username, String password, String requester, EncryptionSuite sessionKey) throws Exception
@@ -602,7 +658,7 @@ public class GroupThread extends Thread
         }
         else
         {
-            return false; //
+            return false;
         }
     }
 

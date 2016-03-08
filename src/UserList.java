@@ -43,6 +43,21 @@ public class UserList implements java.io.Serializable
         return this.list.get(username);
     }
 
+    public synchronized boolean isLocked(String username)
+    {
+        return this.list.get(username).isLocked();
+    }
+
+    public synchronized void failedLogin(String username)
+    {
+        this.list.get(username).failedLogin();
+    }
+
+    public synchronized void unlockUser(String username)
+    {
+        this.list.get(username).unlock();
+    }
+
     public synchronized byte[] getPasswordHash(String username)
     {
         return this.getUser(username).getPasswordHash();
@@ -107,6 +122,8 @@ public class UserList implements java.io.Serializable
         private byte[] passwordHash = null;
         private byte[] passwordSalt = null;
 
+        private int numLogin = 0;
+
         String username = "";
         Token userToken = null;
 
@@ -116,6 +133,27 @@ public class UserList implements java.io.Serializable
             this.ownership = new ArrayList<String>();
         }
 
+        public void failedLogin()
+        {
+            numLogin++;
+        }
+
+        public boolean isLocked()
+        {
+            boolean locked = false;
+            if(numLogin >= 3)
+            {
+                locked = true;
+            }
+            return locked;
+        }
+
+        public void unlock()
+        {
+            numLogin = 0;
+        }
+
+        // if the user is locked return null so that they cannot login
         public byte[] getPasswordHash()
         {
             return this.passwordHash;

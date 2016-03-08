@@ -263,7 +263,7 @@ public class FileClient extends Client implements FileClientInterface
             {
 
                 message = new Envelope("EOF");
-                
+
                 // Get encrypted message from our EncryptionSuite
                 message = this.sessionKey.getEncryptedMessage(message);
                 // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
@@ -333,8 +333,6 @@ public class FileClient extends Client implements FileClientInterface
         byte[] challenge = new byte[16];
         prng.nextBytes(challenge);
 
-        System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
-
         try
         {
             Envelope message = null, response = null;
@@ -368,7 +366,6 @@ public class FileClient extends Client implements FileClientInterface
                 // 4) Store new shared key in sessionKey ES object
                 Key sessionKey = (Key)response.getObjContents().get(1); // New session key from file server
 		        this.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
-                System.out.println("\n\nShared Key From File Server: \n\n"+this.sessionKey.encryptionKeyToString());
                 return true;
             }
         }
@@ -387,7 +384,6 @@ public class FileClient extends Client implements FileClientInterface
 
 		// Get File server public key
         Key fileServerPublicKey = this.getFileServerPublicKey(userKeys, userToken);
-        System.out.println("Got file server public key");
         // Generate new object for encryption / decryption with fs public key
         this.fileServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, fileServerPublicKey, null);
         System.out.println("File Server Public Key: \n\n"+

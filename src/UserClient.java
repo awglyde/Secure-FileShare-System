@@ -50,7 +50,8 @@ public class UserClient
                                             "List all of the members of a group (that you are a member of)"};
 
         String[] adminOptions = new String[]{"Add (create) a user",
-                                             "Remove (delete) a user"};
+                                             "Remove (delete) a user",
+ 											 "Unlock a user"};
 
 
         while (true)
@@ -116,7 +117,7 @@ public class UserClient
 						}
                         break;
                     case "8": // Delete a user
-                        System.out.println("Enter userName of user to delete: ");
+                        System.out.println("Enter username of user to delete: ");
                         String userToDelete = inputValidation(in.readLine());
                         if (groupClient.deleteUser(userToDelete, userName, publicKey))
                         {
@@ -130,6 +131,32 @@ public class UserClient
                         }
                         selectedAdminOption = true;
                         break;
+					case "9":
+						System.out.println("Enter username of the user to unlock:");
+						String userToUnlock = inputValidation(in.readLine());
+
+						System.out.println("Enter new password of the user to unlock:");
+						String newPassword = inputValidation(in.readLine());
+
+						// verify if the password follows the requirements specified by
+						// the encryption suite
+						if(!EncryptionSuite.verifyPassword(userToUnlock, newPassword))
+						{
+							System.out.println("Invalid Password. \n" + EncryptionSuite.PASSWORD_INFO);
+						}
+						else
+						{
+							if(groupClient.unlockUser(userToUnlock, newPassword, userName, publicKey))
+							{
+								System.out.println("User unlocked!");
+							}
+							else
+							{
+								System.out.println("User not unlocked.");
+							}
+						}
+						selectedAdminOption = true;
+						break;
                 }
             }
 
