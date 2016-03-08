@@ -3,6 +3,8 @@
     using AES, Blowfish, and RSA encryption.
 */
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
@@ -35,14 +37,24 @@ import java.util.Base64.Encoder;
 public class EncryptionSuite
 {
 
+    public static final String PASSWORD_INFO = "A user password must have the following: \n" +
+                                                "\t1. At least one digit. \n" +
+                                                "\t2. At least one lowercase letter. \n" +
+                                                "\t3. At least one uppercase letter. \n" +
+                                                "\t4. At least a special character: @, #, $, %, ^, &, +, = \n" +
+                                                "\t5. No whitespace \n" +
+                                                "\t6. At least 8 characters in length.\n";
+
     public static final String ENCRYPTION_AES = "AES";
     public static final String ENCRYPTION_BLOWFISH = "Blowfish";
     public static final String ENCRYPTION_RSA = "RSA";
     public static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
     public static final String HASH_ALGORITHM = "SHA-256";
     public static final String PROVIDER = "BC";
+
 	public static final int encrypt = Cipher.ENCRYPT_MODE;
 	public static final int decrypt = Cipher.DECRYPT_MODE;
+
     private String algorithmName = "";
     private int rsaKeyLength = 4096;
     private int aesKeyLength = 128;
@@ -333,5 +345,31 @@ public class EncryptionSuite
             publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyBytes));
         }
         return publicKey;
+    }
+
+    public static boolean verifyPassword(String username, String password)
+    {
+        boolean valid = true;
+
+        /*
+            A user password must have the following:
+                1. At least one digit.
+                2. At least one lowercase letter.
+                3. At least one uppercase letter.
+                4. At least a special character: @, #, $, %, ^, &, +, =
+                5. No whitespace
+                6. At least 8 characters in length.
+
+            A user password cannot be equal to your username and cannot equal
+            "password" as well.
+        */
+        Pattern validPassword = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$");
+        Matcher match = validPassword.matcher(password);
+
+        // if no match is found, then the password isn't created
+        if(!match.find() || password.equals(username) || password.equals("password"))
+            valid = false;
+
+        return valid;
     }
 }

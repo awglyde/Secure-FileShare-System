@@ -67,8 +67,16 @@ public class GroupServer extends Server
             System.out.println("No users currently exist. Your account will be the administrator.");
             System.out.print("Enter your username: ");
             username = in.readLine();
-            System.out.print("Enter your password: ");
-            password = in.readLine();
+
+            do{
+                System.out.print("Enter your password (q to quit): ");
+                password = in.readLine();
+
+                if(password.equalsIgnoreCase("q"))
+                    break;
+
+            }
+            while(!EncryptionSuite.verifyPassword(username, password));
 
             //Create a new list, add current user to the ADMIN group. They now own the ADMIN group.
             this.userList = new UserList();

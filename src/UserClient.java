@@ -89,20 +89,31 @@ public class UserClient
                 switch(choice)
                 {
                     case "7": // Create a user
-                        System.out.println("Enter userName of new user to create: ");
+                        System.out.println("Enter username of new user to create: ");
                         String newUserName = inputValidation(in.readLine());
-                        System.out.println("Enter password for "+newUserName);
+                        System.out.println("Enter password for "+newUserName +":");
                         String password = inputValidation(in.readLine());
-                        if (groupClient.createUser(newUserName, password, userName, publicKey))
-                        {
-                            System.out.println("User created successfully!");
-                        }
-                        else
-                        {
-                            System.out.println("User creation failed!");
-                            System.out.println("You cannot create a user with a duplicate userName.");
-                        }
-                        selectedAdminOption = true;
+
+						// verify if the password follows the requirements specified by
+						// the encryption suite
+						if(!EncryptionSuite.verifyPassword(newUserName, password))
+						{
+							System.out.println("Invalid Password. \n" + EncryptionSuite.PASSWORD_INFO);
+						}
+						else
+						{
+
+	                        if (groupClient.createUser(newUserName, password, userName, publicKey))
+	                        {
+	                            System.out.println("User created successfully!");
+	                        }
+	                        else
+	                        {
+	                            System.out.println("User creation failed!");
+	                            System.out.println("You cannot create a user with a duplicate userName.");
+	                        }
+	                        selectedAdminOption = true;
+						}
                         break;
                     case "8": // Delete a user
                         System.out.println("Enter userName of user to delete: ");

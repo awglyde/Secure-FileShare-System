@@ -48,31 +48,27 @@ public class GroupThread extends Thread
                 else if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
                 {
                     // Decrypt message with shared AES key
-                    // TODO: MAKE A LIST OF SHARED AES KEYS MAPPED TO.. WHAT? USERNAME?
                     Integer clientPubHash = (Integer)message.getObjContents().get(1);
+
+                    // gets shared AES for the correct client
                     sessionKey = my_gs.getSessionES(clientPubHash);
             		message = my_gs.getSessionES(clientPubHash).getDecryptedMessage(message);
                 }
 
                 System.out.println("Request received: " + message.getMessage());
 
-                Envelope response;
+                Envelope response = new Envelope("FAIL");
 
                 if (message.getMessage().equals("GPUBLICKEY"))
                 {
-                    if(message.getObjContents().size() < 1) // Make sure message size >= 1
+                    if(message.getObjContents().size() >= 1)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
                         // Checking first param isn't null
                         if(message.getObjContents().get(0) != null)
                         {
 							// Map the client's hash of their key to their key, so we know who we're talking to in the future
-		                    my_gs.mapClientCodeToPublicKey((Integer)message.getObjContents().get(0).hashCode(), (Key)message.getObjContents().get(0));
+                            Key key = (Key)message.getObjContents().get(0);
+		                    my_gs.mapClientCodeToPublicKey((Integer)key.hashCode(), key);
 		                    response = new Envelope("OK");
 							// Add the server's public key to the envelope and send it back.
 		                    response.addObject(my_gs.getPublicKey());
@@ -84,43 +80,32 @@ public class GroupThread extends Thread
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {
 					EncryptionSuite clientKeys = null;
-                    if(message.getObjContents().size() < 2) // If we don't get a challenge and a public key hash, fail
+                    if(message.getObjContents().size() >= 2)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
                         // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null)
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
                         {
-                            // Checking second param isn't null
-                            if(message.getObjContents().get(1) != null)
-                            {
-			                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
-			                    Integer clientPubHash = (Integer)message.getObjContents().get(1); // Hash of users pub key
+		                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
+		                    Integer clientPubHash = (Integer)message.getObjContents().get(1); // Hash of users pub key
 
-			                    // Retrieving the client's public key from our hashmap
-			                    Key clientPubKey = my_gs.getClientPublicKey(clientPubHash);
-                                my_gs.removePublicKeyMapping(clientPubHash);
-			                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
-			                    // Generating a new AES session key
-			                    sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
-                                // Adding session key to our mapping (Allows multiple users)
-                                my_gs.mapSessionES(clientPubKey.hashCode(), sessionKey);
+		                    // Retrieving the client's public key from our hashmap
+		                    Key clientPubKey = my_gs.getClientPublicKey(clientPubHash);
+                            my_gs.removePublicKeyMapping(clientPubHash);
 
-			                    System.out.println("\n\nNew Shared Key: \n\n"+sessionKey.encryptionKeyToString());
-			                    // Making a temporary client key ES object to encrypt the session key with
-			                    clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
+		                    // Generating a new AES session key
+		                    sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+                            // Adding session key to our mapping (Allows multiple users)
+                            my_gs.mapSessionES(clientPubKey.hashCode(), sessionKey);
 
-			                    // Constructing the envelope
-			                    response = new Envelope("OK");
-			                    // Adding completed challenge
-			                    response.addObject(sessionKey.hashBytes(challenge));
-			                    // Adding new AES session key
-			                    response.addObject(sessionKey.getEncryptionKey());
-							}
+		                    // Making a temporary client key ES object to encrypt the session key with
+		                    clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
+
+		                    // Constructing the envelope
+		                    response = new Envelope("OK");
+		                    // Adding completed challenge
+		                    response.addObject(sessionKey.hashBytes(challenge));
+		                    // Adding new AES session key
+		                    response.addObject(sessionKey.getEncryptionKey());
 						}
 					}
 
@@ -129,30 +114,20 @@ public class GroupThread extends Thread
                 }
                 else if (message.getMessage().equals("AUTHLOGIN"))
                 {
-                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() >= 2)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null)
+                        // Verifying the parameters passed in aren't null
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
                         {
-                            // Checking second param isn't null
-                            if(message.getObjContents().get(1) != null)
+                            String username = (String) message.getObjContents().get(0); //Extract the username
+                            String password = (String) message.getObjContents().get(1); //Extract the password
+                            if(sessionKey.verifyUserPassword(password,
+                                                                    my_gs.userList.getPasswordHash(username),
+                                                                    my_gs.userList.getPasswordSalt(username)))
                             {
-                                String username = (String) message.getObjContents().get(0); //Extract the username
-                                String password = (String) message.getObjContents().get(1); //Extract the password
-                                if(sessionKey.verifyUserPassword(password,
-                                                                        my_gs.userList.getPasswordHash(username),
-                                                                        my_gs.userList.getPasswordSalt(username)))
-                                {
 
-                                    System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD!");
-                                    response = new Envelope("OK"); //Success
-                                }
+                                System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD!");
+                                response = new Envelope("OK"); //Success
                             }
                         }
                     }
@@ -161,14 +136,8 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("ISADMIN"))
                 {
-                    if(message.getObjContents().size() < 1) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() >= 1)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
                         // Checking first param isn't null
                         if(message.getObjContents().get(0) != null)
                         {
@@ -182,43 +151,37 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {
-                    String username = (String) message.getObjContents().get(0); //Get the username
-                    if(username == null)
+                    UserToken yourToken = null;
+                    if(message.getObjContents().size() >= 1)
                     {
-                        response = new Envelope("FAIL");
-                        response.addObject(null);
-                        output.writeObject(sessionKey.getEncryptedMessage(response));
+                        if(message.getObjContents().get(0) != null)
+                        {
+                            String username = (String) message.getObjContents().get(0); //Get the username
+                            response = new Envelope("OK");
+                            yourToken = createToken(username);
+                        }
                     }
-                    else
-                    {
-                        UserToken yourToken = createToken(username); //Create a token
 
-                        //Respond to the client. On error, the client will receive a null token
-                        response = new Envelope("OK");
-                        response.addObject(yourToken);
-                        output.writeObject(sessionKey.getEncryptedMessage(response));
-                    }
+                    response.addObject(yourToken);
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("CUSER")) //Client wants to create a user
                 {
-                    if(message.getObjContents().size() < 3) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() >= 3)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null)
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null
+                                                                   && message.getObjContents().get(2) != null)
                         {
-                            // Checking second param isn't null
-                            if(message.getObjContents().get(1) != null)
-                            {
-                                String username = (String) message.getObjContents().get(0); //Extract the username
-                                String password = (String) message.getObjContents().get(1); //Extract the password
-                                String requester = (String) message.getObjContents().get(2); //Extract the requester
+                            String username = (String) message.getObjContents().get(0); //Extract the username
+                            String password = (String) message.getObjContents().get(1); //Extract the password
+                            String requester = (String) message.getObjContents().get(2); //Extract the requester
 
+                            if(!EncryptionSuite.verifyPassword(username, password))
+                            {
+                                response = new Envelope("BADPWD");
+                            }
+                            else
+                            {
                                 if(createUser(username, password, requester, sessionKey))
                                 {
                                     response = new Envelope("OK"); //Success
@@ -231,26 +194,16 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("DUSER")) //Client wants to delete a user
                 {
-
-                    if(message.getObjContents().size() < 2)
+                    if(message.getObjContents().size() >= 2)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        if(message.getObjContents().get(0) != null)
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
                         {
-                            if(message.getObjContents().get(1) != null)
-                            {
-                                String username = (String) message.getObjContents().get(0); //Extract the username
-                                String requester = (String) message.getObjContents().get(1); //Extract the requester
+                            String username = (String) message.getObjContents().get(0); //Extract the username
+                            String requester = (String) message.getObjContents().get(1); //Extract the requester
 
-                                if(deleteUser(username, requester))
-                                {
-                                    response = new Envelope("OK"); //Success
-                                }
+                            if(deleteUser(username, requester))
+                            {
+                                response = new Envelope("OK"); //Success
                             }
                         }
                     }
@@ -259,27 +212,16 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("CGROUP")) //Client wants to create a group
                 {
-                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() >= 2)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null)
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
                         {
-                            // Checking second param isn't null
-                            if(message.getObjContents().get(1) != null)
-                            {
-                                String groupName = (String) message.getObjContents().get(0); //Extract the username
-                                String requester = (String) message.getObjContents().get(1); //Extract the requester
+                            String groupName = (String) message.getObjContents().get(0); //Extract the username
+                            String requester = (String) message.getObjContents().get(1); //Extract the requester
 
-                                if(createGroup(groupName, requester))
-                                {
-                                    response = new Envelope("OK"); //Success
-                                }
+                            if(createGroup(groupName, requester))
+                            {
+                                response = new Envelope("OK"); //Success
                             }
                         }
                     }
@@ -288,27 +230,16 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("DGROUP")) //Client wants to delete a group
                 {
-                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() >= 2)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null)
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
                         {
-                            // Checking second param isn't null
-                            if(message.getObjContents().get(1) != null)
-                            {
-                                String groupName = (String) message.getObjContents().get(0); //Extract the username
-                                String requester = (String) message.getObjContents().get(1); //Extract the requester
+                            String groupName = (String) message.getObjContents().get(0); //Extract the username
+                            String requester = (String) message.getObjContents().get(1); //Extract the requester
 
-                                if(deleteGroup(groupName, requester))
-                                {
-                                    response = new Envelope("OK"); //Success
-                                }
+                            if(deleteGroup(groupName, requester))
+                            {
+                                response = new Envelope("OK"); //Success
                             }
                         }
                     }
@@ -317,29 +248,18 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("LMEMBERS")) //Client wants a list of members in a group
                 {
-                    if(message.getObjContents().size() < 2) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() >= 2)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null)
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
                         {
-                            // Checking second param isn't null
-                            if(message.getObjContents().get(1) != null)
-                            {
-                                String groupname = (String) message.getObjContents().get(0); //Extract the username
-                                String requester = (String) message.getObjContents().get(1); //Extract the requester
+                            String groupname = (String) message.getObjContents().get(0); //Extract the username
+                            String requester = (String) message.getObjContents().get(1); //Extract the requester
 
-                                ArrayList<String> members = listMembers(groupname, requester);
-                                if(members != null)
-                                {
-                                    response = new Envelope("OK"); //Success
-                                    response.addObject(members);
-                                }
+                            ArrayList<String> members = listMembers(groupname, requester);
+                            if(members != null)
+                            {
+                                response = new Envelope("OK"); //Success
+                                response.addObject(members);
                             }
                         }
                     }
@@ -348,18 +268,10 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("AUSERTOGROUP")) //Client wants to add user to a group
                 {
-                    if(message.getObjContents().size() < 3) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() >= 3)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking params aren't null
-                        if( message.getObjContents().get(0) != null ||
-                            message.getObjContents().get(1) != null ||
-                            message.getObjContents().get(2) != null )
+                        if( message.getObjContents().get(0) != null && message.getObjContents().get(1) != null
+                                                                    && message.getObjContents().get(2) != null)
                         {
                             // Checking second param isn't null
                             String userName = (String) message.getObjContents().get(0); //Extract the userName
@@ -377,15 +289,8 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("RUSERFROMGROUP")) //Client wants to remove user from a group
                 {
-                    if(message.getObjContents().size() < 3) // If we don't get a token and a name, fail
+                    if(message.getObjContents().size() >= 3)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking params aren't null
                         if( message.getObjContents().get(0) != null ||
                             message.getObjContents().get(1) != null ||
                             message.getObjContents().get(2) != null )
