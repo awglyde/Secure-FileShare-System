@@ -10,7 +10,7 @@ public class GroupClient extends Client implements GroupClientInterface
 {
     public static final int SERVER_PORT = 8765;
 
-    public UserToken getToken(String userName)
+    public UserToken getToken(String userName, EncryptionSuite userKeys)
     {
         try
         {
@@ -20,7 +20,10 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to return a token.
             message = new Envelope("GET");
             message.addObject(userName); //Add user name string
-            output.writeObject(this.sessionKey.getEncryptedMessage(message));
+            message = this.sessionKey.getEncryptedMessage(message);
+            // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
+            message.addObject(userKeys.getEncryptionKey().hashCode()); //Add user public key hash
+            output.writeObject(message);
 
             //Get the response from the server
             response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
@@ -60,7 +63,10 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(userName); //Add user name string
             message.addObject(password); //Add the new user's password
             message.addObject(requester); //Add the requester
-            output.writeObject(this.sessionKey.getEncryptedMessage(message));
+            message = this.sessionKey.getEncryptedMessage(message);
+            // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
+            message.addObject(userKeys.getEncryptionKey().hashCode()); //Add user public key hash
+            output.writeObject(message);
 
             //Get the response from the server
             response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
@@ -92,7 +98,11 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(userName); //Add user name
             message.addObject(requester);  //Add requester's token
 
-            output.writeObject(this.sessionKey.getEncryptedMessage(message));
+            // Get encrypted message from our EncryptionSuite
+            message = this.sessionKey.getEncryptedMessage(message);
+            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
+            message.addObject(userKeys.getEncryptionKey().hashCode()); //Add user public key hash
+            output.writeObject(message);
 
             //Get the response from the server
             response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());

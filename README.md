@@ -91,3 +91,4 @@ ejw45, gah33, awg13
 * Fix bug:
     Add a file, then download file. Then try to delete. Delete fails
     However, if we add a file, then delete file, delete succeeds.
+* Add password validation on server side.
