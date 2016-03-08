@@ -167,7 +167,6 @@ public class UserClient
                     return;
 				case "1":
         			userToken = (Token) groupClient.getToken(userName, publicKey);
-					System.out.println("User Token: "+userToken.toString());
 					break;
                 case "2": // Create a group
                     System.out.println("Enter a group name: ");
