@@ -44,7 +44,7 @@ header {
 <p>
 	To address the threats from T1-T4 we have implemented ubiquitous encryption for all communications
 	across our system. Key exchange is done using public key cryptography and further communications
-	are done using AES-256 on a per session basis. Login is done via a username and hashed password.
+	are done using AES-256 on a per session basis. Login is done via a username and password. The password is then salted and hashed in a local file.
 </p>
 <p>
     For the passing of information to be secure we exchange a shared AES key
@@ -58,7 +58,7 @@ header {
     <section id="threat1">
       <h2>Threat T1: Unauthorized Token Issuance</h2>
 <!-- BEGIN CHANGES HERE -->
-
+<h3>Describing the Threat</h3>
 <p>
 	Unauthorized token issuance is equivalent to users being granted unauthorized access to our servers.
 	This is problematic because unauthorized users being granted access to tokens that do not belong to them
@@ -72,6 +72,7 @@ header {
 
 <img src="../doc/t1_t2.png" style="width:1000px;">
 <br /><br />
+<h3>Mechanism to protect against this Threat</h3>
 <p>
     To initiate the authentication, the client requests the Group Server's public key. At the same time, it sends the group server its own public key. The group server stores this public key in a mapping from the hashcode of the public key to the key itself. This way, when the client encrypts the firt authentication message (which contains a challenge R along with the hash of its public key), the group server will know who to respond to.
 </p>
@@ -89,6 +90,7 @@ header {
 	This mechanism was chosen to prevent an adversary from attempting to brute-force a user's password.
 	If the user's password is validated, the user and the group server have successfully authenticated and the user can carry out group server operations that it has the privilege to do, encrypting each operation it requests with the shared key K_AES.
 </p>
+<h3>Why This is Sufficient</h3>
 <p>
     When and if the user requests a token, the server signs the user's token T using its private key (K_g)^-1
 	then encrypts it with the shared AES key and sends it to the user.
@@ -116,6 +118,7 @@ header {
       <h2>Threat T2: Token Modification/Forgery</h2>
 
 <!-- BEGIN CHANGES HERE -->
+<h3>Describing the Threat</h3>
 <p>
 	The threat of token modification or forgery is seen when a user receives a token with a certain set of permissions,
 	but modifies the token to receive more permissions than they were originally granted.
@@ -127,6 +130,7 @@ header {
 	if it has been modified.
 </p>
 
+<h3>Mechanism to protect against this Threat</h3>
 <p>
 	The mechanism that we chose to implement to protect against this threat can be viewed in the diagram below T1.
 	We require that the group server sign and encrypt each token granted to users using a shared AES key
@@ -135,6 +139,7 @@ header {
 	the file server will validate that the token is signed by the group server using the group server's public key which is loaded on the file server when it starts up from a local config file. (The owner of the file server will copy the public key of the group server into this local config file when they start their file server.)
 </p>
 
+<h3>Why This is Sufficient</h3>
 <p>
 	Our mechanism sufficiently addresses this particular threat because it prevents modification of tokens by users, and prevents passively listening adversaries from acquiring an unencrypted token. Further, we set an expiration date on the token and check to make sure it hasn't expired before any request on the file server is carried out.
 </p>
@@ -144,6 +149,7 @@ header {
     <section id="threat3">
       <h2>Threat T3: Unauthorized File Servers</h2>
 
+<h3>Describing the Threat</h3>
 <!-- BEGIN CHANGES HERE -->
 <p>
 	An example of unauthorized file servers manifesting themselves in our insecure implementation
@@ -157,6 +163,7 @@ header {
 <br /><br />
 <img src="../doc/t3.png" style="width:1000px;">
 <br /><br />
+<h3>Mechanism to protect against this Threat</h3>
 <p>
 	To protect against a user connecting to an unauthorized file server, we first make the assumption that
 	all authorized file servers, (since they are run by users of our system) will have their public keys
@@ -180,22 +187,24 @@ header {
     Once the user has verified that the correct computation on R was performed, the user is now confident that the file server is <b>actually</b> the owner of K_f^-1. Since the message was encrypted using K_c, this ensures the client is the only one who can decrypt the shared key K_AES. At this point, we are authenticated and the user can carry out operations. When an operation is requested, the user sends the request along with the user's token which was provided by the group server. The file server then verifies this token's signature using the group server's public key which it loads from a configuration file on startup. All further communications are encrypted with the shared AES key.
 </p>
 
+<h3>Why This is Sufficient</h3>
 <p>
-	We know based on the assumptions of our system that the public keys of the file servers in our system are known and legitimate. Thus, since initial communication and shared key exchange is done using encryption with these public keys, we can be certain that the shared key will only be known to the client and the respective file server. Further, we prompt the user to verify the public key that is displayed. We can be sure both parties agree on the same key as it is generated by the file server, encrypted with the client's public key (which is sent in the first message) and then sent to the client. This ensures both correctness and security.
+	We know based on the assumptions of our system that the public keys of the file servers in our system are known and legitimate. We also require that the file server decrypt and respond to a challenge R correctly. This ensures the authentic file server is the only one who can respond to said challenge, and that the shared key was generated by this authentic file server. Thus, since initial communication and shared key exchange is done using encryption with these public keys, we can be certain that the shared key will only be known to the client and the respective file server. Further, we prompt the user to verify the public key that is displayed. We can be sure both parties agree on the same key as it is generated by the file server, encrypted with the client's public key (which is sent in the first message) and then sent to the client. This ensures both correctness and security.
 </p>
 
 <!-- END CHANGES HERE -->
     </section>
     <section id="threat4">
       <h2>Threat T4: Information Leakage via Passive Monitoring</h2>
+<h3>Describing the Threat</h3>
 <!-- BEGIN CHANGES HERE -->
 <p>Passive monitoring on data that is not obfuscated presents a risk to the confidentiality of our communications. Confidentiality is important because if communications are not hidden, then tokens, files, passwords, and group server actions are all transparent to any listening entity. This violates the user's privacy and poses security risks to the integrity of the system. In particular, monitoring of tokens is especially problematic for reasons previously mentioned in T1. In our insecure implementation we do not make any attempt to encrypt or obfuscate communications so all information would be leaked.
 </p>
-
-
+<h3>Mechanism to protect against this Threat</h3>
 <p>
 	The mechanism we chose to implement to protect against this threat can be viewed in the diagram below T1. We chose to use a shared AES-256 key as we believed it to currently be the standard in secure data transmission. We exchanged shared AES keys via the server and client's public RSA keys. In particular, the server generates a shared AES key and shares it with the client after encrypting it with the clients public key, as can be seen in T1.
 </p>
+<h3>Why This is Sufficient</h3>
 <p>
 	Our proposed mechanism sufficiently addresses the threat because at no point would an adversary be able to access a shared key. The shared keys are transmitted using RSA encryption at the authentication stage. Furthermore, passively monitoring adversaries would only see encrypted information being communicated between the server's and client. Because of this, all communications are hidden from outside observers. This ensures that file contents remain private, and that tokens cannot be stolen in transit.
 </p>
