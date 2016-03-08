@@ -25,8 +25,7 @@ public class UserList implements java.io.Serializable
         this.list.remove(username);
     }
 
-    // TODO: rename to isGroup (ALSO NEED TO RENAME GROUPLIST checkUser method)
-    public synchronized boolean checkUser(String username)
+    public synchronized boolean isUser(String username)
     {
         if(this.list.containsKey(username))
         {

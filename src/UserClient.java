@@ -213,8 +213,6 @@ public class UserClient
                     }
                     else
                     {
-                        // TODO update error warning, could fail if user doesn't exist, etc...
-                        // TODO: Ideally we'd return the SPECIFIC error from the server.
                         System.out.println("Failed to add user to group.");
                         System.out.println("The user may not exist.");
                         System.out.println("The group may not exist.");
@@ -306,9 +304,6 @@ public class UserClient
             // reset the group client to reset the state of objects on the stream
             fileClient.reset();
 
-			// TODO: CHECK IF TOKEN IS EXPIRED INSTEAD OF GETTING A NEW TOKEN EVERY TIME
-            // userToken = getToken(groupSeverName, groupPort, userName);
-
             for (int i = 0; i < menuOptions.length; i++)
             {
                 System.out.println(i+". \t"+menuOptions[i]);
@@ -324,6 +319,7 @@ public class UserClient
                 System.out.println("Error parsing input. Exiting...");
             }
 
+			// if the user token is expire the user must go back to the group server to get a new token
 			if(userToken != null && userToken.isExpired())
 			{
 				System.out.println("User Token is expired. Contact the Group Server to recieve a new token.");

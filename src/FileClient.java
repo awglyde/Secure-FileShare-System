@@ -339,9 +339,8 @@ public class FileClient extends Client implements FileClientInterface
             message = new Envelope("AUTHCHALLENGE");
             // Add challenge and client pub key hash to envelope
 			message.addObject(challenge);
-            // TODO: Should we use our EncryptionSuite hash method?
+
             message.addObject(userKeys.getEncryptionKey().hashCode());
-            // Add signers public key (for convenience)
 
             // 2) Encrypt challenge, client's pub key hash with FS public key
             output.writeObject(this.fileServerPublicKey.getEncryptedMessage(message));

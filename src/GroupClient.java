@@ -370,7 +370,6 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("AUTHCHALLENGE");
 			message.addObject(challenge);
 
-            // TODO: Should we use our EncryptionSuite hash method?
             message.addObject(userKeys.getEncryptionKey().hashCode());
 
             // 2) Encrypt challenge & user's public key HASHCODE with GS public key

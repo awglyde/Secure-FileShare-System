@@ -87,5 +87,5 @@ gah33, awg13
 * Fix bug:
     Add a file, then download file. Then try to delete. Delete fails
     However, if we add a file, then delete file, delete succeeds.
-* Get rid of TODO's
+* test the Token method isExpired
 * remove test print statements

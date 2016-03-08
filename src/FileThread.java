@@ -43,7 +43,6 @@ public class FileThread extends Thread
                 else if (e.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
                 {
                     // Decrypt message with shared AES key
-                    // TODO: MAKE A LIST OF SHARED AES KEYS MAPPED TO.. WHAT? USERNAME?
                     Integer clientPubHash = (Integer)e.getObjContents().get(1);
                     sessionKey = my_fs.getSessionES(clientPubHash);
             		e = my_fs.getSessionES(clientPubHash).getDecryptedMessage(e);

@@ -379,7 +379,7 @@ public class GroupThread extends Thread
     private UserToken createToken(String username) throws Exception
     {
         //Check that user exists
-        if(my_gs.userList.checkUser(username))
+        if(my_gs.userList.isUser(username))
         {
             //Issue a new token with server's name, user's name, and user's groups
             UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username), my_gs.serverRSAKeys.getEncryptionKey());
@@ -399,7 +399,7 @@ public class GroupThread extends Thread
     private boolean unlockUser(String username, String password, String requester, EncryptionSuite sessionKey) throws Exception
     {
         //Check if requester exists
-        if(my_gs.userList.checkUser(requester))
+        if(my_gs.userList.isUser(requester))
         {
             //Get the user's groups
             ArrayList<String> temp = my_gs.userList.getUserGroups(requester);
@@ -408,7 +408,7 @@ public class GroupThread extends Thread
             if(temp.contains("ADMIN"))
             {
                 // Does the user exist
-                if(my_gs.userList.checkUser(username))
+                if(my_gs.userList.isUser(username))
                 {
                     // unlock the user
                     my_gs.userList.unlockUser(username);
@@ -432,7 +432,7 @@ public class GroupThread extends Thread
     {
 
         //Check if requester exists
-        if(my_gs.userList.checkUser(requester))
+        if(my_gs.userList.isUser(requester))
         {
             //Get the user's groups
             ArrayList<String> temp = my_gs.userList.getUserGroups(requester);
@@ -440,7 +440,7 @@ public class GroupThread extends Thread
             if(temp.contains("ADMIN"))
             {
                 //Does user already exist?
-                if(my_gs.userList.checkUser(username))
+                if(my_gs.userList.isUser(username))
                 {
                     return false; //User already exists
                 }
@@ -470,7 +470,7 @@ public class GroupThread extends Thread
     private boolean deleteUser(String username, String requester)
     {
         //Does requester exist?
-        if(my_gs.userList.checkUser(requester))
+        if(my_gs.userList.isUser(requester))
         {
             ArrayList<String> temp = my_gs.userList.getUserGroups(requester);
             //requester needs to be an administer
@@ -479,7 +479,7 @@ public class GroupThread extends Thread
                 //Does user exist and is the User the owner of ADMIN?
                 // if they are the ADMIN owner, they cannot be deleted
                 // if the requester is trying to delete them selves do not allow it - leaves program in odd state with requester still logged in
-                if(my_gs.userList.checkUser(username) & !my_gs.groupList.isGroupOwner(username, "ADMIN") && !username.equals(requester))
+                if(my_gs.userList.isUser(username) & !my_gs.groupList.isGroupOwner(username, "ADMIN") && !username.equals(requester))
                 {
                     //User needs deleted from the groups they belong
                     ArrayList<String> deleteFromGroups = new ArrayList<String>();
@@ -541,10 +541,10 @@ public class GroupThread extends Thread
     {
 
         //Check if requester exists (creator of group)
-        if(my_gs.userList.checkUser(requester))
+        if(my_gs.userList.isUser(requester))
         {
             //Does group already exist?
-            if(my_gs.groupList.checkGroup(groupName))
+            if(my_gs.groupList.isGroup(groupName))
             {
                 return false; // Group already exists
             }
@@ -569,7 +569,7 @@ public class GroupThread extends Thread
         if(!groupName.equals("ADMIN"))
         {
             // Check if group exists & requester is owner
-            if( my_gs.groupList.checkGroup(groupName) &&
+            if( my_gs.groupList.isGroup(groupName) &&
                 my_gs.groupList.getGroup(groupName).isOwner(requester))
             {
                 // Removes members association with the group being deleted
@@ -591,7 +591,7 @@ public class GroupThread extends Thread
     private ArrayList<String> listMembers(String groupName, String requester)
     {
         //Check if requester exists (creator of group)
-        if(my_gs.userList.checkUser(requester))
+        if(my_gs.userList.isUser(requester))
         {
             // Does group exist and is the requester a member of the group
             if( my_gs.groupList.getGroup(groupName) == null ||
@@ -615,11 +615,11 @@ public class GroupThread extends Thread
     {
 
         //Check if group exists & requester is owner
-        if(my_gs.groupList.checkGroup(groupName) && my_gs.groupList.getGroup(groupName).isOwner(requester))
+        if(my_gs.groupList.isGroup(groupName) && my_gs.groupList.getGroup(groupName).isOwner(requester))
         {
             // Check if user exists && is not already a member of the group
             // Check if user is the owner of the group, if they are do not allow them to add themselves as a memeber
-            if((!my_gs.userList.checkUser(userName) ||
+            if((!my_gs.userList.isUser(userName) ||
                my_gs.groupList.getGroup(groupName).isMember(userName)) ||
                my_gs.groupList.isGroupOwner(userName, groupName))
             {
@@ -648,11 +648,11 @@ public class GroupThread extends Thread
         if( !(groupname.equals("ADMIN") && my_gs.groupList.isGroupOwner(username, "ADMIN")))
         {
             // Check if group exists & requester is owner & the requester is not trying to delete themselves
-            if( my_gs.groupList.checkGroup(groupname) &&
+            if( my_gs.groupList.isGroup(groupname) &&
                 my_gs.groupList.getGroup(groupname).isOwner(requester))
             {
                 // Check if user exists && IS a member of the group
-                if( my_gs.userList.checkUser(username) &&
+                if( my_gs.userList.isUser(username) &&
                     my_gs.groupList.getGroup(groupname).isMember(username))
                 {
                     return  my_gs.userList.removeGroup(username, groupname) &&

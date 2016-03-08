@@ -80,7 +80,6 @@ public class Token implements UserToken, java.io.Serializable
             return false;
     }
 
-    // TODO: TEST
     public boolean isExpired()
     {
         if ( ( this.expirationDate.getTime() - new Date().getTime() ) <= 0 )
