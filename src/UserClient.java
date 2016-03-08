@@ -13,7 +13,7 @@ public class UserClient
     static UserToken userToken = null;
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-    public static void connectGroupServer(String groupServerName, int groupPort, Key userKeys) throws Exception
+    public static void connectGroupServer(String groupServerName, int groupPort, EncryptionSuite userKeys) throws Exception
     {
         groupClient.connect(groupServerName,  groupPort);
         if (groupClient.isConnected())
@@ -21,7 +21,7 @@ public class UserClient
 			if (groupClient.authenticateGroupServer(userKeys))
 			{
                 System.out.println("Logged in and authenticated group server successfully!");
-	            groupOptions(userKeys.publicKey());
+	            groupOptions(userKeys.getEncryptionKey());
 			}
 			else
 			{
