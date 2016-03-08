@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.security.Key;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -15,14 +16,6 @@ public abstract class Client
 	public EncryptionSuite groupServerPublicKey;
     public EncryptionSuite fileServerPublicKey;
 	public EncryptionSuite sessionKey;
-
-    public static enum Privilege {
-        USER,
-        GROUPMEMBER,
-        GROUPOWNER,
-        ADMIN,
-        ADMINOWNER
-    }
 
     public boolean connect(final String serverName, final int port)
     {
@@ -74,15 +67,18 @@ public abstract class Client
         }
     }
 
-    public void disconnect()
+    public void disconnect(Key publicKey)
     {
         if(isConnected())
         {
             try
             {
                 Envelope message = new Envelope("DISCONNECT");
-                this.output.writeObject(message);
-
+                message.addObject(publicKey.hashCode());
+                message = this.sessionKey.getEncryptedMessage(message);
+                // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
+                message.addObject(publicKey.hashCode()); //Add user public key hash
+                output.writeObject(message);
                 // close the socket and the input/output streams connecting to the server
                 this.output.close();
                 this.input.close();

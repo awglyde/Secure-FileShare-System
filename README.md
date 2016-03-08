@@ -87,5 +87,5 @@ gah33, awg13
 * Fix bug:
     Add a file, then download file. Then try to delete. Delete fails
     However, if we add a file, then delete file, delete succeeds.
-* Remove Session Key when user disconnects
-* remove public key from token
+* Get rid of TODO's
+* remove test print statements

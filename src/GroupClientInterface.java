@@ -22,7 +22,7 @@ public interface GroupClientInterface
     /**
      * Close down the connection to the group server.
      */
-    public void disconnect();
+    public void disconnect(Key publickey);
 
 
     /**

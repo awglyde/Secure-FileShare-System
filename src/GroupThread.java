@@ -345,6 +345,19 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("DISCONNECT")) //Client wants to disconnect
                 {
+
+                    if(message.getObjContents().size() >= 1)
+                    {
+
+                        if(message.getObjContents().get(0) != null)
+                        {
+                            Integer clientPubHash = (Integer)message.getObjContents().get(0);
+                            // remove session key and public key
+                            my_gs.removePublicKeyMapping(clientPubHash);
+                            my_gs.removeSessionESMapping(clientPubHash);
+                        }
+                    }
+
                     socket.close(); //Close the socket
                     proceed = false; //End this communication loop
                 }

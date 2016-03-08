@@ -22,7 +22,7 @@ public interface FileClientInterface
     /**
      * Close down the connection to the file server.
      */
-    public void disconnect();
+    public void disconnect(Key publicKey);
 
 
     /**

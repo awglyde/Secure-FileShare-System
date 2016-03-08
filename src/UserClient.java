@@ -33,7 +33,7 @@ public class UserClient
             System.out.println("System error. Group Server is not running.");
         }
 
-        groupClient.disconnect();
+        groupClient.disconnect(userKeys.getEncryptionKey());
     }
 
     public static void groupOptions(Key publicKey) throws IOException
@@ -288,7 +288,7 @@ public class UserClient
             System.out.println("System error. File Server is not running.");
         }
 
-        fileClient.disconnect();
+        fileClient.disconnect(userKeys.getEncryptionKey());
     }
     public static void fileOptions(String groupSeverName, int groupPort, Key publicKey) throws Exception
     {

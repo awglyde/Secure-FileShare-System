@@ -50,6 +50,11 @@ public abstract class Server
         this.clientCodeToSessionES.put(clientPubHashCode, sessionKey);
     }
 
+    public void removeSessionESMapping(Integer pubKeyHash)
+    {
+        this.clientCodeToSessionES.remove(pubKeyHash);
+    }
+
     public int getPort()
     {
         return this.port;
