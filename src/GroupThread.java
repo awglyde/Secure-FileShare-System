@@ -39,16 +39,18 @@ public class GroupThread extends Thread
 
                 // Receives message. Potentially encrypted or unencrypted
                 Envelope message = (Envelope) input.readObject();
+                EncryptionSuite sessionKey = null;
 				if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_RSA))
                 {
                     // Decrypt message with group server's private key
-            		message = my_gs.groupServerKeys.getDecryptedMessage(message);
+            		message = my_gs.serverRSAKeys.getDecryptedMessage(message);
                 }
                 else if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
                 {
                     // Decrypt message with shared AES key
                     // TODO: MAKE A LIST OF SHARED AES KEYS MAPPED TO.. WHAT? USERNAME?
                     Integer clientPubHash = (Integer)message.getObjContents().get(0);
+                    sessionKey = my_gs.getSessionES(clientPubHash);
             		message = my_gs.getSessionES(clientPubHash).getDecryptedMessage(message);
                 }
 
@@ -104,20 +106,20 @@ public class GroupThread extends Thread
                                 my_gs.removePublicKeyMapping(clientPubHash);
 			                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
 			                    // Generating a new AES session key
-			                    my_gs.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+			                    sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
                                 // Adding session key to our mapping (Allows multiple users)
-                                my_gs.mapSessionES(clientPubKey.hashCode(), my_gs.sessionKey);
+                                my_gs.mapSessionES(clientPubKey.hashCode(), sessionKey);
 
-			                    System.out.println("\n\nNew Shared Key: \n\n"+my_gs.sessionKey.encryptionKeyToString());
+			                    System.out.println("\n\nNew Shared Key: \n\n"+sessionKey.encryptionKeyToString());
 			                    // Making a temporary client key ES object to encrypt the session key with
 			                    clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
 
 			                    // Constructing the envelope
 			                    response = new Envelope("OK");
 			                    // Adding completed challenge
-			                    response.addObject(my_gs.sessionKey.hashBytes(challenge));
+			                    response.addObject(sessionKey.hashBytes(challenge));
 			                    // Adding new AES session key
-			                    response.addObject(my_gs.sessionKey.getEncryptionKey());
+			                    response.addObject(sessionKey.getEncryptionKey());
 							}
 						}
 					}
@@ -143,7 +145,7 @@ public class GroupThread extends Thread
                             {
                                 String username = (String) message.getObjContents().get(0); //Extract the username
                                 String password = (String) message.getObjContents().get(1); //Extract the password
-                                if(my_gs.sessionKey.verifyUserPassword(password,
+                                if(sessionKey.verifyUserPassword(password,
                                                                         my_gs.userList.getPasswordHash(username),
                                                                         my_gs.userList.getPasswordSalt(username)))
                                 {
@@ -155,7 +157,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("ISADMIN"))
                 {
@@ -176,7 +178,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {
@@ -185,7 +187,7 @@ public class GroupThread extends Thread
                     {
                         response = new Envelope("FAIL");
                         response.addObject(null);
-                        output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                        output.writeObject(sessionKey.getEncryptedMessage(response));
                     }
                     else
                     {
@@ -194,7 +196,7 @@ public class GroupThread extends Thread
                         //Respond to the client. On error, the client will receive a null token
                         response = new Envelope("OK");
                         response.addObject(yourToken);
-                        output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                        output.writeObject(sessionKey.getEncryptedMessage(response));
                     }
                 }
                 else if(message.getMessage().equals("CUSER")) //Client wants to create a user
@@ -217,7 +219,7 @@ public class GroupThread extends Thread
                                 String password = (String) message.getObjContents().get(1); //Extract the password
                                 String requester = (String) message.getObjContents().get(2); //Extract the requester
 
-                                if(createUser(username, password, requester))
+                                if(createUser(username, password, requester, sessionKey))
                                 {
                                     response = new Envelope("OK"); //Success
                                 }
@@ -225,7 +227,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("DUSER")) //Client wants to delete a user
                 {
@@ -253,7 +255,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("CGROUP")) //Client wants to create a group
                 {
@@ -282,7 +284,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("DGROUP")) //Client wants to delete a group
                 {
@@ -311,7 +313,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("LMEMBERS")) //Client wants a list of members in a group
                 {
@@ -342,7 +344,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("AUSERTOGROUP")) //Client wants to add user to a group
                 {
@@ -371,7 +373,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("RUSERFROMGROUP")) //Client wants to remove user from a group
                 {
@@ -409,7 +411,7 @@ public class GroupThread extends Thread
                         }
                     }
 
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("DISCONNECT")) //Client wants to disconnect
                 {
@@ -419,7 +421,7 @@ public class GroupThread extends Thread
                 else
                 {
                     response = new Envelope("FAIL"); //Server does not understand client request
-                    output.writeObject(my_gs.sessionKey.getEncryptedMessage(response));
+                    output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
             } while(proceed);
         }
@@ -437,10 +439,10 @@ public class GroupThread extends Thread
         if(my_gs.userList.checkUser(username))
         {
             //Issue a new token with server's name, user's name, and user's groups
-            UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username), my_gs.groupServerKeys.getEncryptionKey());
+            UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username), my_gs.serverRSAKeys.getEncryptionKey());
 			// Hash token, sign hash. Add signed   hash to token
-			byte[] tokenHash = my_gs.groupServerKeys.hashBytes(yourToken.toString().getBytes());
-			byte[] signedTokenHash = my_gs.groupServerKeys.generateSignature(tokenHash);
+			byte[] tokenHash = my_gs.serverRSAKeys.hashBytes(yourToken.toString().getBytes());
+			byte[] signedTokenHash = my_gs.serverRSAKeys.generateSignature(tokenHash);
 			yourToken.setSignedHash(signedTokenHash);
             return yourToken;
         }
@@ -452,7 +454,7 @@ public class GroupThread extends Thread
 
 
     //Method to create a user
-    private boolean createUser(String username, String password, String requester) throws Exception
+    private boolean createUser(String username, String password, String requester, EncryptionSuite sessionKey) throws Exception
     {
 
         //Check if requester exists
@@ -471,9 +473,9 @@ public class GroupThread extends Thread
                 else
                 {
                     // Generate salt
-                    byte[] tempSalt = my_gs.sessionKey.generateSalt();
+                    byte[] tempSalt = sessionKey.generateSalt();
                     // salt and hash the password
-                    byte[] saltedPwHash = my_gs.sessionKey.saltAndHashPassword(password, tempSalt);
+                    byte[] saltedPwHash = sessionKey.saltAndHashPassword(password, tempSalt);
                     // Add user with their hashed and salted password
                     my_gs.userList.addUser(username, saltedPwHash, tempSalt);
                     return true;

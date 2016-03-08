@@ -20,6 +20,7 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to return a token.
             message = new Envelope("GET");
             message.addObject(userName); //Add user name string
+            // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
             message.addObject(publicKey.hashCode()); //Add user public key hash

@@ -8,6 +8,7 @@ public abstract class Server
     protected int port;
     protected HashMap<Integer, Key> clientCodeToPublicKey;
     protected HashMap<Integer, EncryptionSuite> clientCodeToSessionES;
+    protected EncryptionSuite serverRSAKeys;
 
     public Server(int _SERVER_PORT, String _serverName)
     {
@@ -18,6 +19,12 @@ public abstract class Server
     }
 
     abstract void start() throws Exception;
+
+    public Key getPublicKey()
+    {
+        return serverRSAKeys.getEncryptionKey();
+    }
+
 
     public EncryptionSuite getSessionES(Integer pubKeyHash)
     {
