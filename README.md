@@ -35,8 +35,8 @@ YOLO
 
 ### Who do I talk to? ###
 
-Ethan Welsh, George Hoesch, Alex Glyde
-ejw45, gah33, awg13
+George Hoesch, Alex Glyde
+gah33, awg13
 
 # TODO
     * Validating input - Entering a userName when looking for a group gives an exception
@@ -84,8 +84,8 @@ ejw45, gah33, awg13
 - User can only see files of groups they are in.
 
 ### TODO:
-* Update writeup, update diagrams with new implementation
 * Fix bug:
     Add a file, then download file. Then try to delete. Delete fails
     However, if we add a file, then delete file, delete succeeds.
+* Disconnect user after 3 tries. Keep a variable mapped to username or public key on group server
 * Remove Session Key when user disconnects
