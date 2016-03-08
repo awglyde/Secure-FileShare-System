@@ -11,44 +11,26 @@ public class FileServer extends Server
 {
     public static final int SERVER_PORT = 4321;
     public static FileList fileList;
-    protected EncryptionSuite fileServerKeys;
     protected EncryptionSuite groupServerPubKey;
-    protected EncryptionSuite sessionKey = null;
 
     public FileServer() throws Exception
     {
         super(SERVER_PORT, "FilePile");
-        fileServerKeys = new EncryptionSuite("file_server_config/file_server_pub", "file_server_config/file_server_priv");
+        serverRSAKeys = new EncryptionSuite("file_server_config/file_server_pub", "file_server_config/file_server_priv");
         groupServerPubKey = new EncryptionSuite("file_server_config/group_server_pub", "");
         System.out.println("Group Server Public Key: \n\n"+ this.groupServerPubKey.encryptionKeyToString());
-        System.out.println("File Server Public Key: \n\n"+ this.fileServerKeys.encryptionKeyToString());
+        System.out.println("File Server Public Key: \n\n"+ this.serverRSAKeys.encryptionKeyToString());
     }
 
     public FileServer(int _port) throws Exception
     {
         super(_port, "FilePile");
-        fileServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+        serverRSAKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
     }
 
     public boolean verifyToken(UserToken token) throws Exception
     {
         return  this.groupServerPubKey.verifySignature(token.getSignedHash(), this.groupServerPubKey.hashBytes(token.toString().getBytes()));
-    }
-
-    public Key getPublicKey()
-    {
-        return fileServerKeys.getEncryptionKey();
-    }
-
-    public Key getSessionKey()
-    {
-        if(sessionKey != null)
-        {
-            return sessionKey.getEncryptionKey();
-        } else
-        {
-            return null;
-        }
     }
 
     public void start() throws Exception

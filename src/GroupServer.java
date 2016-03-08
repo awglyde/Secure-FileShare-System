@@ -22,36 +22,23 @@ public class GroupServer extends Server
     public static final int SERVER_PORT = 8765;
     public UserList userList;
     public GroupList groupList;
-    protected EncryptionSuite groupServerKeys;
-    protected EncryptionSuite sessionKey = null;
 
     public GroupServer() throws Exception
     {
         super(SERVER_PORT, "ALPHA");
-        groupServerKeys = new EncryptionSuite("group_server_config/group_server_pub", "group_server_config/group_server_priv");
-        System.out.println("Group Server Public Key: \n\n"+ this.groupServerKeys.encryptionKeyToString());
+        serverRSAKeys = new EncryptionSuite("group_server_config/group_server_pub", "group_server_config/group_server_priv");
+        System.out.println("Group Server Public Key: \n\n"+ this.serverRSAKeys.encryptionKeyToString());
     }
 
     public GroupServer(int _port) throws Exception
     {
         super(_port, "ALPHA");
-        groupServerKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+        serverRSAKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
     }
 
     public Key getPublicKey()
     {
-        return groupServerKeys.getEncryptionKey();
-    }
-
-    public Key getSessionKey()
-    {
-        if(sessionKey != null)
-        {
-            return sessionKey.getEncryptionKey();
-        } else
-        {
-            return null;
-        }
+        return serverRSAKeys.getEncryptionKey();
     }
 
     public void start() throws Exception
@@ -92,9 +79,9 @@ public class GroupServer extends Server
             this.userList = new UserList();
 
             // Generate salt
-            byte[] tempSalt = this.groupServerKeys.generateSalt();
+            byte[] tempSalt = this.serverRSAKeys.generateSalt();
             // salt and hash the password
-            byte[] saltedPwHash = this.groupServerKeys.saltAndHashPassword(password, tempSalt);
+            byte[] saltedPwHash = this.serverRSAKeys.saltAndHashPassword(password, tempSalt);
             // Add user with their hashed and salted password
             this.userList.addUser(username, saltedPwHash, tempSalt);
             this.userList.addGroup(username, "ADMIN");
