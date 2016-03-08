@@ -22,9 +22,8 @@ public abstract class Server
 
     public Key getPublicKey()
     {
-        return serverRSAKeys.getEncryptionKey();
+        return this.serverRSAKeys.getEncryptionKey();
     }
-
 
     public EncryptionSuite getSessionES(Integer pubKeyHash)
     {

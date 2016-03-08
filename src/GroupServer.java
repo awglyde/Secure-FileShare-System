@@ -36,11 +36,6 @@ public class GroupServer extends Server
         serverRSAKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
     }
 
-    public Key getPublicKey()
-    {
-        return serverRSAKeys.getEncryptionKey();
-    }
-
     public void start() throws Exception
     {
 

@@ -49,7 +49,7 @@ public class GroupThread extends Thread
                 {
                     // Decrypt message with shared AES key
                     // TODO: MAKE A LIST OF SHARED AES KEYS MAPPED TO.. WHAT? USERNAME?
-                    Integer clientPubHash = (Integer)message.getObjContents().get(0);
+                    Integer clientPubHash = (Integer)message.getObjContents().get(1);
                     sessionKey = my_gs.getSessionES(clientPubHash);
             		message = my_gs.getSessionES(clientPubHash).getDecryptedMessage(message);
                 }

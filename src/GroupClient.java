@@ -378,7 +378,7 @@ public class GroupClient extends Client implements GroupClientInterface
 		return false;
 	}
 
-	public boolean authLogin() throws Exception
+	public boolean authLogin(EncryptionSuite userKeys) throws Exception
 	{
 		// 1) Enter userName and password (SECURELY. SANITIZE INPUTS)
 
@@ -394,7 +394,12 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("AUTHLOGIN");
 			message.addObject(UserClient.userName);
             message.addObject(password);
-            output.writeObject(this.sessionKey.getEncryptedMessage(message));
+            // Get encrypted message from our EncryptionSuite
+            message = this.sessionKey.getEncryptedMessage(message);
+            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
+            message.addObject(userKeys.getEncryptionKey().hashCode()); //Add user public key hash
+            output.writeObject(message);
+
 
             response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
 
@@ -423,7 +428,7 @@ public class GroupClient extends Client implements GroupClientInterface
         // Generate new object for encryption / decryption with gs public key
         System.out.println("Group Server Public Key: \n\n"+
                             this.groupServerPublicKey.encryptionKeyToString());
-		if (this.authChallenge(userKeys) && this.authLogin())
+		if (this.authChallenge(userKeys) && this.authLogin(userKeys))
 			return true;
 		else
 			return false;

@@ -121,7 +121,7 @@ public interface GroupClientInterface
 
     public Key getGroupServerPublicKey(EncryptionSuite userKeys);
 	public boolean authChallenge(EncryptionSuite userKeys) throws Exception;
-	public boolean authLogin() throws Exception;
+	public boolean authLogin(EncryptionSuite userKeys) throws Exception;
 	public boolean authenticateGroupServer(EncryptionSuite userKeys) throws Exception;
     public boolean isAdmin(String userName, Key publicKey);
 
