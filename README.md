@@ -87,6 +87,5 @@ gah33, awg13
 * Fix bug:
     Add a file, then download file. Then try to delete. Delete fails
     However, if we add a file, then delete file, delete succeeds.
-* Disconnect user after 3 tries. Keep a variable mapped to username or public key on group server
 * Remove Session Key when user disconnects
 * remove public key from token
