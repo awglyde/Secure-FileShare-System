@@ -48,45 +48,40 @@ public class FileThread extends Thread
                     sessionKey = my_fs.getSessionES(clientPubHash);
             		e = my_fs.getSessionES(clientPubHash).getDecryptedMessage(e);
                 }
-                System.out.println("Request received: " + e.getMessage());
+
+                response = new Envelope("FAIL");
 
                 // Handler to list files that this user is allowed to see
                 if(e.getMessage().equals("LFILES"))
                 {
-                    response = new Envelope("FAIL");
-                    // Ensure envelope size is 1 (contains token) and the token is not null
-                    if( e.getObjContents().size() == 1 && e.getObjContents().get(0) != null)
+                    if(e.getObjContents().size() >= 2)
                     {
-                        UserToken yourToken = (UserToken) e.getObjContents().get(0); //Extract the token
-						// Make sure your token isn't expired and validate signed hash with group server public key
-						if (!yourToken.isExpired() && my_fs.verifyToken(yourToken))
-						{
-							System.out.println("Successfully verified token!");
-	                        response = new Envelope("OK"); //Success
-	                        response.addObject(FileServer.fileList.getUserFiles(yourToken)); // append the users files
-						}
+                        if( e.getObjContents().size() == 1 && e.getObjContents().get(0) != null)
+                        {
+                            UserToken yourToken = (UserToken) e.getObjContents().get(0); //Extract the token
+    						// Make sure your token isn't expired and validate signed hash with group server public key
+    						if (!yourToken.isExpired() && my_fs.verifyToken(yourToken))
+    						{
+    							System.out.println("Successfully verified token!");
+    	                        response = new Envelope("OK"); //Success
+    	                        response.addObject(FileServer.fileList.getUserFiles(yourToken)); // append the users files
+    						}
+                        }
                     }
 
                     output.writeObject(sessionKey.getEncryptedMessage(response));
                 }
                 else if(e.getMessage().equals("GPUBLICKEY"))
 				{
-                    if(e.getObjContents().size() < 1) // Make sure e size >= 2
+                    if(e.getObjContents().size() >= 1)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking first param isn't null
                         if(e.getObjContents().get(0) != null)
                         {
 							// Map the client's hash of their key to their key, so we know who we're talking to in the future
 		                    my_fs.mapClientCodeToPublicKey((Integer)e.getObjContents().get(0).hashCode(), (Key)e.getObjContents().get(0));
 		                    response = new Envelope("OK");
+
 							// Add the server's public key to the envelope and send it back.
-							// TODO: Ask the client if this is the public key they were expecting
 		                    response.addObject(my_fs.getPublicKey());
 						}
 					}
@@ -96,45 +91,28 @@ public class FileThread extends Thread
                 else if(e.getMessage().equals("AUTHCHALLENGE"))
                 {
 					EncryptionSuite clientKeys = null;
-                    // If we don't get a challenge, public key hash, and signed token hash fail
-                    if(e.getObjContents().size() < 2)
+                    if(e.getObjContents().size() >= 2)
                     {
-                        response = new Envelope("FAIL");
-                    }
-                    else
-                    {
-                        response = new Envelope("FAIL");
-
-                        // Checking first param isn't null
-                        if(e.getObjContents().get(0) != null)
+                        if(e.getObjContents().get(0) != null && e.getObjContents().get(1) != null)
                         {
-                            // Checking second param isn't null
-                            if(e.getObjContents().get(1) != null)
-                            {
-			                    byte[] challenge = (byte[])e.getObjContents().get(0); // User's challenge R
-			                    Integer clientPubHash = (Integer)e.getObjContents().get(1); // Hash of users pub key
+		                    byte[] challenge = (byte[])e.getObjContents().get(0); // User's challenge R
+		                    Integer clientPubHash = (Integer)e.getObjContents().get(1); // Hash of users pub key
 
-			                    // Retrieving the client's public key from our hashmap
-			                    Key clientPubKey = my_fs.getClientPublicKey(clientPubHash);
-                                my_fs.removePublicKeyMapping(clientPubHash);
-			                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
-			                    // Generating a new AES session key
-			                    sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
-                                // Adding session key to our mapping (Allows multiple users)
-                                my_fs.mapSessionES(clientPubKey.hashCode(), sessionKey);
+		                    // Retrieving the client's public key from our hashmap
+		                    Key clientPubKey = my_fs.getClientPublicKey(clientPubHash);
+                            my_fs.removePublicKeyMapping(clientPubHash);
 
-			                    System.out.println("\n\nNew Shared Key: \n\n"+sessionKey.encryptionKeyToString());
-			                    // Making a temporary client key ES object to encrypt the session key with
-			                    clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
+		                    sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
 
-			                    // Constructing the envelope
-			                    response = new Envelope("OK");
-			                    // Adding completed challenge
-			                    response.addObject(sessionKey.hashBytes(challenge));
-			                    // Adding new AES session key
-			                    response.addObject(sessionKey.getEncryptionKey());
+                            // Adding session key to our mapping (Allows multiple users)
+                            my_fs.mapSessionES(clientPubKey.hashCode(), sessionKey);
+		                    clientKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey, null);
 
-							}
+		                    response = new Envelope("OK");
+		                    // Adding completed challenge
+		                    response.addObject(sessionKey.hashBytes(challenge));
+		                    // Adding new AES session key
+		                    response.addObject(sessionKey.getEncryptionKey());
 						}
 					}
 
@@ -143,7 +121,6 @@ public class FileThread extends Thread
                 }
                 else if(e.getMessage().equals("UPLOADF"))
                 {
-
                     if(e.getObjContents().size() < 3)
                     {
                         response = new Envelope("FAIL-BADCONTENTS");
@@ -167,12 +144,11 @@ public class FileThread extends Thread
                             String remotePath = (String) e.getObjContents().get(0);
                             String group = (String) e.getObjContents().get(1);
                             UserToken yourToken = (UserToken) e.getObjContents().get(2); //Extract token
-                            // Verify token signature and make sure it isn't expired
 
+                            // Verify token signature and make sure it isn't expired
                             response = new Envelope("FAIL-BADTOKEN");
         					if (!yourToken.isExpired() && my_fs.verifyToken(yourToken))
         					{
-
                                 if(FileServer.fileList.checkFile(remotePath))
                                 {
                                     System.out.printf("Error: file already exists at %s\n", remotePath);
@@ -258,7 +234,6 @@ public class FileThread extends Thread
                                     System.out.printf("Error file %s missing from disk\n", "_" + remotePath.replace('/', '_'));
                                     e = new Envelope("ERROR_NOTONDISK");
                                     output.writeObject(sessionKey.getEncryptedMessage(e));
-
                                 }
                                 else
                                 {
@@ -281,9 +256,7 @@ public class FileThread extends Thread
                                         else if(n < 0)
                                         {
                                             System.out.println("Read error");
-
                                         }
-
 
                                         e.addObject(buf);
                                         e.addObject(new Integer(n));
@@ -292,15 +265,12 @@ public class FileThread extends Thread
 
                                         e = (Envelope) input.readObject();
                                         e = sessionKey.getDecryptedMessage(e);
-
-
                                     }
                                     while(fis.available() > 0);
 
                                     //If server indicates success, return the member list
                                     if(e.getMessage().compareTo("DOWNLOADF") == 0)
                                     {
-
                                         e = new Envelope("EOF");
                                         output.writeObject(sessionKey.getEncryptedMessage(e));
 
@@ -312,17 +282,12 @@ public class FileThread extends Thread
                                         }
                                         else
                                         {
-
                                             System.out.printf("Upload failed: %s\n", e.getMessage());
-
                                         }
-
                                     }
                                     else
                                     {
-
                                         System.out.printf("Upload failed: %s\n", e.getMessage());
-
                                     }
                                 }
                             }
@@ -330,14 +295,12 @@ public class FileThread extends Thread
                             {
                                 System.err.println("Error: " + e.getMessage());
                                 e1.printStackTrace(System.err);
-
                             }
                         }
                     }
                 }
                 else if(e.getMessage().compareTo("DELETEF") == 0)
                 {
-
                     String remotePath = (String) e.getObjContents().get(0);
                     UserToken yourToken = (UserToken) e.getObjContents().get(1);
 
@@ -377,8 +340,6 @@ public class FileThread extends Thread
                                     System.out.printf("Error deleting file %s from disk\n", "_" + remotePath.replace('/', '_'));
                                     e = new Envelope("ERROR_DELETE");
                                 }
-
-
                             }
                             catch(Exception e1)
                             {
