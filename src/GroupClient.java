@@ -435,8 +435,12 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             message = new Envelope("ISADMIN");
 			message.addObject(userName);
-            output.writeObject(this.sessionKey.getEncryptedMessage(message));
+            message = this.sessionKey.getEncryptedMessage(message);
+            // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
+            message.addObject(publicKey.hashCode()); //Add user public key hash
+            output.writeObject(message);
 
+            //Get the response from the server
             response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true

@@ -388,7 +388,7 @@ public class UserClient
                         break;
                     case "2":
                         System.out.println("File Server");
-                        connectFileServer(groupServerName, groupPort, fileServerName, filePort);
+                        connectFileServer(groupServerName, groupPort, fileServerName, filePort, userKeys);
 
                         break;
                     case "0":
