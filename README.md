@@ -92,4 +92,5 @@ ejw45, gah33, awg13
     Greater than 8 characters
     Must contain special characters
     Cant be username
+* Disconnect user after 3 tries. Keep a variable mapped to username or public key on group server
 * Remove Session Key when user disconnects
