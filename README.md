@@ -88,3 +88,6 @@ ejw45, gah33, awg13
 * Create a list of session keys. Somehow keep track of them. Do we need to do this?
     * Client starts. User logs in. User gets a session key
 * Update writeup, update diagrams with new implementation
+* Fix bug:
+    Add a file, then download file. Then try to delete. Delete fails
+    However, if we add a file, then delete file, delete succeeds.
