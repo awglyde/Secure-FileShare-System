@@ -84,10 +84,12 @@ ejw45, gah33, awg13
 - User can only see files of groups they are in.
 
 ### TODO:
-* Create a list of session keys. Somehow keep track of them. Do we need to do this?
-    * Client starts. User logs in. User gets a session key
 * Update writeup, update diagrams with new implementation
 * Fix bug:
     Add a file, then download file. Then try to delete. Delete fails
     However, if we add a file, then delete file, delete succeeds.
-* Add password validation on server side.
+* Add password checking on server side (in the encryption suite)
+    Greater than 8 characters
+    Must contain special characters
+    Cant be username
+* Remove Session Key when user disconnects
