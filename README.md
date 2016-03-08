@@ -35,8 +35,8 @@ YOLO
 
 ### Who do I talk to? ###
 
-Ethan Welsh, George Hoesch, Alex Glyde
-ejw45, gah33, awg13
+George Hoesch, Alex Glyde
+gah33, awg13
 
 # TODO
     * Validating input - Entering a userName when looking for a group gives an exception

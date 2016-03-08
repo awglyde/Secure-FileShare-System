@@ -21,7 +21,6 @@ header {
 <ul style="list-style-type: none;">
 	<li>George Hoesch - gah33@pitt.edu</li>
 	<li>Alex Glyde - awg13@pitt.edu</li>
-	<li>Ethan Welsh - ejw45@pitt.edu</li>
 </ul>
 <!-- END CHANGES HERE -->
     </header>
@@ -71,7 +70,7 @@ header {
 	an account name can receive a token.
 </p>
 
-<img src="../doc/t1_t2.png" style="width:750px;">
+<img src="../doc/t1_t2.png" style="width:1000px;">
 <br /><br />
 <p>
     To initiate the authentication, the client requests the Group Server's public key. At the same time, it sends the group server its own public key. The group server stores this public key in a mapping from the hashcode of the public key to the key itself. This way, when the client encrypts the firt authentication message (which contains a challenge R along with the hash of its public key), the group server will know who to respond to.
@@ -156,7 +155,7 @@ header {
 </p>
 
 <br /><br />
-<img src="../doc/t3.png" style="width:750px;">
+<img src="../doc/t3.png" style="width:1000px;">
 <br /><br />
 <p>
 	To protect against a user connecting to an unauthorized file server, we first make the assumption that
@@ -225,7 +224,7 @@ header {
     We put limitations on the passwords that are created for each user. They must be 8 characters long and require a special character among other requirements. This, along with the fact that we salt the password before hashing it helps prevent passwords from being compromised.
 </p>
 <p>
-    We have an isExpired() method on our Token object which prevents users from using expired tokens to carry out operations on the file server. 
+    We have an isExpired() method on our Token object which prevents users from using expired tokens to carry out operations on the file server.
 </p>
 <!-- END CHANGES HERE -->
 
