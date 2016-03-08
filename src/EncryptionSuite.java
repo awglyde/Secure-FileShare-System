@@ -10,6 +10,8 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SealedObject;
+import javax.crypto.spec.IvParameterSpec;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.MessageDigest;
 import java.security.spec.X509EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -137,8 +139,9 @@ public class EncryptionSuite
     */
     private void generateKey() throws Exception
     {
+		SecureRandom prng = new SecureRandom();
         KeyGenerator keyGenerator = KeyGenerator.getInstance(this.algorithmName, PROVIDER);
-        keyGenerator.init(this.aesKeyLength);
+        keyGenerator.init(this.aesKeyLength, prng);
         this.encryptionKey = keyGenerator.generateKey();
         this.decryptionKey = this.encryptionKey;
     }
@@ -148,8 +151,9 @@ public class EncryptionSuite
     */
     public void generateKeyPair() throws Exception
     {
+		SecureRandom prng = new SecureRandom();
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(this.algorithmName, PROVIDER);
-        keyPairGenerator.initialize(rsaKeyLength);
+        keyPairGenerator.initialize(rsaKeyLength, prng);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         this.encryptionKey = (Key)keyPair.getPublic();
         this.decryptionKey = (Key)keyPair.getPrivate();
@@ -244,15 +248,19 @@ public class EncryptionSuite
 
     public Cipher getCipher(int mode) throws Exception
     {
+        // Make a new secure pseudo random number generator
+		SecureRandom prng = new SecureRandom();
+
         Key key = null;
         if (mode == Cipher.ENCRYPT_MODE)
             key = this.encryptionKey;
         else
             key = this.decryptionKey;
 
-		// ADD INITIALZIATION VECTOR
+        // Create a new cipher
         Cipher cipher = Cipher.getInstance(this.algorithmName, PROVIDER);
-        cipher.init(mode, key);
+        // Init with a prng to ensure the encryptions are random every time
+		cipher.init(mode, key, prng);
 
 		return cipher;
     }
@@ -269,6 +277,7 @@ public class EncryptionSuite
 
 	public Envelope getEncryptedMessage(Envelope message) throws Exception
 	{
+
 		SealedObject encMessage = new SealedObject(message, this.getCipher(encrypt));
 		Envelope wrappedEncMessage = new Envelope("ENCRYPTEDENV"+this.algorithmName);
 		wrappedEncMessage.addObject(encMessage);

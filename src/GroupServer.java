@@ -30,6 +30,7 @@ public class GroupServer extends Server
     {
         super(SERVER_PORT, "ALPHA");
         groupServerKeys = new EncryptionSuite("group_server_config/group_server_pub", "group_server_config/group_server_priv");
+        System.out.println("Group Server Public Key: \n\n"+ this.groupServerKeys.encryptionKeyToString());
     }
 
     public GroupServer(int _port) throws Exception
