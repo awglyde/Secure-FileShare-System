@@ -59,10 +59,6 @@ public interface UserToken
 
 	public byte[] getSignedHash();
 
-	public Key getSignerPublicKey();
-
-	public String signerPublicKeyToString();
-
     public String toString();
 
 }   //-- end interface UserToken

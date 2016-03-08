@@ -14,7 +14,6 @@ public class Token implements UserToken, java.io.Serializable
     private ArrayList<String> groups;
     private Date expirationDate;
 	private byte[] signedHash;
-	private Key signerPublicKey;
 
     public Token(String issuer, String subject, ArrayList<String> groups, Key key)
     {
@@ -28,7 +27,6 @@ public class Token implements UserToken, java.io.Serializable
         this.expirationDate = cal.getTime();
 
 		this.signedHash = null;
-		this.signerPublicKey = key;
     }
 
     /**
@@ -103,28 +101,13 @@ public class Token implements UserToken, java.io.Serializable
 		return signedHash;
 	}
 
-	public Key getSignerPublicKey()
-	{
-		return this.signerPublicKey;
-	}
-
-	public String signerPublicKeyToString()
-	{
-        String stringKey = "";
-        Encoder encoder = Base64.getEncoder();
-
-        if (this.signerPublicKey != null)
-            stringKey = encoder.encodeToString(this.signerPublicKey.getEncoded());
-        return stringKey;
-	}
 
     public String toString()
     {
         return this.issuer+System.lineSeparator()+
                 this.subject+System.lineSeparator()+
                 String.join(",", this.groups)+System.lineSeparator()+
-                this.expirationDate.toString()+System.lineSeparator()+
-				this.signerPublicKeyToString();
+                this.expirationDate.toString()+System.lineSeparator();
 
     }
 
