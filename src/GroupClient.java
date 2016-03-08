@@ -457,8 +457,6 @@ public class GroupClient extends Client implements GroupClientInterface
 		// this.groupServerPublicKey.setEncryptionKey(groupServerPublicKey);
         this.groupServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
         // Generate new object for encryption / decryption with gs public key
-        System.out.println("Group Server Public Key: \n\n"+
-                            this.groupServerPublicKey.encryptionKeyToString());
 		if (this.authChallenge(userKeys) && this.authLogin(userKeys))
 			return true;
 		else
