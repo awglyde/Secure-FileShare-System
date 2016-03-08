@@ -54,7 +54,7 @@ public class FileThread extends Thread
                 // Handler to list files that this user is allowed to see
                 if(e.getMessage().equals("LFILES"))
                 {
-                    if(e.getObjContents().size() >= 2)
+                    if(e.getObjContents().size() >= 1)
                     {
                         if( e.getObjContents().size() == 1 && e.getObjContents().get(0) != null)
                         {
