@@ -1,3 +1,5 @@
 Once inside src/ folder,
 
-COMPILE: javac *.java
+Compile with
+
+	javac -cp ../resources/bcprov-jdk15on-154.jar *.java
