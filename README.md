@@ -88,6 +88,3 @@ ejw45, gah33, awg13
 * Create a list of session keys. Somehow keep track of them. Do we need to do this?
     * Client starts. User logs in. User gets a session key
 * Update writeup, update diagrams with new implementation
-* Figure out initialization vector for encryption / decryption
-	Do we have to pass it through in the sealed object so the other side can decrypt?
-    The same RSA / AES key is generated for every single session. Need to use IV to prevent this.
