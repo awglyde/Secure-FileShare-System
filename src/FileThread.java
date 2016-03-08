@@ -34,17 +34,18 @@ public class FileThread extends Thread
                 output.reset();
 
                 Envelope e = (Envelope) input.readObject();
-
 				if (e.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_RSA))
                 {
-                    // Decrypt message with group server's private key
+                    // Decrypt message with file server's private key
             		e = my_fs.fileServerKeys.getDecryptedMessage(e);
                 }
                 else if (e.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
                 {
                     // Decrypt message with shared AES key
                     // TODO: MAKE A LIST OF SHARED AES KEYS MAPPED TO.. WHAT? USERNAME?
-            		e = my_fs.sessionKey.getDecryptedMessage(e);
+
+                    Integer clientPubHash = (Integer)e.getObjContents().get(0);
+            		e = my_fs.getSessionES(clientPubHash).getDecryptedMessage(e);
                 }
                 System.out.println("Request received: " + e.getMessage());
 
@@ -80,10 +81,8 @@ public class FileThread extends Thread
                         // Checking first param isn't null
                         if(e.getObjContents().get(0) != null)
                         {
-							// Map the client's key to the hash of their key, so we know who we're talking to in the future
-		                    my_fs.clientCodeToKey.put((Integer)e.getObjContents().get(0).hashCode(),
-		                                                (Key)e.getObjContents().get(0));
-
+							// Map the client's hash of their key to their key, so we know who we're talking to in the future
+		                    my_fs.mapClientCodeToPublicKey((Integer)e.getObjContents().get(0).hashCode(), (Key)e.getObjContents().get(0));
 		                    response = new Envelope("OK");
 							// Add the server's public key to the envelope and send it back.
 							// TODO: Ask the client if this is the public key they were expecting
@@ -115,10 +114,13 @@ public class FileThread extends Thread
 			                    Integer clientPubHash = (Integer)e.getObjContents().get(1); // Hash of users pub key
 
 			                    // Retrieving the client's public key from our hashmap
-			                    Key clientPubKey = my_fs.clientCodeToKey.get(clientPubHash);
+			                    Key clientPubKey = my_fs.getClientPublicKey(clientPubHash);
+                                my_fs.removePublicKeyMapping(clientPubHash);
 			                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
 			                    // Generating a new AES session key
 			                    my_fs.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+                                // Adding session key to our mapping (Allows multiple users)
+                                my_fs.mapSessionES(clientPubKey.hashCode(), my_fs.sessionKey);
 
 			                    System.out.println("\n\nNew Shared Key: \n\n"+my_fs.sessionKey.encryptionKeyToString());
 			                    // Making a temporary client key ES object to encrypt the session key with

@@ -48,7 +48,8 @@ public class GroupThread extends Thread
                 {
                     // Decrypt message with shared AES key
                     // TODO: MAKE A LIST OF SHARED AES KEYS MAPPED TO.. WHAT? USERNAME?
-            		message = my_gs.sessionKey.getDecryptedMessage(message);
+                    Integer clientPubHash = (Integer)message.getObjContents().get(0);
+            		message = my_gs.getSessionES(clientPubHash).getDecryptedMessage(message);
                 }
 
                 System.out.println("Request received: " + message.getMessage());
@@ -68,9 +69,8 @@ public class GroupThread extends Thread
                         // Checking first param isn't null
                         if(message.getObjContents().get(0) != null)
                         {
-							// Map the client's key to the hash of their key, so we know who we're talking to in the future
-		                    my_gs.clientCodeToKey.put((Integer)message.getObjContents().get(0).hashCode(),
-		                                                (Key)message.getObjContents().get(0));
+							// Map the client's hash of their key to their key, so we know who we're talking to in the future
+		                    my_gs.mapClientCodeToPublicKey((Integer)message.getObjContents().get(0).hashCode(), (Key)message.getObjContents().get(0));
 		                    response = new Envelope("OK");
 							// Add the server's public key to the envelope and send it back.
 		                    response.addObject(my_gs.getPublicKey());
@@ -100,10 +100,13 @@ public class GroupThread extends Thread
 			                    Integer clientPubHash = (Integer)message.getObjContents().get(1); // Hash of users pub key
 
 			                    // Retrieving the client's public key from our hashmap
-			                    Key clientPubKey = my_gs.clientCodeToKey.get(clientPubHash);
+			                    Key clientPubKey = my_gs.getClientPublicKey(clientPubHash);
+                                my_gs.removePublicKeyMapping(clientPubHash);
 			                    System.out.println("User's challenge R: "+ new String(challenge, "UTF-8"));
 			                    // Generating a new AES session key
 			                    my_gs.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+                                // Adding session key to our mapping (Allows multiple users)
+                                my_gs.mapSessionES(clientPubKey.hashCode(), my_gs.sessionKey);
 
 			                    System.out.println("\n\nNew Shared Key: \n\n"+my_gs.sessionKey.encryptionKeyToString());
 			                    // Making a temporary client key ES object to encrypt the session key with

@@ -13,7 +13,6 @@ public class FileServer extends Server
     public static FileList fileList;
     protected EncryptionSuite fileServerKeys;
     protected EncryptionSuite groupServerPubKey;
-    HashMap<Integer, Key> clientCodeToKey =  new HashMap<Integer, Key>();
     protected EncryptionSuite sessionKey = null;
 
     public FileServer() throws Exception

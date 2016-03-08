@@ -23,7 +23,6 @@ public class GroupServer extends Server
     public UserList userList;
     public GroupList groupList;
     protected EncryptionSuite groupServerKeys;
-    HashMap<Integer, Key> clientCodeToKey =  new HashMap<Integer, Key>();
     protected EncryptionSuite sessionKey = null;
 
     public GroupServer() throws Exception
