@@ -111,7 +111,7 @@ public class UserClient
 	                        else
 	                        {
 	                            System.out.println("User creation failed!");
-	                            System.out.println("You cannot create a user with a duplicate userName.");
+	                            System.out.println("You cannot create a user with a duplicate username.");
 	                        }
 	                        selectedAdminOption = true;
 						}
@@ -487,7 +487,7 @@ public class UserClient
         catch(Exception e)
         {
             System.out.println("Failed to connect to group server\n"+
-                                "Possibly invalid userName,\n"+
+                                "Possibly invalid username,\n"+
                                 "or failed to get group server public key.");
         }
 

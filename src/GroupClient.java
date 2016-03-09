@@ -412,7 +412,7 @@ public class GroupClient extends Client implements GroupClientInterface
 	{
 		// 1) Enter userName and password (SECURELY. SANITIZE INPUTS)
 
-	    System.out.println("Enter userName to login: ");
+	    System.out.println("Enter username to login: ");
 	    UserClient.userName = UserClient.inputValidation(UserClient.in.readLine());
         System.out.println("Enter Password: ");
 	    String password = UserClient.inputValidation(UserClient.in.readLine());
