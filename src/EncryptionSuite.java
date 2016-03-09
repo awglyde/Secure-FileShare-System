@@ -31,8 +31,9 @@ import java.security.SecureRandom;
 import java.util.Scanner;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Base64;
-import java.util.Base64.Encoder;
+import javax.xml.bind.DatatypeConverter;
+// import java.util.Base64;
+// import java.util.Base64.Encoder;
 
 public class EncryptionSuite
 {
@@ -276,10 +277,14 @@ public class EncryptionSuite
     public String encryptionKeyToString()
     {
         String stringKey = "";
-        Encoder encoder = Base64.getEncoder();
+        String encoded = "";
+        // Encoder encoder = Base64.getEncoder();
 
         if (this.encryptionKey != null)
-            stringKey = encoder.encodeToString(this.encryptionKey.getEncoded());
+		{
+            // stringKey = encoder.encodeToString(this.encryptionKey.getEncoded());
+			encoded = DatatypeConverter.printBase64Binary(this.encryptionKey.getEncoded());
+		}
         return stringKey;
     }
 

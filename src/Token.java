@@ -3,8 +3,6 @@ import java.util.List;
 import java.util.Date;
 import java.util.Calendar;
 import java.security.Key;
-import java.util.Base64;
-import java.util.Base64.Encoder;
 
 public class Token implements UserToken, java.io.Serializable
 {
@@ -103,9 +101,17 @@ public class Token implements UserToken, java.io.Serializable
 
     public String toString()
     {
+		String groupList = null;
+		for (String group : this.groups)
+		{
+			if (groupList != null)
+				groupList = groupList+","+group;
+			else
+				groupList = group;
+		}
         return this.issuer+System.lineSeparator()+
                 this.subject+System.lineSeparator()+
-                String.join(",", this.groups)+System.lineSeparator()+
+                groups+System.lineSeparator()+
                 this.expirationDate.toString()+System.lineSeparator();
 
     }
