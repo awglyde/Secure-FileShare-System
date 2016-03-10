@@ -274,18 +274,15 @@ public class EncryptionSuite
 		return cipher;
     }
 
-    public String encryptionKeyToString()
+    public String encryptionKeyToString() throws Exception
     {
-        String stringKey = "";
         String encoded = "";
-        // Encoder encoder = Base64.getEncoder();
 
         if (this.encryptionKey != null)
-		{
-            // stringKey = encoder.encodeToString(this.encryptionKey.getEncoded());
-			encoded = DatatypeConverter.printBase64Binary(this.encryptionKey.getEncoded());
-		}
-        return stringKey;
+            encoded = DatatypeConverter.printHexBinary(this.encryptionKey.getEncoded());
+
+        return encoded;
+
     }
 
 	public Envelope getEncryptedMessage(Envelope message) throws Exception
