@@ -26,7 +26,7 @@ public class GroupServer extends Server
     public GroupServer(int _port) throws Exception
     {
         super(_port, "ALPHA");
-        serverRSAKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+        serverRSAKeys = new EncryptionSuite("group_server_config/group_server_pub", "group_server_config/group_server_priv");
     }
 
     public void start() throws Exception

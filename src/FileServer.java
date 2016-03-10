@@ -23,7 +23,8 @@ public class FileServer extends Server
     public FileServer(int _port) throws Exception
     {
         super(_port, "FilePile");
-        serverRSAKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
+        serverRSAKeys = new EncryptionSuite("file_server_config/file_server_pub", "file_server_config/file_server_priv");
+        groupServerPubKey = new EncryptionSuite("file_server_config/group_server_pub", "");
     }
 
     public boolean verifyToken(UserToken token) throws Exception
