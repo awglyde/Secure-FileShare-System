@@ -167,6 +167,16 @@ public class UserClient
                     return;
 				case "1":
         			userToken = (Token) groupClient.getToken(userName, publicKey);
+
+					if(userToken != null)
+					{
+						System.out.println("Token received!");
+					}
+					else
+					{
+						System.out.println("No token received... :(");
+					}
+
 					break;
                 case "2": // Create a group
                     System.out.println("Enter a group name: ");
