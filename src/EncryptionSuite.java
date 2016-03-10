@@ -32,8 +32,6 @@ import java.util.Scanner;
 import java.util.Arrays;
 import java.util.HashMap;
 import javax.xml.bind.DatatypeConverter;
-// import java.util.Base64;
-// import java.util.Base64.Encoder;
 
 public class EncryptionSuite
 {
@@ -234,27 +232,6 @@ public class EncryptionSuite
             return false;
     }
 
-    /*
-        Encrypts or Decrypts an input stream based on the algorithm passed in and the
-        mode determined.
-    */
-    public byte[] encryptOrDecrypt(byte[] inputBytes, int mode) throws Exception
-    {
-        Key key = null;
-        if (mode == Cipher.ENCRYPT_MODE)
-            key = this.encryptionKey;
-        else
-            key = this.decryptionKey;
-
-        Cipher cipher = Cipher.getInstance(this.algorithmName, PROVIDER);
-        cipher.init(mode, key);
-
-        byte[] outputBytes = new byte[cipher.getOutputSize(inputBytes.length)];
-        int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
-        cipher.doFinal(outputBytes, outputLength);
-        return outputBytes;
-    }
-
     public Cipher getCipher(int mode) throws Exception
     {
         // Make a new secure pseudo random number generator
@@ -274,6 +251,7 @@ public class EncryptionSuite
 		return cipher;
     }
 
+    // Prints encryption key formatted in Hex as a string
     public String encryptionKeyToString() throws Exception
     {
         String encoded = "";
