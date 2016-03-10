@@ -82,11 +82,3 @@ gah33, awg13
 
 ### List Files
 - User can only see files of groups they are in.
-
-### TODO:
-* Fix bug:
-    Add a file, then download file. Then try to delete. Delete fails
-    However, if we add a file, then delete file, delete succeeds.
-* test the Token method isExpired
-* remove test print statements
-* go through unit tests and add new unit tests to above list!
