@@ -68,6 +68,11 @@ public class GroupServer extends Server
                 if(password.equalsIgnoreCase("q"))
                     break;
 
+                if(!EncryptionSuite.verifyPassword(username, password))
+                {
+                    System.out.println("Invalid Password. \n" + EncryptionSuite.PASSWORD_INFO);
+                }
+
             }
             while(!EncryptionSuite.verifyPassword(username, password));
 
