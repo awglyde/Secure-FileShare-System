@@ -13,7 +13,7 @@ public class Token implements UserToken, java.io.Serializable
     private Date expirationDate;
 	private byte[] signedHash;
 
-    public Token(String issuer, String subject, ArrayList<String> groups, Key key)
+    public Token(String issuer, String subject, ArrayList<String> groups)
     {
         this.issuer = issuer;
         this.subject = subject;

@@ -496,9 +496,7 @@ public class UserClient
         }
         catch(Exception e)
         {
-            System.out.println("Failed to connect to group server\n"+
-                                "Possibly invalid username,\n"+
-                                "or failed to get group server public key.");
+            System.out.println("Disconnected from server\n");
         }
 
         in.close();
