@@ -44,17 +44,22 @@ public class UserList implements java.io.Serializable
 
     public synchronized boolean isLocked(String username)
     {
-        return this.list.get(username).isLocked();
+        if (this.getUser(username) != null)
+            return this.list.get(username).isLocked();
+        else
+            return true;
     }
 
     public synchronized void failedLogin(String username)
     {
-        this.list.get(username).failedLogin();
+        if (this.getUser(username) != null)
+            this.list.get(username).failedLogin();
     }
 
     public synchronized void unlockUser(String username)
     {
-        this.list.get(username).unlock();
+        if (this.getUser(username) != null)
+            this.list.get(username).unlock();
     }
 
     public synchronized byte[] getPasswordHash(String username)
