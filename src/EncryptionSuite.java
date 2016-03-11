@@ -221,7 +221,10 @@ public class EncryptionSuite
 
     public boolean verifyUserPassword(String password, byte[] saltedPwHash, byte[] salt) throws Exception
     {
-        return Arrays.equals(this.saltAndHashPassword(password, salt), saltedPwHash);
+        if (password == null || saltedPwHash == null || salt == null)
+            return false;
+        else
+            return Arrays.equals(this.saltAndHashPassword(password, salt), saltedPwHash);
     }
 
     public boolean verifyChallenge(byte[] challenge, byte[] completedChallenge) throws Exception
