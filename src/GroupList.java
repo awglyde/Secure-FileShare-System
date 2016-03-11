@@ -5,10 +5,6 @@ import java.util.Hashtable;
 
 public class GroupList implements java.io.Serializable
 {
-
-    /**
-     *
-     */
     private static final long serialVersionUID = 7660378893561417352L;
     private Hashtable<String, Group> list = new Hashtable<String, Group>();
 
@@ -75,6 +71,9 @@ public class GroupList implements java.io.Serializable
 
     public synchronized ArrayList<String> getMembers(String groupName)
     {
+        if(this.getGroup(groupName) == null)
+            return null;
+
         return this.getGroup(groupName).getMemberNames();
     }
 

@@ -53,7 +53,7 @@ public class FileThread extends Thread
                 // Handler to list files that this user is allowed to see
                 if(e.getMessage().equals("LFILES"))
                 {
-                    if( e.getObjContents().size() >= 1 && e.getObjContents().get(0) != null)
+                    if(e.getObjContents().size() >= 1 && e.getObjContents().get(0) != null)
                     {
                         UserToken yourToken = (UserToken) e.getObjContents().get(0); //Extract the token
 						// Make sure your token isn't expired and validate signed hash with group server public key
