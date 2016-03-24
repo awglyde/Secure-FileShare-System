@@ -37,7 +37,55 @@ your group has decided to use to address threats T5–T7.</p>
       <h2>Threat T5: Message Reorder, Replay, or Modification</h2>
 <!-- BEGIN CHANGES HERE -->
 
-<p>Begin this section by describing threat T5. This may include describing
+<p>
+    Add a sequence number to messages during a single session with the file server or group server. This will prevent messages from being replayed or reordered, because they will be out of order with the number the server is expecting. Furthermore, messages sent during the authentication / handshake phase will be signed and verified by their respective senders / receivers.
+</p>
+<!-- END CHANGES HERE -->
+    </section>
+    <section id="threat6">
+      <h2>Threat T6: File Leakage</h2>
+<!-- BEGIN CHANGES HERE -->
+
+<p>
+    Encrypt all files with an AES key held by the group server. When a file is uploaded, the user will log in to the group server with their username and password (the typical handshake / login process from our previous protocol). Then the group server will generate or already have an AES key for that particular group. This AES key will be used to encrypt the file and sent back to the user. There will be a similar process for decrypting files. The group server is then the only trusted party, and holds the key to decrypt the file ultimately.
+</p>
+
+<!-- END CHANGES HERE -->
+    </section>
+    <section id="threat7">
+      <h2>Threat T7: Token Theft</h2>
+<!-- BEGIN CHANGES HERE -->
+<p>
+    We are going to create a unique identifier (ip and port number) that is an immutable field in our token which is unique to the server we're connecting to. So when a token is created, the user will provide the IP and port number of a file server they're connecting to. The file server will verify that the IP and port number provided in the token are its own. This ensures that a token cannot be used to connect to a DIFFERENT file server than the one that was originally intended. 
+</p>
+<!--  The authentication protocol from phase 3 already checks to see if we're connecting to an unauthorized file server so sending a token to an unauthorized file server should not be possible. -->
+
+<!-- END CHANGES HERE -->
+    </section>
+    <section id="discussion">
+      <h2>Discussion</h2>
+<!-- BEGIN CHANGES HERE -->
+
+<!-- <p>Conclude with a paragraph or two discussing the interplay between your
+proposed mechanisms, and commenting on the design process that your group
+followed. Did you discuss other ideas that didn’t pan out before settling on the
+above-documented approach? Did you end up designing a really interesting
+protocol suite that addresses multiple threats at once? Use this space to show
+off your hard work!</p>
+
+<p>Finally, spend about one paragraph convincing me that your modified protocols
+still address the threats T1–T4 described in Phase 3 of the project.</p>
+
+<p>If your group did any extra credit, please discuss that in this section, as
+well.</p> -->
+
+<!-- END CHANGES HERE -->
+    </section>
+  </body>
+</html>
+
+
+<!-- <p>Begin this section by describing threat T5. This may include describing
 examples of the threat being exploited by an adversary, a short discussion of
 why this threat is problematic and needs to be addressed, and/or diagrams
 showing how the threat might manifest in your group’s implementation from Phase
@@ -57,44 +105,4 @@ correctness of your approach, as well as its overall security. For example, if
 your mechanism involves a key agreement or key exchange protocol, you should
 argue that both parties agree on the same key (correctnes) and that no other
 party can figure out the key (security).</p>
-
-<!-- END CHANGES HERE -->
-    </section>
-    <section id="threat6">
-      <h2>Threat T6: File Leakage</h2>
-<!-- BEGIN CHANGES HERE -->
-
-<p>Repeat the steps as for Threat T5.</p>
-
-<!-- END CHANGES HERE -->
-    </section>
-    <section id="threat7">
-      <h2>Threat T7: Token Theft</h2>
-<!-- BEGIN CHANGES HERE -->
-
-<p>Repeat the steps as for Threat T5.</p>
-
-<!-- END CHANGES HERE -->
-    </section>
-    <section id="discussion">
-      <h2>Discussion</h2>
-<!-- BEGIN CHANGES HERE -->
-
-<p>Conclude with a paragraph or two discussing the interplay between your
-proposed mechanisms, and commenting on the design process that your group
-followed. Did you discuss other ideas that didn’t pan out before settling on the
-above-documented approach? Did you end up designing a really interesting
-protocol suite that addresses multiple threats at once? Use this space to show
-off your hard work!</p>
-
-<p>Finally, spend about one paragraph convincing me that your modified protocols
-still address the threats T1–T4 described in Phase 3 of the project.</p>
-
-<p>If your group did any extra credit, please discuss that in this section, as
-well.</p>
-
-<!-- END CHANGES HERE -->
-    </section>
-  </body>
-</html>
-
+ -->
