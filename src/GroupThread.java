@@ -382,7 +382,7 @@ public class GroupThread extends Thread
         if(my_gs.userList.isUser(username))
         {
             //Issue a new token with server's name, user's name, and user's groups
-            UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username), my_gs.serverRSAKeys.getEncryptionKey());
+            UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username));
 			// Hash token, sign hash. Add signed   hash to token
 			byte[] tokenHash = my_gs.serverRSAKeys.hashBytes(yourToken.toString().getBytes());
 			byte[] signedTokenHash = my_gs.serverRSAKeys.generateSignature(tokenHash);
