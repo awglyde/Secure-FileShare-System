@@ -19,7 +19,10 @@ header {
       <h2>
 <!-- BEGIN CHANGES HERE -->
 
-William Garrison
+<ul style="list-style-type: none;">
+	<li>George Hoesch - gah33@pitt.edu</li>
+	<li>Alex Glyde - awg13@pitt.edu</li>
+</ul>
 
 <!-- END CHANGES HERE -->
       </h2>
@@ -28,8 +31,7 @@ William Garrison
       <h2>Overview</h2>
 <!-- BEGIN CHANGES HERE -->
 
-<p>In this section, broadly overview the types of cryptographic techniques that
-your group has decided to use to address threats T5–T7.</p>
+<!-- <p>In this section, broadly overview the types of cryptographic techniques that your group has decided to use to address threats T5–T7.</p> -->
 
 <!-- END CHANGES HERE -->
     </section>
@@ -56,7 +58,7 @@ your group has decided to use to address threats T5–T7.</p>
       <h2>Threat T7: Token Theft</h2>
 <!-- BEGIN CHANGES HERE -->
 <p>
-    We are going to create a unique identifier (ip and port number) that is an immutable field in our token which is unique to the server we're connecting to. So when a token is created, the user will provide the IP and port number of a file server they're connecting to. The file server will verify that the IP and port number provided in the token are its own. This ensures that a token cannot be used to connect to a DIFFERENT file server than the one that was originally intended. 
+    We are going to create a unique identifier (ip and port number) that is an immutable field in our token which is unique to the server we're connecting to. So when a token is created, the user will provide the IP and port number of a file server they're connecting to. The file server will verify that the IP and port number provided in the token are its own. This ensures that a token cannot be used to connect to a DIFFERENT file server than the one that was originally intended.
 </p>
 <!--  The authentication protocol from phase 3 already checks to see if we're connecting to an unauthorized file server so sending a token to an unauthorized file server should not be possible. -->
 
