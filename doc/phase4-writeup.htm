@@ -42,15 +42,45 @@ header {
 <p>
     Add a sequence number to messages during a single session with the file server or group server. This will prevent messages from being replayed or reordered, because they will be out of order with the number the server is expecting. Furthermore, messages sent during the authentication / handshake phase will be signed and verified by their respective senders / receivers.
 </p>
+<p>
+	Replay:
+	<br />
+		&nbsp;- Session key prevents OUT OF session replays.
+	<br />
+		&nbsp;- Sequence numbers prevent IN session replays.
+	<br />
+	Reorder:
+	<br />
+		&nbsp;- Sequence numbers prevent reordering of messages.
+	<br />
+	Modification:
+	<br />
+		&nbsp;- An HMAC will allow each recipient to verify whether the message has been modified or not. We create HMACs and initialize them using the shared AES session key (see phase3-writeup). Messages sent before the session key is exchanged (i.e., during authentication) are verified using RSA signatures since we do not yet have a shared key.
+</p>
 <!-- END CHANGES HERE -->
     </section>
     <section id="threat6">
       <h2>Threat T6: File Leakage</h2>
 <!-- BEGIN CHANGES HERE -->
 
+<h4>Description of Mechanism</h4>
 <p>
-    Encrypt all files with an AES key held by the group server. When a file is uploaded, the user will log in to the group server with their username and password (the typical handshake / login process from our previous protocol). Then the group server will generate or already have an AES key for that particular group. This AES key will be used to encrypt the file and sent back to the user. There will be a similar process for decrypting files. The group server is then the only trusted party, and holds the key to decrypt the file ultimately.
+	In the GroupList object, the group server will store a HashMap of Group Name strings to an ArrayList of AES keys. The index in the ArrayList will indicate the 'version' of the key (i.e., ArrayList.get(0) will contain the "first" key in the list, and ArrayList.get(ArrayList.size()) will represent the "latest" or "last" key in the list).
 </p>
+<p>
+	When a client requests a token, they will be given another object as well. This object will be a HashMap of String group names to an ArrayList of keys. The group server will only provide group names (and corresponding keys) that the user is a member of.
+</p>
+<p>
+	When a client uploads a new file to the file server, they will encrypt it with the latest version of the AES key for that group, and append the version number to the encrypted file. When a client downloads a file, they will check the version number appended to the file, and decrypt it using the appropriate key corresponding to that version number.
+</p>
+<p>
+	To handle the version numbering, our EncryptionSuite class will have an encryptFile and decryptFile method. Both methods will take a file and an arrayList of keys as parameters. The encryptFile will use the latest key then append the index as the version number to the end of the file. The decryptFile method will remove the appended version number, then use the version number to index the appropriate key to decrypt the file.
+</p>
+<p>
+	When a user is removed from a group or deleted, the group server will generate new keys for all relevant groups (e.g., if a user is deleted, the group server will generate a new key for each group they were a member of).
+</p>
+
+
 
 <!-- END CHANGES HERE -->
     </section>
@@ -58,7 +88,9 @@ header {
       <h2>Threat T7: Token Theft</h2>
 <!-- BEGIN CHANGES HERE -->
 <p>
-    We are going to create a unique identifier (ip and port number) that is an immutable field in our token which is unique to the server we're connecting to. So when a token is created, the user will provide the IP and port number of a file server they're connecting to. The file server will verify that the IP and port number provided in the token are its own. This ensures that a token cannot be used to connect to a DIFFERENT file server than the one that was originally intended.
+    We are going to create a unique identifier (hash of the public key) that is an immutable field in our token which is unique to the server we're connecting to. So when a token is created, the user will provide the public key hash of a file server they're connecting to. The file server will verify that the public key hash provided in the token is its own. This ensures that a token cannot be used to connect to a DIFFERENT file server than the one that was originally intended.
+
+	When the client initially starts up the application, we request the file server's public key. The client validates whether or not this is the correct public key.
 </p>
 <!--  The authentication protocol from phase 3 already checks to see if we're connecting to an unauthorized file server so sending a token to an unauthorized file server should not be possible. -->
 

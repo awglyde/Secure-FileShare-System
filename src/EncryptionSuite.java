@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import javax.crypto.Mac;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -50,6 +51,7 @@ public class EncryptionSuite
     public static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
     public static final String HASH_ALGORITHM = "SHA-256";
     public static final String PROVIDER = "BC";
+	public static final String HMAC_ALGORITHM = "HmacSHA1";
 
 	public static final int encrypt = Cipher.ENCRYPT_MODE;
 	public static final int decrypt = Cipher.DECRYPT_MODE;
@@ -186,11 +188,21 @@ public class EncryptionSuite
         return signature.verify(signatureBytes);
     }
 
+	public byte[] generateHmac(byte[] messageBytes, Key aesKey) throws Exception
+	{
+	    Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+	    mac.init(aesKey);
+
+	    // byte[] digest = mac.doFinal(messageBytes);
+		// return digest;
+	    return mac.doFinal(messageBytes);
+	}
+
     public byte[] hashString(String string) throws Exception
     {
         MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
 
-        md.update(string.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        md.update(string.getBytes("UTF-8"));
         byte[] digest = md.digest();
         return digest;
     }
