@@ -34,6 +34,9 @@ header {
 <!-- <p>In this section, broadly overview the types of cryptographic techniques that your group has decided to use to address threats T5–T7.</p> -->
 
 <!-- END CHANGES HERE -->
+
+<img src="../doc/t5_6_gs.png" style="width:1000px;">
+<img src="../doc/t5_6_fs.png" style="width:1000px;">
     </section>
     <section id="threat5">
       <h2>Threat T5: Message Reorder, Replay, or Modification</h2>
@@ -100,6 +103,12 @@ header {
       <h2>Discussion</h2>
 <!-- BEGIN CHANGES HERE -->
 
+<p>
+	We don’t want to hash the encrypted message because then the adversary could modify the encrypted message and recompute the hash since you would be forced to send the hash OUTSIDE of the message itself (e.g., unencrypted);
+</p>
+<p>
+	The first message to the server is not verified by HMAC because that is the message in which the client actually SENDS the key to HMAC messages. Thus, an adversary could potentially forge a message with a different AES key. Instead we sign it with the client's private key which cannot be forged.
+</p>
 <!-- <p>Conclude with a paragraph or two discussing the interplay between your
 proposed mechanisms, and commenting on the design process that your group
 followed. Did you discuss other ideas that didn’t pan out before settling on the
