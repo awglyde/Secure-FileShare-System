@@ -3,7 +3,7 @@ public class Session
 {
 	EncryptionSuite hmacKey;
 	EncryptionSuite aesSessionKey;
-	EncryptionSuite clientPubKey;
+	EncryptionSuite targetPubKey;
     byte[] nonce;
 
 	public Session()
@@ -31,14 +31,14 @@ public class Session
 		this.aesSessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
 	}
 
-	public void setClientPublicKey(Key clientPubKey) throws Exception
+	public void setClientPublicKey(Key targetPubKey) throws Exception
 	{
-		this.clientPubKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, clientPubKey);
+		this.targetPubKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, targetPubKey);
 	}
 
-	public EncryptionSuite getClientPublicKey()
+	public EncryptionSuite getTargetKey()
 	{
-		return this.clientPubKey;
+		return this.targetPubKey;
 	}
 
 	public EncryptionSuite getHmacKey()
@@ -51,9 +51,9 @@ public class Session
 		return this.aesSessionKey;
 	}
 
-	public Envelope getEncryptedMessageClientKey(Envelope message) throws Exception
+	public Envelope getEncryptedMessageTargetKey(Envelope message) throws Exception
 	{
-		return this.clientPubKey.getEncryptedMessage(message);
+		return this.targetPubKey.getEncryptedMessage(message);
 	}
 
 	public Envelope getDecryptedMessage(Envelope encryptedMessage) throws Exception
