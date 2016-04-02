@@ -198,6 +198,12 @@ public class EncryptionSuite
 	    return mac.doFinal(messageBytes);
 	}
 
+    public boolean verifyHmac(byte[] hmacMessage, byte[] messageBytes) throws Exception
+    {
+        byte[] hmac = this.generateHmac(messageBytes);
+        return Arrays.equals(hmac, hmacMessage);
+    }
+
     public byte[] hashString(String string) throws Exception
     {
         MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
