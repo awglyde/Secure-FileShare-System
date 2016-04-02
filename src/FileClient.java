@@ -1,6 +1,9 @@
 /* FileClient provides all the client functionality regarding the file server */
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -186,6 +189,14 @@ public class FileClient extends Client implements FileClientInterface
     public boolean upload(String sourceFile, String destFile, String group,
                           UserToken token) throws Exception
     {
+        /*Path path = Paths.get(sourceFile);
+        byte[] data = Files.readAllBytes(path);
+        data = session.getAESKey().encryptFile(data);
+
+        FileOutputStream fout = new FileOutputStream(sourceFile);
+        fout.write(data);
+        fout.close();*/
+
 
         if(destFile.charAt(0) != '/')
         {
@@ -204,7 +215,6 @@ public class FileClient extends Client implements FileClientInterface
             message.addObject(token); //Add requester's token
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
 
             output.writeObject(message);
 

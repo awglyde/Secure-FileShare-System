@@ -69,18 +69,7 @@ public class GroupThread extends Thread
                     // gets shared AES for the correct client
 					message = session.getDecryptedMessage(message);
                     if (message.getObjContents().get(0) != null)
-                    {
-
-                        int sequenceNum = (int)message.getObjContents().get(0);
-                        message.removeObject(message.getObjContents().get(0));
-                        if (session.getSequenceNum() == -1 || session.verifySequenceNumber(sequenceNum))
-                        {
-                            System.out.println("Sequence num: "+sequenceNum);
-                            session.setSequenceNum(sequenceNum);
-                            session.incrementSequenceNum();
-                            System.out.println("Responding with sequence num: "+session.getSequenceNum());
-                        }
-                    }
+                        message = session.serverSequenceNumberHandler(message);
                 }
 
                 System.out.println("Request received: " + message.getMessage());
