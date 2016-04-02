@@ -63,7 +63,7 @@ public abstract class Client
         }
     }
 
-    public void disconnect(Key publicKey)
+    public void disconnect()
     {
         if(isConnected())
         {
@@ -71,7 +71,6 @@ public abstract class Client
             {
                 Envelope message = new Envelope("DISCONNECT");
                 message = this.session.getEncryptedMessage(message);
-                // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
                 output.writeObject(message);
                 // close the socket and the input/output streams connecting to the server
                 this.output.close();

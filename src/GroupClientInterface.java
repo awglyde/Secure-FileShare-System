@@ -22,7 +22,7 @@ public interface GroupClientInterface
     /**
      * Close down the connection to the group server.
      */
-    public void disconnect(Key publickey);
+    public void disconnect();
 
 
     /**
@@ -33,7 +33,7 @@ public interface GroupClientInterface
      * @return A UserToken describing the permissions of "userName."
      * If this user does not exist, a null value will be returned.
      */
-    public UserToken getToken(final String userName, final Key publicKey);
+    public UserToken getToken(final String userName, final Key fileServerPublickey);
 
 
     /**
@@ -44,7 +44,7 @@ public interface GroupClientInterface
      * @param token    The token of the user requesting the create operation
      * @return true if the new user was created, false otherwise
      */
-    public boolean createUser(final String userName, final String password, final String requester, final Key publicKey);
+    public boolean createUser(final String userName, final String password, final String requester);
 
 
     /**
@@ -56,7 +56,7 @@ public interface GroupClientInterface
      * @param token    The token of the user requesting the delete operation
      * @return true if the user was deleted, false otherwise
      */
-    public boolean deleteUser(final String userName, final String requester, final Key publicKey);
+    public boolean deleteUser(final String userName, final String requester);
 
 
     /**
@@ -67,7 +67,7 @@ public interface GroupClientInterface
      * @param token     The token of the user requesting the create operation
      * @return true if the new group was created, false otherwise
      */
-    public boolean createGroup(final String groupName, final String requester, final Key publicKey);
+    public boolean createGroup(final String groupName, final String requester);
 
 
     /**
@@ -78,7 +78,7 @@ public interface GroupClientInterface
      * @param token     The token of the user requesting the delete operation
      * @return true if the group was deleted, false otherwise
      */
-    public boolean deleteGroup(final String groupName, final String requester, final Key publicKey);
+    public boolean deleteGroup(final String groupName, final String requester);
 
 
     /**
@@ -90,7 +90,7 @@ public interface GroupClientInterface
      * @param token The token of the user requesting the create operation
      * @return true if the user was added, false otherwise
      */
-    public boolean addUserToGroup(final String user, final String group, final String requester, final Key publicKey);
+    public boolean addUserToGroup(final String user, final String group, final String requester);
 
 
     /**
@@ -102,7 +102,7 @@ public interface GroupClientInterface
      * @param token The token of the user requesting the remove operation
      * @return true if the user was removed, false otherwise
      */
-    public boolean deleteUserFromGroup(final String user, final String group, final String requester, final Key publicKey);
+    public boolean deleteUserFromGroup(final String user, final String group, final String requester);
 
 
     /**
@@ -116,12 +116,12 @@ public interface GroupClientInterface
      * a group has no members, while a null return indicates
      * an error.
      */
-    public List<String> listMembers(final String group, final String requester, final Key publicKey);
+    public List<String> listMembers(final String group, final String requester);
 
 
 	public boolean authChallenge(EncryptionSuite userKeys) throws Exception;
 	public boolean authLogin(EncryptionSuite userKeys) throws Exception;
 	public boolean authenticateGroupServer(EncryptionSuite userKeys, EncryptionSuite groupServerPublicKey) throws Exception;
-    public boolean isAdmin(String userName, Key publicKey);
+    public boolean isAdmin(String userName);
 
 }   //-- end interface GroupClientInterface

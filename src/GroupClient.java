@@ -10,7 +10,7 @@ public class GroupClient extends Client implements GroupClientInterface
 {
     public static final int SERVER_PORT = 8765;
 
-    public UserToken getToken(String userName, Key publicKey)
+    public UserToken getToken(String userName, Key fileServerPublicKey)
     {
         try
         {
@@ -20,10 +20,11 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to return a token.
             message = new Envelope("GET");
             message.addObject(userName); //Add user name string
+            // add file serverpublic key, used to uniquely associate this token w a file server
+            message.addObject(fileServerPublicKey);
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -54,7 +55,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
     }
 
-    public boolean unlockUser(String username, String password, String requester, Key publicKey)
+    public boolean unlockUser(String username, String password, String requester)
     {
         try
         {
@@ -88,7 +89,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean createUser(String userName, String password, String requester, Key publicKey)
+    public boolean createUser(String userName, String password, String requester)
     {
         try
         {
@@ -123,7 +124,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean deleteUser(String userName, String requester, Key publicKey)
+    public boolean deleteUser(String userName, String requester)
     {
         try
         {
@@ -159,7 +160,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean createGroup(String groupName, String userName, Key publicKey)
+    public boolean createGroup(String groupName, String userName)
     {
         try
         {
@@ -193,7 +194,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean deleteGroup(String groupName, String requester, Key publicKey)
+    public boolean deleteGroup(String groupName, String requester)
     {
         try
         {
@@ -227,7 +228,7 @@ public class GroupClient extends Client implements GroupClientInterface
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> listMembers(String group, String requester, Key publicKey)
+    public List<String> listMembers(String group, String requester)
     {
         try
         {
@@ -262,7 +263,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean addUserToGroup(String userName, String groupName, String requester, Key publicKey)
+    public boolean addUserToGroup(String userName, String groupName, String requester)
     {
         try
         {
@@ -296,7 +297,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean deleteUserFromGroup(String userName, String groupName, String requester, Key publicKey)
+    public boolean deleteUserFromGroup(String userName, String groupName, String requester)
     {
         try
         {
@@ -438,7 +439,7 @@ public class GroupClient extends Client implements GroupClientInterface
 			return false;
 	}
 
-    public boolean isAdmin(String userName, Key publicKey)
+    public boolean isAdmin(String userName)
     {
         try
         {

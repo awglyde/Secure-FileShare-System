@@ -12,7 +12,7 @@ public class FileClient extends Client implements FileClientInterface
 {
     public static final int SERVER_PORT = 4321;
 
-    public boolean delete(String filename, UserToken token, Key publicKey) throws Exception
+    public boolean delete(String filename, UserToken token) throws Exception
     {
         String remotePath;
         if(filename.charAt(0) == '/')
@@ -30,13 +30,11 @@ public class FileClient extends Client implements FileClientInterface
         {
 
             // Get encrypted message from our EncryptionSuite
-            env = this.sessionKey.getEncryptedMessage(env);
-            // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-            env.addObject(publicKey.hashCode()); //Add user public key hash
+            env = this.session.getEncryptedMessage(env);
             output.writeObject(env);
 
             //Get the response from the server
-            env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            env = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             if(env.getMessage().compareTo("OK") == 0)
             {
@@ -60,7 +58,7 @@ public class FileClient extends Client implements FileClientInterface
         return true;
     }
 
-    public boolean download(String sourceFile, String destFile, UserToken token, Key publicKey) throws Exception
+    public boolean download(String sourceFile, String destFile, UserToken token) throws Exception
     {
         if(sourceFile.charAt(0) == '/')
         {
@@ -81,13 +79,11 @@ public class FileClient extends Client implements FileClientInterface
                 env.addObject(sourceFile);
                 env.addObject(token);
                 // Get encrypted message from our EncryptionSuite
-                env = this.sessionKey.getEncryptedMessage(env);
-                // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-                env.addObject(publicKey.hashCode()); //Add user public key hash
+                env = this.session.getEncryptedMessage(env);
                 output.writeObject(env);
 
                 //Get the response from the server
-                env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+                env = this.session.getDecryptedMessage((Envelope)input.readObject());
 
                 while(env.getMessage().compareTo("CHUNK") == 0)
                 {
@@ -95,12 +91,10 @@ public class FileClient extends Client implements FileClientInterface
                     System.out.printf(".");
                     env = new Envelope("DOWNLOADF"); //Success
                     // Get encrypted message from our EncryptionSuite
-                    env = this.sessionKey.getEncryptedMessage(env);
-                    // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-                    env.addObject(publicKey.hashCode()); //Add user public key hash
+                    env = this.session.getEncryptedMessage(env);
                     output.writeObject(env);
 
-                    env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+                    env = this.session.getDecryptedMessage((Envelope)input.readObject());
                 }
                 fos.close();
 
@@ -111,9 +105,7 @@ public class FileClient extends Client implements FileClientInterface
                     env = new Envelope("OK"); //Success
 
                     // Get encrypted message from our EncryptionSuite
-                    env = this.sessionKey.getEncryptedMessage(env);
-                    // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-                    env.addObject(publicKey.hashCode()); //Add user public key hash
+                    env = this.session.getEncryptedMessage(env);
                     output.writeObject(env);
                 }
                 else
@@ -147,7 +139,7 @@ public class FileClient extends Client implements FileClientInterface
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> listFiles(UserToken token, Key publicKey) throws Exception
+    public List<String> listFiles(UserToken token) throws Exception
     {
         try
         {
@@ -156,13 +148,13 @@ public class FileClient extends Client implements FileClientInterface
             message = new Envelope("LFILES");
             message.addObject(token); //Add requester's token
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
 
             output.writeObject(message);
 
             //Get the response from the server
-            e = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            e = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return the member list
             if(e.getMessage().equals("OK"))
@@ -182,7 +174,7 @@ public class FileClient extends Client implements FileClientInterface
     }
 
     public boolean upload(String sourceFile, String destFile, String group,
-                          UserToken token, Key publicKey) throws Exception
+                          UserToken token) throws Exception
     {
 
         if(destFile.charAt(0) != '/')
@@ -200,14 +192,14 @@ public class FileClient extends Client implements FileClientInterface
             message.addObject(group);
             message.addObject(token); //Add requester's token
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
 
             output.writeObject(message);
 
             FileInputStream fis = new FileInputStream(sourceFile);
 
-            env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            env = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return the member list
             if(env.getMessage().equals("READY"))
@@ -247,12 +239,12 @@ public class FileClient extends Client implements FileClientInterface
                 message.addObject(new Integer(n));
 
                 // Get encrypted message from our EncryptionSuite
-                message = this.sessionKey.getEncryptedMessage(message);
+                message = this.session.getEncryptedMessage(message);
                 // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
 
                 output.writeObject(message);
 
-                env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+                env = this.session.getDecryptedMessage((Envelope)input.readObject());
 
 
             }
@@ -265,12 +257,12 @@ public class FileClient extends Client implements FileClientInterface
                 message = new Envelope("EOF");
 
                 // Get encrypted message from our EncryptionSuite
-                message = this.sessionKey.getEncryptedMessage(message);
+                message = this.session.getEncryptedMessage(message);
                 // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
 
                 output.writeObject(message);
 
-                env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+                env = this.session.getDecryptedMessage((Envelope)input.readObject());
                 if(env.getMessage().compareTo("OK") == 0)
                 {
                     System.out.printf("\nFile data upload successful\n");
@@ -300,7 +292,47 @@ public class FileClient extends Client implements FileClientInterface
         return true;
     }
 
-	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken) throws Exception
+    public EncryptionSuite getFileServerPublicKey()
+    {
+        try
+        {
+            Envelope message = null, response = null;
+
+            message = new Envelope("GPUBLICKEY");
+
+            output.writeObject(message);
+
+            //Get the response from the server
+            response = ((Envelope)input.readObject());
+
+            //If server indicates success, return the file server public key
+            if(response.getMessage().equals("OK"))
+            {
+
+                EncryptionSuite fileServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, (Key)response.getObjContents().get(0));
+                System.out.println("File Server Public Key: \n\n"+
+                                    fileServerPublicKey.encryptionKeyToString());
+
+                System.out.println("\n\nIs this key authentic? Enter 'y' to continue, 'n' to quit.");
+                String choice = UserClient.in.readLine();
+                if (choice.equals("y"))
+                    return fileServerPublicKey; //This cast creates compiler warnings. Sorry.
+                else
+                    return null;
+            }
+
+            return null;
+
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+
+	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken, EncryptionSuite fileServerPublicKey) throws Exception
     {
 		// 1) Generate a challenge.
 		SecureRandom prng = new SecureRandom();
@@ -314,10 +346,8 @@ public class FileClient extends Client implements FileClientInterface
             // Add challenge and client pub key hash to envelope
 			message.addObject(challenge);
 
-
-
             // 2) Encrypt challenge, client's pub key hash with FS public key
-            output.writeObject(this.fileServerPublicKey.getEncryptedMessage(message));
+            output.writeObject(this.session.getEncryptedMessageTargetKey(message));
             message.addObject(userKeys.getEncryptionKey());
 
             // 3) Receive completed challenge and shared AES key
@@ -337,9 +367,9 @@ public class FileClient extends Client implements FileClientInterface
                     return false;
                 }
 
-                // 4) Store new shared key in sessionKey ES object
-                Key sessionKey = (Key)response.getObjContents().get(1); // New session key from file server
-		        this.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
+                // 4) Store new shared key in session ES object
+                Key session = (Key)response.getObjContents().get(1); // New session key from file server
+				this.session.setAESKey(session);
                 return true;
             }
         }
@@ -353,17 +383,13 @@ public class FileClient extends Client implements FileClientInterface
 		return false;
 	}
 
-	public boolean authenticateFileServer(EncryptionSuite userKeys, UserToken userToken) throws Exception
+	public boolean authenticateFileServer(EncryptionSuite userKeys, UserToken userToken, EncryptionSuite fileServerPublicKey) throws Exception
 	{
 
-        // Generate new object for encryption / decryption with fs public key
-        EncryptionSuite fileServerPublicKey = this.session.getTargetKey();
-        System.out.println("File Server Public Key: \n\n"+
-                            this.fileServerPublicKey.encryptionKeyToString());
+		this.session = new Session();
+		this.session.setTargetKey(fileServerPublicKey.getEncryptionKey());
 
-        System.out.println("\n\nIs this key authentic? Enter 'y' to continue, 'n' to quit.");
-        String choice = UserClient.in.readLine();
-		if (choice.equals("y") && this.authChallenge(userKeys, userToken))
+		if (this.authChallenge(userKeys, userToken, fileServerPublicKey))
 			return true;
 		else
 			return false;

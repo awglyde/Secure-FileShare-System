@@ -22,7 +22,7 @@ public interface FileClientInterface
     /**
      * Close down the connection to the file server.
      */
-    public void disconnect(Key publicKey);
+    public void disconnect();
 
 
     /**
@@ -32,7 +32,7 @@ public interface FileClientInterface
      * @param token The UserToken object assigned to the user invoking this operation
      * @return A list of filenames
      */
-    public List<String> listFiles(final UserToken token, final Key publicKey) throws Exception;
+    public List<String> listFiles(final UserToken token) throws Exception;
 
 
     /**
@@ -47,7 +47,7 @@ public interface FileClientInterface
      * @param token      The token of the user uploading the file
      * @return true on success, false on failure
      */
-    public boolean upload(final String sourceFile, final String destFile, final String group, final UserToken token, final Key publicKey) throws Exception;
+    public boolean upload(final String sourceFile, final String destFile, final String group, final UserToken token) throws Exception;
 
 
     /**
@@ -59,7 +59,7 @@ public interface FileClientInterface
      * @param token      The token of the user uploading the file
      * @return true on success, false on failure
      */
-    public boolean download(final String sourceFile, final String destFile, final UserToken token, final Key publicKey) throws Exception;
+    public boolean download(final String sourceFile, final String destFile, final UserToken token) throws Exception;
 
 
     /**
@@ -70,13 +70,13 @@ public interface FileClientInterface
      * @param token    The token of the user requesting the delete
      * @return true on success, false on failure
      */
-    public boolean delete(final String filename, final UserToken token, final Key publicKey) throws Exception;
+    public boolean delete(final String filename, final UserToken token) throws Exception;
 
-    public Key getFileServerPublicKey(EncryptionSuite userKeys, UserToken userToken) throws Exception;
+    public EncryptionSuite getFileServerPublicKey() throws Exception;
 
-	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken) throws Exception;
+	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken, EncryptionSuite fileServerPublicKey) throws Exception;
 
-	public boolean authenticateFileServer(EncryptionSuite userKeys, UserToken userToken) throws Exception;
+	public boolean authenticateFileServer(EncryptionSuite userKeys, UserToken userToken, EncryptionSuite fileServerPublicKey) throws Exception;
 
 
 }  //-- end interface FileClientInterface
