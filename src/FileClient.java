@@ -346,9 +346,10 @@ public class FileClient extends Client implements FileClientInterface
             // Add challenge and client pub key hash to envelope
 			message.addObject(challenge);
 
-            // 2) Encrypt challenge, client's pub key hash with FS public key
-            output.writeObject(this.session.getEncryptedMessageTargetKey(message));
-            message.addObject(userKeys.getEncryptionKey());
+            // 2) Encrypt challenge with GS public key
+			Envelope encryptedMessage = this.session.getEncryptedMessageTargetKey(message);
+            encryptedMessage.addObject(userKeys.getEncryptionKey());
+            output.writeObject(encryptedMessage);
 
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
