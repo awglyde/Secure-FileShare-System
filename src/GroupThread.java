@@ -45,11 +45,11 @@ public class GroupThread extends Thread
                 if (message.getObjContents().size() > 1) // if envelope contains a public key as well
 				{
                     // Checking first param isn't null
-                    if(message.getObjContents().get(0) != null)
+                    if(message.getObjContents().get(1) != null)
                     {
 						// Map the client's hash of their key to their key, so we know who we're talking to in the future
 
-                        Key clientPublicKey = (Key)message.getObjContents().get(0);
+                        Key clientPublicKey = (Key)message.getObjContents().get(1);
 						session.setTargetKey(clientPublicKey);
 						// TODO: Remove this property. Deprecated with new protocol
 	                    // my_gs.mapClientCodeToPublicKey((Integer)key.hashCode(), key);

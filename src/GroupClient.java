@@ -405,10 +405,7 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(password);
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(userKeys.getEncryptionKey().hashCode()); //Add user public key hash
             output.writeObject(message);
-
 
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
