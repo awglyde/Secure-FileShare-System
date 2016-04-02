@@ -96,10 +96,10 @@ public class GroupThread extends Thread
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {
 					EncryptionSuite clientKeys = null;
-                    if(message.getObjContents().size() >= 2)
+                    if(message.getObjContents().size() >= 1)
                     {
                         // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
+                        if(message.getObjContents().get(0) != null)
                         {
 		                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
 

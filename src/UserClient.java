@@ -415,9 +415,18 @@ public class UserClient
         EncryptionSuite userKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
         EncryptionSuite groupServerPublicKey = new EncryptionSuite("client_config/group_server_pub", "");
 		EncryptionSuite fileServerPublicKey = null;
-    	fileClient.connect(groupServerName,  groupPort);
+    	fileClient.connect(fileServerName,  filePort);
     	if (fileClient.isConnected())
+		{
 			fileServerPublicKey = fileClient.getFileServerPublicKey();
+			fileClient.disconnect();
+			if (fileServerPublicKey == null)
+			{
+				System.out.println("File server public key was not legitimate! Malicious activity detected! EXITING");
+				System.exit(0);
+			}
+		}
+
 
         try
         {

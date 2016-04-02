@@ -67,12 +67,11 @@ public class FileThread extends Thread
                 // Handler to list files that this user is allowed to see
                 if(message.getMessage().equals("GPUBLICKEY"))
                 {
-
                     response = new Envelope("OK"); //Success
-                    response.addObject(my_fs.serverRSAKeys.getEncryptionKey()); 
-                    output.writeObject(session.getEncryptedMessage(response));
+                    response.addObject(my_fs.serverRSAKeys.getEncryptionKey());
+                    output.writeObject(response);
                 }
-                if(message.getMessage().equals("LFILES"))
+                else if(message.getMessage().equals("LFILES"))
                 {
                     if(message.getObjContents().size() >= 1 && message.getObjContents().get(0) != null)
                     {

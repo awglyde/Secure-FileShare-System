@@ -70,7 +70,6 @@ public abstract class Client
             try
             {
                 Envelope message = new Envelope("DISCONNECT");
-                message = this.session.getEncryptedMessage(message);
                 output.writeObject(message);
                 // close the socket and the input/output streams connecting to the server
                 this.output.close();
