@@ -188,10 +188,10 @@ public class EncryptionSuite
         return signature.verify(signatureBytes);
     }
 
-	public byte[] generateHmac(byte[] messageBytes, Key aesKey) throws Exception
+	public byte[] generateHmac(byte[] messageBytes) throws Exception
 	{
 	    Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-	    mac.init(aesKey);
+	    mac.init(this.encryptionKey);
 
 	    // byte[] digest = mac.doFinal(messageBytes);
 		// return digest;

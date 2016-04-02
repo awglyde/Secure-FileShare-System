@@ -38,8 +38,22 @@ public class GroupThread extends Thread
                 output.reset();
 
                 // Receives message. Potentially encrypted or unencrypted
+				Key clientPublicKey = null;
                 Envelope message = (Envelope) input.readObject();
                 EncryptionSuite sessionKey = null;
+                if (message.getObjContents().size() > 1) // if envelope contains a public key as well
+				{
+                    // Checking first param isn't null
+                    if(message.getObjContents().get(0) != null)
+                    {
+						// Map the client's hash of their key to their key, so we know who we're talking to in the future
+                        clientPublicKey = (Key)message.getObjContents().get(0);
+						// TODO: Remove this property. Deprecated with new protocol
+	                    // my_gs.mapClientCodeToPublicKey((Integer)key.hashCode(), key);
+						// Add the server's public key to the envelope and send it back.
+					}
+
+				}
 				if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_RSA))
                 {
                     // Decrypt message with group server's private key
@@ -78,24 +92,6 @@ public class GroupThread extends Thread
 
                     // Encrypting it all and sending it along
                     output.writeObject(sessionKey.getEncryptedMessage(response));
-                }
-                else if (message.getMessage().equals("GPUBLICKEY"))
-                {
-                    if(message.getObjContents().size() >= 1)
-                    {
-                        // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null)
-                        {
-							// Map the client's hash of their key to their key, so we know who we're talking to in the future
-                            Key key = (Key)message.getObjContents().get(0);
-		                    my_gs.mapClientCodeToPublicKey((Integer)key.hashCode(), key);
-		                    response = new Envelope("OK");
-							// Add the server's public key to the envelope and send it back.
-		                    response.addObject(my_gs.getPublicKey());
-						}
-					}
-
-                    output.writeObject(response);
                 }
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {

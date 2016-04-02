@@ -337,7 +337,6 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to return its public key
             message = new Envelope("GPUBLICKEY");
-            message.addObject(userKeys.getEncryptionKey());
             output.writeObject(message);
 
             response = (Envelope) input.readObject();
@@ -360,6 +359,7 @@ public class GroupClient extends Client implements GroupClientInterface
 	{
 
 		// 1) Generate a challenge.
+		EncryptionSuite hmac = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
 		SecureRandom prng = new SecureRandom();
         byte[] challenge = new byte[16];
         prng.nextBytes(challenge);
@@ -368,12 +368,13 @@ public class GroupClient extends Client implements GroupClientInterface
         {
             Envelope message = null, response = null;
             message = new Envelope("AUTHCHALLENGE");
-			message.addObject(challenge);
-
-            message.addObject(userKeys.getEncryptionKey().hashCode());
+			message.addObject(challenge); // Add the nonce to our message
+			message.addObject(hmac.getEncryptionKey()); // add the hmac key to our message
 
             // 2) Encrypt challenge & user's public key HASHCODE with GS public key
-            output.writeObject(this.groupServerPublicKey.getEncryptedMessage(message));
+			Envelope encryptedMessage = this.groupServerPublicKey.getEncryptedMessage(message);
+            encryptedMessage.addObject(userKeys.getEncryptionKey());
+            output.writeObject(encryptedMessage);
 
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
