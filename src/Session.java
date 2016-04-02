@@ -125,4 +125,28 @@ public class Session
 		return message;
 	}
 
+	public Envelope serverSequenceNumberHandler(Envelope message)
+	{
+		Envelope oldMessage = message;
+        if (message.getObjContents().get(0) != null)
+        {
+            int sequenceNum = (int)message.getObjContents().get(0);
+            message.removeObject(message.getObjContents().get(0));
+            if (this.getSequenceNum() == -1 || this.verifySequenceNumber(sequenceNum))
+            {
+                System.out.println("Sequence num: "+sequenceNum);
+                this.setSequenceNum(sequenceNum);
+                this.incrementSequenceNum();
+                System.out.println("Responding with sequence num: "+this.getSequenceNum());
+				return message;
+            }
+			else
+			{
+            	System.out.println("Sequence number out of order! Session may be compromised. Disconnecting");
+				return new Envelope("DISCONNECT");
+			}
+        }
+		return new Envelope("DISCONNECT");
+	}
+
 }

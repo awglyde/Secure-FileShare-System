@@ -60,16 +60,21 @@ public class FileThread extends Thread
                 {
                     // gets shared AES for the correct client
 					message = session.getDecryptedMessage(message);
+                    // Handle the client's sequence number. if it's wrong, send a disconnect message
+                    message = session.serverSequenceNumberHandler(message);
                 }
 
                 System.out.println("Request received: " + message.getMessage());
-                
+
                 response = new Envelope("FAIL");
+
+                if (!message.getMessage().equals("AUTHCHALLENGE") && !message.getMessage().equals("GPUBLICKEY"))
+                    response.addObject(this.session.getSequenceNum());
 
                 // Handler to list files that this user is allowed to see
                 if(message.getMessage().equals("GPUBLICKEY"))
                 {
-                    response = new Envelope("OK"); //Success
+                    response.setMessage("OK"); //Success
                     response.addObject(my_fs.serverRSAKeys.getEncryptionKey());
                     output.writeObject(response);
                 }
@@ -82,7 +87,7 @@ public class FileThread extends Thread
 						if (!yourToken.isExpired() && my_fs.verifyToken(yourToken))
 						{
 							System.out.println("Successfully verified token!");
-	                        response = new Envelope("OK"); //Success
+	                        response.setMessage("OK"); //Success
 	                        response.addObject(FileServer.fileList.getUserFiles(yourToken)); // append the users files
 						}
                     }
@@ -104,7 +109,7 @@ public class FileThread extends Thread
 							// Setting the nonce
 							session.setNonce(challenge);
 
-		                    response = new Envelope("OK");
+		                    response.setMessage("OK");
 		                    // Adding completed challenge
 		                    response.addObject(session.completeChallenge());
 		                    // Adding new AES session key
@@ -119,21 +124,21 @@ public class FileThread extends Thread
                 {
                     if(message.getObjContents().size() < 3)
                     {
-                        response = new Envelope("FAIL-BADCONTENTS");
+                        response.setMessage("FAIL-BADCONTENTS");
                     }
                     else
                     {
                         if(message.getObjContents().get(0) == null)
                         {
-                            response = new Envelope("FAIL-BADPATH");
+                            response.setMessage("FAIL-BADPATH");
                         }
                         if(message.getObjContents().get(1) == null)
                         {
-                            response = new Envelope("FAIL-BADGROUP");
+                            response.setMessage("FAIL-BADGROUP");
                         }
                         if(message.getObjContents().get(2) == null)
                         {
-                            response = new Envelope("FAIL-BADTOKEN");
+                            response.setMessage("FAIL-BADTOKEN");
                         }
                         else
                         {
@@ -142,18 +147,18 @@ public class FileThread extends Thread
                             UserToken yourToken = (UserToken) message.getObjContents().get(2); //Extract token
 
                             // Verify token signature and make sure it isn't expired
-                            response = new Envelope("FAIL-BADTOKEN");
+                            response.setMessage("FAIL-BADTOKEN");
         					if (!yourToken.isExpired() && my_fs.verifyToken(yourToken))
         					{
                                 if(FileServer.fileList.checkFile(remotePath))
                                 {
                                     System.out.printf("Error: file already exists at %s\n", remotePath);
-                                    response = new Envelope("FAIL-FILEEXISTS"); //Success
+                                    response.setMessage("FAIL-FILEEXISTS"); //Success
                                 }
                                 else if(!yourToken.getGroups().contains(group))
                                 {
                                     System.out.printf("Error: user missing valid token for group %s\n", group);
-                                    response = new Envelope("FAIL-UNAUTHORIZED"); //Success
+                                    response.setMessage("FAIL-UNAUTHORIZED"); //Success
                                 }
                                 else
                                 {
@@ -163,17 +168,21 @@ public class FileThread extends Thread
                                     System.out.printf("Successfully created file %s\n", remotePath.replace('/', '_'));
 
                                     response = new Envelope("READY"); //Success
+                                    response.addObject(this.session.getSequenceNum());
                                     output.writeObject(session.getEncryptedMessage(response));
 
                                     message = (Envelope) input.readObject();
                                     message = session.getDecryptedMessage(message);
+                                    message = session.serverSequenceNumberHandler(message);
                                     while(message.getMessage().compareTo("CHUNK") == 0)
                                     {
                                         fos.write((byte[]) message.getObjContents().get(0), 0, (Integer) message.getObjContents().get(1));
                                         response = new Envelope("READY"); //Success
+                                        response.addObject(this.session.getSequenceNum());
                                         output.writeObject(session.getEncryptedMessage(response));
                                         message = (Envelope) input.readObject();
                                         message = session.getDecryptedMessage(message);
+                                        message = session.serverSequenceNumberHandler(message);
                                     }
 
                                     if(message.getMessage().compareTo("EOF") == 0)
@@ -181,11 +190,13 @@ public class FileThread extends Thread
                                         System.out.printf("Transfer successful file %s\n", remotePath);
                                         FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath);
                                         response = new Envelope("OK"); //Success
+                                        response.addObject(this.session.getSequenceNum());
                                     }
                                     else
                                     {
                                         System.out.printf("Error reading file %s from client\n", remotePath);
                                         response = new Envelope("ERROR-TRANSFER"); //Success
+                                        response.addObject(this.session.getSequenceNum());
                                     }
                                     fos.close();
                                 }
@@ -209,14 +220,14 @@ public class FileThread extends Thread
                         if(sf == null)
                         {
                             System.out.printf("Error: File %s doesn't exist\n", remotePath);
-                            message = new Envelope("ERROR_FILEMISSING");
+                            message.setMessage("ERROR_FILEMISSING");
                             output.writeObject(session.getEncryptedMessage(message));
 
                         }
                         else if(!yourToken.getGroups().contains(sf.getGroup()))
                         {
                             System.out.printf("Error user %s doesn't have permission\n", yourToken.getSubject());
-                            message = new Envelope("ERROR_PERMISSION");
+                            message.setMessage("ERROR_PERMISSION");
                             output.writeObject(session.getEncryptedMessage(message));
                         }
                         else
@@ -228,7 +239,7 @@ public class FileThread extends Thread
                                 if(!f.exists())
                                 {
                                     System.out.printf("Error file %s missing from disk\n", "_" + remotePath.replace('/', '_'));
-                                    message = new Envelope("ERROR_NOTONDISK");
+                                    message.setMessage("ERROR_NOTONDISK");
                                     output.writeObject(session.getEncryptedMessage(message));
                                 }
                                 else
@@ -244,6 +255,7 @@ public class FileThread extends Thread
                                             break;
                                         }
                                         message = new Envelope("CHUNK");
+                                        message.addObject(this.session.getSequenceNum());
                                         int n = fis.read(buf); //can throw an IOException
                                         if(n > 0)
                                         {
@@ -256,11 +268,11 @@ public class FileThread extends Thread
 
                                         message.addObject(buf);
                                         message.addObject(new Integer(n));
-
                                         output.writeObject(session.getEncryptedMessage(message));
 
                                         message = (Envelope) input.readObject();
                                         message = session.getDecryptedMessage(message);
+                                        message = session.serverSequenceNumberHandler(message);
                                     }
                                     while(fis.available() > 0);
 
@@ -268,10 +280,12 @@ public class FileThread extends Thread
                                     if(message.getMessage().compareTo("DOWNLOADF") == 0)
                                     {
                                         message = new Envelope("EOF");
+                                        message.addObject(this.session.getSequenceNum());
                                         output.writeObject(session.getEncryptedMessage(message));
 
                                         message = (Envelope) input.readObject();
                                         message = session.getDecryptedMessage(message);
+                                        message = session.serverSequenceNumberHandler(message);
                                         if(message.getMessage().compareTo("OK") == 0)
                                         {
                                             System.out.printf("File data upload successful\n");
@@ -307,12 +321,12 @@ public class FileThread extends Thread
                         if(sf == null)
                         {
                             System.out.printf("Error: File %s doesn't exist\n", remotePath);
-                            message = new Envelope("ERROR_DOESNTEXIST");
+                            message.setMessage("ERROR_DOESNTEXIST");
                         }
                         else if(!yourToken.getGroups().contains(sf.getGroup()))
                         {
                             System.out.printf("Error user %s doesn't have permission\n", yourToken.getSubject());
-                            message = new Envelope("ERROR_PERMISSION");
+                            message.setMessage("ERROR_PERMISSION");
                         }
                         else
                         {
@@ -323,25 +337,25 @@ public class FileThread extends Thread
                                 if(!f.exists())
                                 {
                                     System.out.printf("Error file %s missing from disk\n", "_" + remotePath.replace('/', '_'));
-                                    message = new Envelope("ERROR_FILEMISSING");
+                                    message.setMessage("ERROR_FILEMISSING");
                                 }
                                 else if(f.delete())
                                 {
                                     System.out.printf("File %s deleted from disk\n", "_" + remotePath.replace('/', '_'));
                                     FileServer.fileList.removeFile("/" + remotePath);
-                                    message = new Envelope("OK");
+                                    message.setMessage("OK");
                                 }
                                 else
                                 {
                                     System.out.printf("Error deleting file %s from disk\n", "_" + remotePath.replace('/', '_'));
-                                    message = new Envelope("ERROR_DELETE");
+                                    message.setMessage("ERROR_DELETE");
                                 }
                             }
                             catch(Exception e1)
                             {
                                 System.err.println("Error: " + e1.getMessage());
                                 e1.printStackTrace(System.err);
-                                message = new Envelope(e1.getMessage());
+                                message.setMessage(e1.getMessage());
                             }
                         }
                     }

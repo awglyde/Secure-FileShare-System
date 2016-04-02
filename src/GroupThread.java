@@ -70,7 +70,7 @@ public class GroupThread extends Thread
 					message = session.getDecryptedMessage(message);
                     if (message.getObjContents().get(0) != null)
                     {
-                        
+
                         int sequenceNum = (int)message.getObjContents().get(0);
                         message.removeObject(message.getObjContents().get(0));
                         if (session.getSequenceNum() == -1 || session.verifySequenceNumber(sequenceNum))
@@ -88,7 +88,8 @@ public class GroupThread extends Thread
                 Envelope response = new Envelope("FAIL");
 
                 // Adding incremented sequence number
-                response.addObject(this.session.getSequenceNum());
+                if (!message.getMessage().equals("AUTHCHALLENGE"))
+                    response.addObject(this.session.getSequenceNum());
 
                 if(message.getMessage().equals("UNLOCKUSER"))
                 {

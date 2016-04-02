@@ -23,7 +23,8 @@ public class FileClient extends Client implements FileClientInterface
         {
             remotePath = filename;
         }
-        Envelope env = new Envelope("DELETEF"); //Success
+        Envelope env = new Envelope("DELETEF");
+        env.addObject(this.session.getSequenceNum());
         env.addObject(remotePath);
         env.addObject(token);
         try
@@ -35,6 +36,7 @@ public class FileClient extends Client implements FileClientInterface
 
             //Get the response from the server
             env = this.session.getDecryptedMessage((Envelope)input.readObject());
+            env = this.session.clientSequenceNumberHandler(env);
 
             if(env.getMessage().compareTo("OK") == 0)
             {
@@ -76,6 +78,7 @@ public class FileClient extends Client implements FileClientInterface
                 FileOutputStream fos = new FileOutputStream(file);
 
                 Envelope env = new Envelope("DOWNLOADF"); //Success
+                env.addObject(this.session.getSequenceNum());
                 env.addObject(sourceFile);
                 env.addObject(token);
                 // Get encrypted message from our EncryptionSuite
@@ -84,17 +87,20 @@ public class FileClient extends Client implements FileClientInterface
 
                 //Get the response from the server
                 env = this.session.getDecryptedMessage((Envelope)input.readObject());
+                env = this.session.clientSequenceNumberHandler(env);
 
                 while(env.getMessage().compareTo("CHUNK") == 0)
                 {
                     fos.write((byte[]) env.getObjContents().get(0), 0, (Integer) env.getObjContents().get(1));
                     System.out.printf(".");
                     env = new Envelope("DOWNLOADF"); //Success
+                    env.addObject(this.session.getSequenceNum());
                     // Get encrypted message from our EncryptionSuite
                     env = this.session.getEncryptedMessage(env);
                     output.writeObject(env);
 
                     env = this.session.getDecryptedMessage((Envelope)input.readObject());
+                    env = this.session.clientSequenceNumberHandler(env);
                 }
                 fos.close();
 
@@ -103,6 +109,7 @@ public class FileClient extends Client implements FileClientInterface
                     fos.close();
                     System.out.printf("\nTransfer successful file %s\n", sourceFile);
                     env = new Envelope("OK"); //Success
+                    env.addObject(this.session.getSequenceNum());
 
                     // Get encrypted message from our EncryptionSuite
                     env = this.session.getEncryptedMessage(env);
@@ -143,9 +150,10 @@ public class FileClient extends Client implements FileClientInterface
     {
         try
         {
-            Envelope message = null, e = null;
+            Envelope message = null, response = null;
             //Tell the server to return the member list
             message = new Envelope("LFILES");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(token); //Add requester's token
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
@@ -154,12 +162,13 @@ public class FileClient extends Client implements FileClientInterface
             output.writeObject(message);
 
             //Get the response from the server
-            e = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return the member list
-            if(e.getMessage().equals("OK"))
+            if(response.getMessage().equals("OK"))
             {
-                return (List<String>) e.getObjContents().get(0); //This cast creates compiler warnings. Sorry.
+                return (List<String>) response.getObjContents().get(0); //This cast creates compiler warnings. Sorry.
             }
 
             return null;
@@ -188,6 +197,7 @@ public class FileClient extends Client implements FileClientInterface
             Envelope message = null, env = null;
             //Tell the server to return the member list
             message = new Envelope("UPLOADF");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(destFile);
             message.addObject(group);
             message.addObject(token); //Add requester's token
@@ -200,6 +210,7 @@ public class FileClient extends Client implements FileClientInterface
             FileInputStream fis = new FileInputStream(sourceFile);
 
             env = this.session.getDecryptedMessage((Envelope)input.readObject());
+            env = this.session.clientSequenceNumberHandler(env);
 
             //If server indicates success, return the member list
             if(env.getMessage().equals("READY"))
@@ -224,6 +235,7 @@ public class FileClient extends Client implements FileClientInterface
                     return false;
                 }
                 message = new Envelope("CHUNK");
+                message.addObject(this.session.getSequenceNum());
                 int n = fis.read(buf); //can throw an IOException
                 if(n > 0)
                 {
@@ -245,6 +257,7 @@ public class FileClient extends Client implements FileClientInterface
                 output.writeObject(message);
 
                 env = this.session.getDecryptedMessage((Envelope)input.readObject());
+                env = this.session.clientSequenceNumberHandler(env);
 
 
             }
@@ -255,6 +268,7 @@ public class FileClient extends Client implements FileClientInterface
             {
 
                 message = new Envelope("EOF");
+                message.addObject(this.session.getSequenceNum());
 
                 // Get encrypted message from our EncryptionSuite
                 message = this.session.getEncryptedMessage(message);
@@ -263,6 +277,8 @@ public class FileClient extends Client implements FileClientInterface
                 output.writeObject(message);
 
                 env = this.session.getDecryptedMessage((Envelope)input.readObject());
+                env = this.session.clientSequenceNumberHandler(env);
+
                 if(env.getMessage().compareTo("OK") == 0)
                 {
                     System.out.printf("\nFile data upload successful\n");
@@ -308,8 +324,8 @@ public class FileClient extends Client implements FileClientInterface
             //If server indicates success, return the file server public key
             if(response.getMessage().equals("OK"))
             {
-
-                EncryptionSuite fileServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, (Key)response.getObjContents().get(0));
+                EncryptionSuite fileServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA,
+                (Key)response.getObjContents().get(0));
                 System.out.println("File Server Public Key: \n\n"+
                                     fileServerPublicKey.encryptionKeyToString());
 
@@ -339,10 +355,14 @@ public class FileClient extends Client implements FileClientInterface
         byte[] challenge = new byte[16];
         prng.nextBytes(challenge);
 
+        int sequenceNumber = prng.nextInt();
+        this.session.setSequenceNum(sequenceNumber);
+
         try
         {
             Envelope message = null, response = null;
             message = new Envelope("AUTHCHALLENGE");
+
             // Add challenge and client pub key hash to envelope
 			message.addObject(challenge);
 
