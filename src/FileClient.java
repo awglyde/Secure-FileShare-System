@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.lang.Math;
 import java.security.Key;
 import java.security.SecureRandom;
 
@@ -356,7 +357,7 @@ public class FileClient extends Client implements FileClientInterface
         prng.nextBytes(challenge);
 
         int sequenceNumber = prng.nextInt();
-        this.session.setSequenceNum(sequenceNumber);
+        this.session.setSequenceNum(Math.abs(sequenceNumber));
 
         try
         {

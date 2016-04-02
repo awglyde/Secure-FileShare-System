@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 import java.security.Key;
 import java.security.SecureRandom;
 import javax.crypto.*;
@@ -442,7 +443,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
 		SecureRandom prng = new SecureRandom();
         int sequenceNumber = prng.nextInt();
-        this.session.setSequenceNum(sequenceNumber);
+        this.session.setSequenceNum(Math.abs(sequenceNumber));
 
 	    System.out.println("Enter username to login: ");
 	    UserClient.userName = UserClient.inputValidation(UserClient.in.readLine());
