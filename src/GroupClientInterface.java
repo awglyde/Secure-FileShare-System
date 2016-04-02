@@ -118,7 +118,7 @@ public interface GroupClientInterface
      */
     public List<String> listMembers(final String group, final String requester);
 
-    public boolean isAdmin(String userName);
+    public boolean isAdmin(String userName) throws Exception;
 
 	public boolean authChallenge(EncryptionSuite userKeys) throws Exception;
 	public boolean authLogin(EncryptionSuite userKeys) throws Exception;

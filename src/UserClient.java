@@ -38,7 +38,7 @@ public class UserClient
         groupClient.disconnect();
     }
 
-    public static void groupOptions(Key fileServerPublicKey) throws IOException
+    public static void groupOptions(Key fileServerPublicKey) throws Exception
     {
         String choice = "";
         System.out.println("Welcome to the group server! Please choose from the list of options.\n\n");

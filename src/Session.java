@@ -1,4 +1,7 @@
 import java.security.Key;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 public class Session
 {
 	EncryptionSuite hmacKey;
@@ -97,6 +100,15 @@ public class Session
 	public byte[] generateHmac(byte[] messageBytes) throws Exception
 	{
 		return this.hmacKey.generateHmac(messageBytes);
+	}
+
+	public byte[] generateHmac(Envelope message) throws Exception
+	{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(baos);
+        out.writeObject(message);
+        byte[] messageBytes = baos.toByteArray();
+		return this.generateHmac(messageBytes);
 	}
 
 	public boolean verifyHmac(byte[] hmacMesssage, byte[] messageBytes) throws Exception

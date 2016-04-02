@@ -21,9 +21,14 @@ public class GroupClient extends Client implements GroupClientInterface
             //Tell the server to return a token.
             message = new Envelope("GET");
             message.addObject(this.session.getSequenceNum());
+
             message.addObject(userName); //Add user name string
             // add file serverpublic key, used to uniquely associate this token w a file server
             message.addObject(fileServerPublicKey);
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
@@ -68,10 +73,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(username); //Add user name string
             message.addObject(password);
             message.addObject(requester); //Add the requester
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-             //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -105,10 +113,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(userName); //Add user name string
             message.addObject(password); //Add the new user's password
             message.addObject(requester); //Add the requester
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-             //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -143,10 +154,12 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(userName); //Add user name
             message.addObject(requester);  //Add requester's token
 
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-             //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -179,10 +192,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(this.session.getSequenceNum());
             message.addObject(groupName); //Add the group name string
             message.addObject(userName); //Add the requester's userName
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-             //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -215,10 +231,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(this.session.getSequenceNum());
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-             //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -251,10 +270,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(this.session.getSequenceNum());
             message.addObject(group); //Add group name string
             message.addObject(requester); //Add requester's token
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-             //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -289,10 +311,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(userName); //Add user name string
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-             //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -325,10 +350,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(userName); //Add user name string
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-             //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -350,7 +378,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean isAdmin(String userName)
+    public boolean isAdmin(String userName) throws Exception
     {
         try
         {
@@ -358,6 +386,10 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("ISADMIN");
             message.addObject(this.session.getSequenceNum());
 			message.addObject(userName);
+
+            // Generate HMAC for message and add it to the envelope
+            message.addObject(session.generateHmac(message));
+            
             message = this.session.getEncryptedMessage(message);
 
             output.writeObject(message);
