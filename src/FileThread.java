@@ -337,30 +337,29 @@ public class FileThread extends Thread
                                 if(!f.exists())
                                 {
                                     System.out.printf("Error file %s missing from disk\n", "_" + remotePath.replace('/', '_'));
-                                    message.setMessage("ERROR_FILEMISSING");
+                                    response.setMessage("ERROR_FILEMISSING");
                                 }
                                 else if(f.delete())
                                 {
                                     System.out.printf("File %s deleted from disk\n", "_" + remotePath.replace('/', '_'));
                                     FileServer.fileList.removeFile("/" + remotePath);
-                                    message.setMessage("OK");
+                                    response.setMessage("OK");
                                 }
                                 else
                                 {
                                     System.out.printf("Error deleting file %s from disk\n", "_" + remotePath.replace('/', '_'));
-                                    message.setMessage("ERROR_DELETE");
+                                    response.setMessage("ERROR_DELETE");
                                 }
                             }
                             catch(Exception e1)
                             {
                                 System.err.println("Error: " + e1.getMessage());
                                 e1.printStackTrace(System.err);
-                                message.setMessage(e1.getMessage());
+                                response.setMessage(e1.getMessage());
                             }
                         }
                     }
-                    output.writeObject(session.getEncryptedMessage(message));
-
+                    output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("DISCONNECT"))
                 {
