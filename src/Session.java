@@ -31,7 +31,13 @@ public class Session
 		this.aesSessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
 	}
 
-	public void setClientPublicKey(Key targetPubKey) throws Exception
+	public void setAESKey(Key sessionKey) throws Exception
+	{
+		this.aesSessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
+	}
+
+
+	public void setTargetKey(Key targetPubKey) throws Exception
 	{
 		this.targetPubKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, targetPubKey);
 	}

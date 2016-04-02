@@ -119,10 +119,9 @@ public interface GroupClientInterface
     public List<String> listMembers(final String group, final String requester, final Key publicKey);
 
 
-    public Key getGroupServerPublicKey(EncryptionSuite userKeys);
 	public boolean authChallenge(EncryptionSuite userKeys) throws Exception;
 	public boolean authLogin(EncryptionSuite userKeys) throws Exception;
-	public boolean authenticateGroupServer(EncryptionSuite userKeys) throws Exception;
+	public boolean authenticateGroupServer(EncryptionSuite userKeys, EncryptionSuite groupServerPublicKey) throws Exception;
     public boolean isAdmin(String userName, Key publicKey);
 
 }   //-- end interface GroupClientInterface

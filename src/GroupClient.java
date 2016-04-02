@@ -21,13 +21,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("GET");
             message.addObject(userName); //Add user name string
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //Successful response
             if(response.getMessage().equals("OK"))
@@ -64,13 +64,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(password);
             message.addObject(requester); //Add the requester
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -99,13 +99,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(password); //Add the new user's password
             message.addObject(requester); //Add the requester
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -135,13 +135,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(requester);  //Add requester's token
 
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -169,13 +169,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(groupName); //Add the group name string
             message.addObject(userName); //Add the requester's userName
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -203,13 +203,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -237,13 +237,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(group); //Add group name string
             message.addObject(requester); //Add requester's token
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return the member list
             if(response.getMessage().equals("OK"))
@@ -273,13 +273,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -307,13 +307,13 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -349,7 +349,7 @@ public class GroupClient extends Client implements GroupClientInterface
 			// message.addObject(hmac.getEncryptionKey()); // add the hmac key to our message
 
             // 2) Encrypt challenge with GS public key
-			Envelope encryptedMessage = this.groupServerPublicKey.getEncryptedMessage(message);
+			Envelope encryptedMessage = this.session.getEncryptedMessageTargetKey(message);
             encryptedMessage.addObject(userKeys.getEncryptionKey());
             output.writeObject(encryptedMessage);
 
@@ -372,7 +372,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
                 // 4) Store new shared key in sessionKey ES object
                 Key sessionKey = (Key)response.getObjContents().get(1); // New session key from grp server
-		        this.sessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, sessionKey);
+				this.session.setAESKey(sessionKey);
                 return true;
             }
         }
@@ -403,13 +403,13 @@ public class GroupClient extends Client implements GroupClientInterface
 			message.addObject(UserClient.userName);
             message.addObject(password);
             // Get encrypted message from our EncryptionSuite
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
             message.addObject(userKeys.getEncryptionKey().hashCode()); //Add user public key hash
             output.writeObject(message);
 
 
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -427,12 +427,10 @@ public class GroupClient extends Client implements GroupClientInterface
 		return false;
 	}
 
-	public boolean authenticateGroupServer(EncryptionSuite userKeys) throws Exception
+	public boolean authenticateGroupServer(EncryptionSuite userKeys, EncryptionSuite groupServerPublicKey) throws Exception
 	{
-        // Get group server public key
-        Key groupServerPublicKey = this.getGroupServerPublicKey(userKeys);
-		// this.groupServerPublicKey.setEncryptionKey(groupServerPublicKey);
-        this.groupServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, groupServerPublicKey, null);
+		this.session = new Session();
+		this.session.setTargetKey(groupServerPublicKey.getEncryptionKey());
         // Generate new object for encryption / decryption with gs public key
 		if (this.authChallenge(userKeys) && this.authLogin(userKeys))
 			return true;
@@ -447,13 +445,13 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             message = new Envelope("ISADMIN");
 			message.addObject(userName);
-            message = this.sessionKey.getEncryptedMessage(message);
+            message = this.session.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
              //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
-            response = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))

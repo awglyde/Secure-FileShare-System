@@ -13,9 +13,7 @@ public abstract class Client
     protected Socket sock;
     protected ObjectOutputStream output;
     protected ObjectInputStream input;
-	public EncryptionSuite groupServerPublicKey;
-    public EncryptionSuite fileServerPublicKey;
-	public EncryptionSuite sessionKey;
+	protected Session session;
 
     public boolean connect(final String serverName, final int port)
     {
@@ -72,10 +70,8 @@ public abstract class Client
             try
             {
                 Envelope message = new Envelope("DISCONNECT");
-                message.addObject(publicKey.hashCode());
-                message = this.sessionKey.getEncryptedMessage(message);
+                message = this.session.getEncryptedMessage(message);
                 // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-                message.addObject(publicKey.hashCode()); //Add user public key hash
                 output.writeObject(message);
                 // close the socket and the input/output streams connecting to the server
                 this.output.close();

@@ -44,7 +44,7 @@ public class FileThread extends Thread
 						// Map the client's hash of their key to their key, so we know who we're talking to in the future
 
                         Key clientPublicKey = (Key)message.getObjContents().get(0);
-						session.setClientPublicKey(clientPublicKey);
+						session.setTargetKey(clientPublicKey);
 						// TODO: Remove this property. Deprecated with new protocol
 	                    // my_gs.mapClientCodeToPublicKey((Integer)key.hashCode(), key);
 						// Add the server's public key to the envelope and send it back.
