@@ -158,7 +158,7 @@ public class FileClient extends Client implements FileClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+
             output.writeObject(message);
 
             //Get the response from the server
@@ -202,7 +202,7 @@ public class FileClient extends Client implements FileClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+
             output.writeObject(message);
 
             FileInputStream fis = new FileInputStream(sourceFile);
@@ -249,7 +249,7 @@ public class FileClient extends Client implements FileClientInterface
                 // Get encrypted message from our EncryptionSuite
                 message = this.sessionKey.getEncryptedMessage(message);
                 // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-                message.addObject(publicKey.hashCode()); //Add user public key hash
+
                 output.writeObject(message);
 
                 env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
@@ -267,7 +267,7 @@ public class FileClient extends Client implements FileClientInterface
                 // Get encrypted message from our EncryptionSuite
                 message = this.sessionKey.getEncryptedMessage(message);
                 // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-                message.addObject(publicKey.hashCode()); //Add user public key hash
+
                 output.writeObject(message);
 
                 env = this.sessionKey.getDecryptedMessage((Envelope)input.readObject());
@@ -300,32 +300,6 @@ public class FileClient extends Client implements FileClientInterface
         return true;
     }
 
-    public Key getFileServerPublicKey(EncryptionSuite userKeys, UserToken userToken) throws Exception
-    {
-        try
-        {
-            Envelope message = null, response = null;
-            //Tell the server to return its public key
-            message = new Envelope("GPUBLICKEY");
-            message.addObject(userKeys.getEncryptionKey());
-            output.writeObject(message);
-
-            response = (Envelope) input.readObject();
-            //If server indicates success, return true
-            if(response.getMessage().equals("OK"))
-            {
-                return (Key)response.getObjContents().get(0);
-            }
-        }
-        catch(Exception e)
-        {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace(System.err);
-            return null;
-        }
-        return null;
-    }
-
 	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken) throws Exception
     {
 		// 1) Generate a challenge.
@@ -340,10 +314,11 @@ public class FileClient extends Client implements FileClientInterface
             // Add challenge and client pub key hash to envelope
 			message.addObject(challenge);
 
-            message.addObject(userKeys.getEncryptionKey().hashCode());
+
 
             // 2) Encrypt challenge, client's pub key hash with FS public key
             output.writeObject(this.fileServerPublicKey.getEncryptedMessage(message));
+            message.addObject(userKeys.getEncryptionKey());
 
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
@@ -381,10 +356,8 @@ public class FileClient extends Client implements FileClientInterface
 	public boolean authenticateFileServer(EncryptionSuite userKeys, UserToken userToken) throws Exception
 	{
 
-		// Get File server public key
-        Key fileServerPublicKey = this.getFileServerPublicKey(userKeys, userToken);
         // Generate new object for encryption / decryption with fs public key
-        this.fileServerPublicKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA, fileServerPublicKey, null);
+        EncryptionSuite fileServerPublicKey = this.session.getTargetKey();
         System.out.println("File Server Public Key: \n\n"+
                             this.fileServerPublicKey.encryptionKeyToString());
 

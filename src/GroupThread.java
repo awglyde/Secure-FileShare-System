@@ -64,8 +64,6 @@ public class GroupThread extends Thread
                 }
                 else if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
                 {
-                    // Decrypt message with shared AES key
-                    Integer clientPubHash = (Integer)message.getObjContents().get(1);
 
                     // gets shared AES for the correct client
 					message = session.getDecryptedMessage(message);

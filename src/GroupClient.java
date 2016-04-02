@@ -330,31 +330,6 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public Key getGroupServerPublicKey(EncryptionSuite userKeys)
-    {
-        try
-        {
-            Envelope message = null, response = null;
-            //Tell the server to return its public key
-            message = new Envelope("GPUBLICKEY");
-            output.writeObject(message);
-
-            response = (Envelope) input.readObject();
-            //If server indicates success, return true
-            if(response.getMessage().equals("OK"))
-            {
-                return (Key)response.getObjContents().get(0);
-            }
-        }
-        catch(Exception e)
-        {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace(System.err);
-            return null;
-        }
-        return null;
-    }
-
 	public boolean authChallenge(EncryptionSuite userKeys) throws Exception
 	{
 
@@ -373,7 +348,7 @@ public class GroupClient extends Client implements GroupClientInterface
 			message.addObject(challenge); // Add the nonce to our message
 			// message.addObject(hmac.getEncryptionKey()); // add the hmac key to our message
 
-            // 2) Encrypt challenge & user's public key HASHCODE with GS public key
+            // 2) Encrypt challenge with GS public key
 			Envelope encryptedMessage = this.groupServerPublicKey.getEncryptedMessage(message);
             encryptedMessage.addObject(userKeys.getEncryptionKey());
             output.writeObject(encryptedMessage);
