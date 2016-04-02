@@ -321,12 +321,12 @@ public class FileThread extends Thread
                         if(sf == null)
                         {
                             System.out.printf("Error: File %s doesn't exist\n", remotePath);
-                            message.setMessage("ERROR_DOESNTEXIST");
+                            response.setMessage("ERROR_DOESNTEXIST");
                         }
                         else if(!yourToken.getGroups().contains(sf.getGroup()))
                         {
                             System.out.printf("Error user %s doesn't have permission\n", yourToken.getSubject());
-                            message.setMessage("ERROR_PERMISSION");
+                            response.setMessage("ERROR_PERMISSION");
                         }
                         else
                         {
