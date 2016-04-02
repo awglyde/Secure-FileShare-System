@@ -19,6 +19,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Tell the server to return a token.
             message = new Envelope("GET");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(userName); //Add user name string
             // add file serverpublic key, used to uniquely associate this token w a file server
             message.addObject(fileServerPublicKey);
@@ -29,6 +30,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = session.clientSequenceNumberHandler(response);
 
             //Successful response
             if(response.getMessage().equals("OK"))
@@ -61,6 +63,7 @@ public class GroupClient extends Client implements GroupClientInterface
         {
             Envelope message = null, response = null;
             message = new Envelope("UNLOCKUSER");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(username); //Add user name string
             message.addObject(password);
             message.addObject(requester); //Add the requester
@@ -72,6 +75,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -96,6 +100,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to create a user
             message = new Envelope("CUSER");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(userName); //Add user name string
             message.addObject(password); //Add the new user's password
             message.addObject(requester); //Add the requester
@@ -107,6 +112,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -132,6 +138,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Tell the server to delete a user
             message = new Envelope("DUSER");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(userName); //Add user name
             message.addObject(requester);  //Add requester's token
 
@@ -143,6 +150,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -167,6 +175,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to create a group
             message = new Envelope("CGROUP");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(groupName); //Add the group name string
             message.addObject(userName); //Add the requester's userName
             // Get encrypted message from our EncryptionSuite
@@ -177,6 +186,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -201,6 +211,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to delete a group
             message = new Envelope("DGROUP");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
             // Get encrypted message from our EncryptionSuite
@@ -211,6 +222,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -235,6 +247,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to return the member list
             message = new Envelope("LMEMBERS");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(group); //Add group name string
             message.addObject(requester); //Add requester's token
             // Get encrypted message from our EncryptionSuite
@@ -245,6 +258,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return the member list
             if(response.getMessage().equals("OK"))
@@ -270,6 +284,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to add a user to the group
             message = new Envelope("AUSERTOGROUP");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(userName); //Add user name string
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
@@ -281,6 +296,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -304,6 +320,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to remove a user from the group
             message = new Envelope("RUSERFROMGROUP");
+            message.addObject(this.session.getSequenceNum());
             message.addObject(userName); //Add user name string
             message.addObject(groupName); //Add group name string
             message.addObject(requester); //Add requester's token
@@ -315,6 +332,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -329,6 +347,37 @@ public class GroupClient extends Client implements GroupClientInterface
             e.printStackTrace(System.err);
             return false;
         }
+    }
+
+    public boolean isAdmin(String userName)
+    {
+        try
+        {
+            Envelope message = null, response = null;
+            message = new Envelope("ISADMIN");
+            message.addObject(this.session.getSequenceNum());
+			message.addObject(userName);
+            message = this.session.getEncryptedMessage(message);
+
+            output.writeObject(message);
+
+            //Get the response from the server
+            response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
+
+            //If server indicates success, return true
+            if(response.getMessage().equals("OK"))
+            {
+                return true;
+            }
+        }
+        catch(Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return false;
+        }
+		return false;
     }
 
 	public boolean authChallenge(EncryptionSuite userKeys) throws Exception
@@ -391,6 +440,10 @@ public class GroupClient extends Client implements GroupClientInterface
 	{
 		// 1) Enter userName and password (SECURELY. SANITIZE INPUTS)
 
+		SecureRandom prng = new SecureRandom();
+        int sequenceNumber = prng.nextInt();
+        this.session.setSequenceNum(sequenceNumber);
+
 	    System.out.println("Enter username to login: ");
 	    UserClient.userName = UserClient.inputValidation(UserClient.in.readLine());
         System.out.println("Enter Password: ");
@@ -401,6 +454,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to return its public key
             message = new Envelope("AUTHLOGIN");
+            message.addObject(this.session.getSequenceNum());
 			message.addObject(UserClient.userName);
             message.addObject(password);
             // Get encrypted message from our EncryptionSuite
@@ -408,6 +462,7 @@ public class GroupClient extends Client implements GroupClientInterface
             output.writeObject(message);
 
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
@@ -436,34 +491,5 @@ public class GroupClient extends Client implements GroupClientInterface
 			return false;
 	}
 
-    public boolean isAdmin(String userName)
-    {
-        try
-        {
-            Envelope message = null, response = null;
-            message = new Envelope("ISADMIN");
-			message.addObject(userName);
-            message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-             //Add user public key hash
-            output.writeObject(message);
-
-            //Get the response from the server
-            response = this.session.getDecryptedMessage((Envelope)input.readObject());
-
-            //If server indicates success, return true
-            if(response.getMessage().equals("OK"))
-            {
-                return true;
-            }
-        }
-        catch(Exception e)
-        {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace(System.err);
-            return false;
-        }
-		return false;
-    }
 
 }

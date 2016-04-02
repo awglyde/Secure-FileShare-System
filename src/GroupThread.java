@@ -42,6 +42,7 @@ public class GroupThread extends Thread
 
                 // Receives message. Potentially encrypted or unencrypted
                 Envelope message = (Envelope) input.readObject();
+	            boolean sequenceNumVerified;
                 if (message.getObjContents().size() > 1) // if envelope contains a public key as well
 				{
                     // Checking first param isn't null
@@ -67,25 +68,40 @@ public class GroupThread extends Thread
 
                     // gets shared AES for the correct client
 					message = session.getDecryptedMessage(message);
+                    if (message.getObjContents().get(0) != null)
+                    {
+                        
+                        int sequenceNum = (int)message.getObjContents().get(0);
+                        message.removeObject(message.getObjContents().get(0));
+                        if (session.getSequenceNum() == -1 || session.verifySequenceNumber(sequenceNum))
+                        {
+                            System.out.println("Sequence num: "+sequenceNum);
+                            session.setSequenceNum(sequenceNum);
+                            session.incrementSequenceNum();
+                            System.out.println("Responding with sequence num: "+session.getSequenceNum());
+                        }
+                    }
                 }
 
                 System.out.println("Request received: " + message.getMessage());
 
                 Envelope response = new Envelope("FAIL");
 
+                // Adding incremented sequence number
+                response.addObject(this.session.getSequenceNum());
+
                 if(message.getMessage().equals("UNLOCKUSER"))
                 {
                     if(message.getObjContents().size() >= 3)
                     {
-                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null
-                                                                   && message.getObjContents().get(2) != null)
+                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null && message.getObjContents().get(2) != null)
                         {
                             String username = (String) message.getObjContents().get(0); // Extract the username
                             String password = (String) message.getObjContents().get(1); // Extract the password
                             String requester = (String) message.getObjContents().get(2); // Extract the requester
                             if(unlockUser(username, password, requester, session.getAESKey()))
                             {
-                                response = new Envelope("OK");
+                                response.setMessage("OK");
                             }
                         }
                     }
@@ -108,7 +124,7 @@ public class GroupThread extends Thread
 							// Setting the nonce
 							session.setNonce(challenge);
 		                    // Constructing the envelope
-		                    response = new Envelope("OK");
+		                    response.setMessage("OK");
 
 		                    // Completing challenge
 		                    response.addObject(session.completeChallenge());
@@ -134,13 +150,12 @@ public class GroupThread extends Thread
                             {
 
                                 System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD!");
-                                response = new Envelope("OK");
+                                response.setMessage("OK");
                             }
                             else
                             {
                                 // keep track of the number of failed login attempts
                                 my_gs.userList.failedLogin(username);
-                                response = new Envelope("FAIL");
                             }
                         }
                     }
@@ -156,7 +171,7 @@ public class GroupThread extends Thread
                         {
                                 String username = (String) message.getObjContents().get(0); //Extract the username
                                 if(my_gs.groupList.isAdmin(username))
-                                    response = new Envelope("OK"); //Success
+                                    response.setMessage("OK"); //Success
                         }
                     }
 
@@ -170,7 +185,7 @@ public class GroupThread extends Thread
                         if(message.getObjContents().get(0) != null)
                         {
                             String username = (String) message.getObjContents().get(0); //Get the username
-                            response = new Envelope("OK");
+                            response.setMessage("OK");
                             yourToken = createToken(username);
                         }
                     }
@@ -191,13 +206,13 @@ public class GroupThread extends Thread
 
                             if(!EncryptionSuite.verifyPassword(username, password))
                             {
-                                response = new Envelope("BADPWD");
+                                response.setMessage("BADPWD");
                             }
                             else
                             {
                                 if(createUser(username, password, requester, session.getAESKey()))
                                 {
-                                    response = new Envelope("OK"); //Success
+                                    response.setMessage("OK"); //Success
                                 }
                             }
                         }
@@ -216,7 +231,7 @@ public class GroupThread extends Thread
 
                             if(deleteUser(username, requester))
                             {
-                                response = new Envelope("OK"); //Success
+                                response.setMessage("OK"); //Success
                             }
                         }
                     }
@@ -234,7 +249,7 @@ public class GroupThread extends Thread
 
                             if(createGroup(groupName, requester))
                             {
-                                response = new Envelope("OK"); //Success
+                                response.setMessage("OK"); //Success
                             }
                         }
                     }
@@ -252,7 +267,7 @@ public class GroupThread extends Thread
 
                             if(deleteGroup(groupName, requester))
                             {
-                                response = new Envelope("OK"); //Success
+                                response.setMessage("OK"); //Success
                             }
                         }
                     }
@@ -271,7 +286,7 @@ public class GroupThread extends Thread
                             ArrayList<String> members = listMembers(groupname, requester);
                             if(members != null)
                             {
-                                response = new Envelope("OK"); //Success
+                                response.setMessage("OK"); //Success
                                 response.addObject(members);
                             }
                         }
@@ -293,7 +308,7 @@ public class GroupThread extends Thread
 
                             if(addUserToGroup(userName, groupName, requester))
                             {
-                                response = new Envelope("OK"); //Success
+                                response.setMessage("OK"); //Success
                             }
                         }
                     }
@@ -319,12 +334,12 @@ public class GroupThread extends Thread
                             {
                                 if (deleteGroup(groupName, requester))
                                 {
-                                    response = new Envelope("OK"); // success
+                                    response.setMessage("OK"); // success
                                 }
                             }
                             else if(deleteUserFromGroup(userName, groupName, requester))
                             {
-                                response = new Envelope("OK"); //Success
+                                response.setMessage("OK"); //Success
                             }
                         }
                     }
@@ -338,7 +353,7 @@ public class GroupThread extends Thread
                 }
                 else
                 {
-                    response = new Envelope("FAIL"); //Server does not understand client request
+                    response.setMessage("FAIL"); //Server does not understand client request
                     output.writeObject(session.getEncryptedMessage(response));
                 }
             } while(proceed);

@@ -21,9 +21,19 @@ public class Envelope implements java.io.Serializable
         return this.msg;
     }
 
+    public void setMessage(String text)
+    {
+        this.msg = text;
+    }
+
     public ArrayList<Object> getObjContents()
     {
         return this.objContents;
+    }
+
+    public boolean removeObject(Object object)
+    {
+        return this.objContents.remove(object);
     }
 
     public void addObject(Object object)

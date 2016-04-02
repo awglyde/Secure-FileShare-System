@@ -5,10 +5,32 @@ public class Session
 	EncryptionSuite aesSessionKey;
 	EncryptionSuite targetPubKey;
     byte[] nonce;
+	int sequenceNum = -1;
 
 	public Session()
 	{
 
+	}
+
+	public void setSequenceNum(int sequenceNum)
+	{
+		this.sequenceNum = sequenceNum;
+	}
+
+	public int getSequenceNum()
+	{
+		return this.sequenceNum;
+	}
+
+	public int incrementSequenceNum()
+	{
+		this.sequenceNum = this.sequenceNum+1;
+		return this.sequenceNum;
+	}
+
+	public boolean verifySequenceNumber(int newSequenceNum)
+	{
+		return (this.sequenceNum+1 == newSequenceNum);
 	}
 
 	public void setNonce(byte[] nonce)
@@ -86,4 +108,21 @@ public class Session
 	{
 		return this.aesSessionKey.hashBytes(this.nonce);
 	}
+
+	public Envelope clientSequenceNumberHandler(Envelope message)
+	{
+        int newSequenceNum = (int)message.getObjContents().get(0);
+        message.removeObject((int)message.getObjContents().get(0));
+        if (!this.verifySequenceNumber(newSequenceNum))
+        {
+            System.out.println("Sequence number out of order! Session may be compromised. Exiting.");
+            System.exit(0);
+        }
+		this.setSequenceNum(newSequenceNum);
+		this.incrementSequenceNum();
+		System.out.println("Sequence num from server: "+newSequenceNum);
+		System.out.println("Sequence num after incr: "+this.getSequenceNum());
+		return message;
+	}
+
 }
