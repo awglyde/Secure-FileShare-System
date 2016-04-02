@@ -23,7 +23,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -66,7 +66,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -101,7 +101,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -137,7 +137,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -171,7 +171,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -205,7 +205,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -239,7 +239,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -275,7 +275,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -309,7 +309,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get encrypted message from our EncryptionSuite
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT: Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
@@ -359,7 +359,9 @@ public class GroupClient extends Client implements GroupClientInterface
 	{
 
 		// 1) Generate a challenge.
-		EncryptionSuite hmac = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+
+		// TODO: add hmac
+		// EncryptionSuite hmac = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
 		SecureRandom prng = new SecureRandom();
         byte[] challenge = new byte[16];
         prng.nextBytes(challenge);
@@ -369,7 +371,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             message = new Envelope("AUTHCHALLENGE");
 			message.addObject(challenge); // Add the nonce to our message
-			message.addObject(hmac.getEncryptionKey()); // add the hmac key to our message
+			// message.addObject(hmac.getEncryptionKey()); // add the hmac key to our message
 
             // 2) Encrypt challenge & user's public key HASHCODE with GS public key
 			Envelope encryptedMessage = this.groupServerPublicKey.getEncryptedMessage(message);
@@ -472,7 +474,7 @@ public class GroupClient extends Client implements GroupClientInterface
 			message.addObject(userName);
             message = this.sessionKey.getEncryptedMessage(message);
             // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-            message.addObject(publicKey.hashCode()); //Add user public key hash
+             //Add user public key hash
             output.writeObject(message);
 
             //Get the response from the server
