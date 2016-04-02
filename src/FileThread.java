@@ -62,6 +62,8 @@ public class FileThread extends Thread
 					message = session.getDecryptedMessage(message);
                 }
 
+                System.out.println("Request received: " + message.getMessage());
+                
                 response = new Envelope("FAIL");
 
                 // Handler to list files that this user is allowed to see
@@ -90,14 +92,17 @@ public class FileThread extends Thread
                 else if(message.getMessage().equals("AUTHCHALLENGE"))
                 {
 					EncryptionSuite clientKeys = null;
-                    if(message.getObjContents().size() >= 2)
+                    if(message.getObjContents().size() >= 1)
                     {
-                        if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
+                        if(message.getObjContents().get(0) != null)
                         {
 		                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
 
 		                    // Generating a new AES session key
 							session.setAESKey();
+
+							// Setting the nonce
+							session.setNonce(challenge);
 
 		                    response = new Envelope("OK");
 		                    // Adding completed challenge
