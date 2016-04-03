@@ -123,12 +123,10 @@ public class FileClient extends Client implements FileClientInterface
                     // Make sure our key ring is not null before we try to decrypt anything
                     if (!(keyRing == null) && !(keyRing.get(group) == null))
                     {
-                        System.out.println("file length: " + encryptedFileBytes.length);
 
                         // With the right key version, decrypt the file retrieved from the file server
                         byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes);
 
-                        System.out.println("file length: " + decryptedFileBytes.length);
                         fos.write(decryptedFileBytes);
                         fos.close();
 
@@ -286,7 +284,8 @@ public class FileClient extends Client implements FileClientInterface
             //If server indicates success, return the member list
             if(env.getMessage().equals("OK"))
             {
-                System.out.printf("File was uploaded successful\n");
+                System.out.printf("File was uploaded successfully\n");
+                return true;
             }
             else
             {
@@ -300,7 +299,6 @@ public class FileClient extends Client implements FileClientInterface
             e1.printStackTrace(System.err);
             return false;
         }
-        return true;
     }
 
     public EncryptionSuite getFileServerPublicKey()
