@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Date;
 import java.util.Calendar;
 import java.security.Key;
+import javax.xml.bind.DatatypeConverter;
 
 public class Token implements UserToken, java.io.Serializable
 {
@@ -10,14 +11,16 @@ public class Token implements UserToken, java.io.Serializable
     private String issuer;
     private String subject;
     private ArrayList<String> groups;
+    private Key fileServerPublicKey;
     private Date expirationDate;
 	private byte[] signedHash;
 
-    public Token(String issuer, String subject, ArrayList<String> groups)
+    public Token(String issuer, String subject, ArrayList<String> groups, Key fileServerPublicKey)
     {
         this.issuer = issuer;
         this.subject = subject;
         this.groups = groups;
+        this.fileServerPublicKey = fileServerPublicKey;
         Calendar cal = Calendar.getInstance();
         Date date = new Date();
         cal.setTime(date);
@@ -69,6 +72,10 @@ public class Token implements UserToken, java.io.Serializable
         return this.groups;
     }
 
+    public Key getFileServerPublicKey()
+    {
+        return this.fileServerPublicKey;
+    }
 
     public boolean isAdmin()
     {
@@ -101,6 +108,7 @@ public class Token implements UserToken, java.io.Serializable
 
     public String toString()
     {
+
 		String groupList = null;
 		for (String group : this.groups)
 		{
@@ -112,6 +120,7 @@ public class Token implements UserToken, java.io.Serializable
         return this.issuer+System.lineSeparator()+
                 this.subject+System.lineSeparator()+
                 groups+System.lineSeparator()+
+                DatatypeConverter.printHexBinary(this.fileServerPublicKey.getEncoded())+System.lineSeparator()+
                 this.expirationDate.toString()+System.lineSeparator();
 
     }

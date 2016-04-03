@@ -183,13 +183,16 @@ public class GroupThread extends Thread
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {
                     UserToken yourToken = null;
-                    if(message.getObjContents().size() >= 1)
+                    if(message.getObjContents().size() >= 2)
                     {
-                        if(message.getObjContents().get(0) != null)
+                        if(message.getObjContents().get(0) != null &&
+                        message.getObjContents().get(1) != null)
                         {
                             String username = (String) message.getObjContents().get(0); //Get the username
+                            //Get the file server's public key who we're intending to connect to
+                            Key fileServerPublicKey = (Key)message.getObjContents().get(1);
                             response.setMessage("OK");
-                            yourToken = createToken(username);
+                            yourToken = createToken(username, fileServerPublicKey);
                         }
                     }
 
@@ -375,13 +378,13 @@ public class GroupThread extends Thread
     }
 
     //Method to create tokens
-    private UserToken createToken(String username) throws Exception
+    private UserToken createToken(String username, Key fileServerPublicKey) throws Exception
     {
         //Check that user exists
         if(my_gs.userList.isUser(username))
         {
             //Issue a new token with server's name, user's name, and user's groups
-            UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username));
+            UserToken yourToken = new Token(my_gs.name, username, my_gs.userList.getUserGroups(username), fileServerPublicKey);
 			// Hash token, sign hash. Add signed   hash to token
 			byte[] tokenHash = my_gs.serverRSAKeys.hashBytes(yourToken.toString().getBytes());
 			byte[] signedTokenHash = my_gs.serverRSAKeys.generateSignature(tokenHash);

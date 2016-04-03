@@ -44,6 +44,8 @@ public interface UserToken
      */
     public List<String> getGroups();
 
+    public Key getFileServerPublicKey();
+
     /*
     * This method returns whether or not the user is ADMIN
     */

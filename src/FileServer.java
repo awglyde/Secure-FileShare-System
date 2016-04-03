@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.security.Key;
+import javax.xml.bind.DatatypeConverter;
+
 
 public class FileServer extends Server
 {
@@ -29,7 +31,11 @@ public class FileServer extends Server
 
     public boolean verifyToken(UserToken token) throws Exception
     {
-        return  this.groupServerPubKey.verifySignature(token.getSignedHash(), this.groupServerPubKey.hashBytes(token.toString().getBytes()));
+        Key tokensKey = token.getFileServerPublicKey();
+
+        return  this.groupServerPubKey.verifySignature(token.getSignedHash(), this.groupServerPubKey.hashBytes(token.toString().getBytes())) &&
+        DatatypeConverter.printHexBinary(tokensKey.getEncoded()).equals(
+        DatatypeConverter.printHexBinary(this.serverRSAKeys.getEncryptionKey().getEncoded()));
     }
 
     public void start() throws Exception
