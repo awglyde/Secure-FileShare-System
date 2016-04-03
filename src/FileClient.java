@@ -86,8 +86,6 @@ public class FileClient extends Client implements FileClientInterface
         {
             if(!file.exists())
             {
-                file.createNewFile();
-                FileOutputStream fos = new FileOutputStream(file);
 
                 Envelope env = new Envelope("DOWNLOADF"); //Success
                 // Add the most recent sequence number to our message
@@ -112,6 +110,11 @@ public class FileClient extends Client implements FileClientInterface
 
                 if (env.getMessage().equals("FILE"))
                 {
+                    // We got a fle, so create a new file
+                    file.createNewFile();
+
+                    FileOutputStream fos = new FileOutputStream(file);
+
                     byte[] encryptedFileBytes = (byte[])env.getObjContents().get(0);
                     // Group that owns the file we downloaded. Used to find the right key
                     String group = (String)env.getObjContents().get(1);
@@ -129,7 +132,7 @@ public class FileClient extends Client implements FileClientInterface
                         fos.write(decryptedFileBytes);
                         fos.close();
 
-                        System.out.println("SUCCESSFULLY DOWNLOADED THE FILE!");
+                        return true;
                     }
                     else
                     {
@@ -162,7 +165,8 @@ public class FileClient extends Client implements FileClientInterface
         {
             e1.printStackTrace();
         }
-        return true;
+
+        return false;
     }
 
     @SuppressWarnings("unchecked")
