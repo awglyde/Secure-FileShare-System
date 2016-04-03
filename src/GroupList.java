@@ -91,10 +91,10 @@ public class GroupList implements java.io.Serializable
         public Group(String owner)
         {
             this.groupMembers = new ArrayList<String>();
-            this.keys = new ArrayList<Key>();
             groupMembers.add(owner);
 
             // add the first key to the list of keys
+            this.keys = new ArrayList<Key>();
             this.addKey();
 
             this.owner = owner;
