@@ -147,7 +147,7 @@ public class Session
         int newSequenceNum = (int)message.removeObject(0);
         if (!this.verifySequenceNumber(newSequenceNum))
         {
-            System.out.println("Sequence number out of order! Session may be compromised. Exiting.");
+            System.out.println("Sequence number out of order! Session may be compromised.");
 			return new Envelope("FAIL");
         }
 		this.setSequenceNum(newSequenceNum);
@@ -182,7 +182,7 @@ public class Session
 
         if (!this.verifyHmac(hmac, this.getBytes(message)))
         {
-            System.out.println("HMAC not verified! Session may be compromised. Exiting.");
+            System.out.println("HMAC not verified! Session may be compromised.");
 			return new Envelope("FAIL");
         }
 		return message;
