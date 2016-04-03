@@ -36,8 +36,19 @@ header {
     <section id="overview">
       <h2>Overview</h2>
 <!-- BEGIN CHANGES HERE -->
-
 <!-- <p>In this section, broadly overview the types of cryptographic techniques that your group has decided to use to address threats T5–T7.</p> -->
+<p>
+    For <b>Threat T5</b>, we implemented sequence numbers and HMACs to prevent the threats of message reorder, replay, and modification.
+</p>
+<p>
+    For <b>Threat T6</b>, we implemented an AES <b>keyring</b> provided by the Group Server along with the token that contains a mapping of group names to versioned Keys. When a user is removed or deleted from our system altogether the Group Server generates new AES keys for each group which are stored in the Group object and retrieved when a client needs them.
+</p>
+<p>
+    When the user goes to upload or download a file to or from a particular group, they use the appropriate key for that file. The key version used to encrypt a file is stored on the ShareFile object held by the file server. This way, we can keep track of the key used to encrypt a particular file, which allows anyone else actively in the group to decrypt it. When a file is uploaded, the user simply encrypts it with the <i>latest</i> key.
+</p>
+<p>
+    For <b>Threat T7</b>, we require that tokens are generated with the public key of the file server the user is intending to connect to. We require that our file servers validate that the public key in the user's token corresponds to its own public key. Thus, we prevent tokens from being used with any file server OTHER than the one originally intended.
+</p>
 
 <!-- END CHANGES HERE -->
 <h3 style="text-align: center;"><b>Group Server Communication</b></h3>
@@ -126,6 +137,10 @@ This threat can be broken down into multiple categories:
             <br />
             Modification attacks are handled by adding an HMAC of the entire message we're sending BEFORE encrypting it. We add the HMAC of the entire message to the message, encrypt the whole message, then send it along. The recipient decrypts the message, removes the HMAC, recomputes the HMAC of the message with the shared HMAC key and thus verifies the integrity of the file.
         </p>
+        <b>A special case:</b>
+        <p>
+            The lone exception to our providing HMACs generated with the HMAC key is the <i>first</i> message which is sent by the client. In the first message sent by the client (see diagram) they send their public key along with a nonce challenge, the HMAC key for future HMACs, and an HMAC of the entire message. This HMAC, however, is generated using the client's <b>private key</b>. We do this to ensure that an active man-in-the-middle can't <i>modify</i> this initial message and replace it with their own public key. If an adversary replaced the client's public key with their own, the server would attempt to verify the HMAC with this public key, and the verification would fail. The verification of this initial HMAC can ONLY succeed if it's verified with the authentic client's public key. Thus we have prevented a man in the middle from being a malicious router.
+        </p>
     </li>
 </ul>
 <h3>Why This is Sufficient</h3>
@@ -203,6 +218,8 @@ This threat can be broken down into multiple categories:
 <p>
     Say, for example, a user becomes malicious and downloads all the files they have access to. Presumably an administrator will swiftly remove them from the group or delete them altogether. Since they already would have had access to files encrypted with the old key, there is no reason for <b>active re-encryption</b>. Thus, we took a <b>lazy revocation</b> technique where, when a user is removed or deleted, a new key is generated for that group that the <i>old</i> user would <b>not</b> have access to.
 </p>
+<p>
+    So, we have shown that files are only decryptable by users with access to that particular group. Users that are removed may be able to see leaked files that were encrypted with the original key, but any files that are accessed or newly uploaded will be inaccessible to the removed user.</p>
 
 <!-- END CHANGES HERE -->
     </section>
@@ -210,27 +227,48 @@ This threat can be broken down into multiple categories:
       <h2>Threat T7: Token Theft</h2>
 <!-- BEGIN CHANGES HERE -->
 
-<h4>Describing the Threat</h4>
-<h4>Description of Mechanism</h4>
+<h3>Describing the Threat</h3>
 <p>
-    We are going to create a unique identifier (hash of the public key) that is an immutable field in our token which is unique to the server we're connecting to. So when a token is created, the user will provide the public key hash of a file server they're connecting to. The file server will verify that the public key hash provided in the token is its own. This ensures that a token cannot be used to connect to a DIFFERENT file server than the one that was originally intended.
-
-	When the client initially starts up the application, we request the file server's public key. The client validates whether or not this is the correct public key.
+    Token theft can be seen if a File Server steals a token given to it by an authentic client and passes it off to another, most likely adversarial client who attempts to use it to connect to another file server.
 </p>
-<h4>Why This is Sufficient</h4>
-<!--  The authentication protocol from phase 3 already checks to see if we're connecting to an unauthorized file server so sending a token to an unauthorized file server should not be possible. -->
+<p>
+    Alternatively, a malicious client may take a token they were granted and give it to another malicious client, or attempt to use it with a separate file server.
+</p>
+<p>
+    The only thing our P3 implementation validates is that the token was signed by the group server. It could potentially be used for any file server the user wants to give it to, and it could potentially be stolen as well. Our P3 implementation is particularly vulnerable to token theft.
+</p>
+<h3>Description of Mechanism</h3>
+<p>
+    When a token is created, we add the public key of the file server that the client intends to connect to as an immutable field to our token. To get this key, the client passes it in to the group server when they connect.
+</p>
+<p>
+    When the client passes the token to a file server, the file server will verify that the public key provided in the token is its own. Additionally, it verifies that the token was signed by the group server. This ensures that a token cannot be used to connect to a DIFFERENT file server than the one that was originally intended.
+</p>
+<p>
+	When the client initially starts up the application, we request the file server's public key. The client validates whether or not this is the correct public key and then goes on to pass this to the group server which uses it to create a new object.
+</p>
+<h3>Why This is Sufficient</h3>
+<p>
+    Since an authentic file server would verify whether or not a token it receives is <i>intended</i> to be used with it, we can ensure that tokens cannot be stolen and used on other file servers.
+</p>
+<p>
+    This guarantees that stolen tokens can only be used on the server at which the theft took place. If a user attempts to use a stolen token for another file server, it will be rejected.
+</p>
 
 <!-- END CHANGES HERE -->
     </section>
     <section id="discussion">
       <h2>Discussion</h2>
 <!-- BEGIN CHANGES HERE -->
-
 <p>
-	We don’t want to hash the encrypted message because then the adversary could modify the encrypted message and recompute the hash since you would be forced to send the hash OUTSIDE of the message itself (e.g., unencrypted);
+    One interplay between the proposed mechanisms is that sequence numbers end up handling both message reorder and message replay attacks. They are a very simple and robust mechanism which allow us to prevent multiple threats without adding much extra bulk or computation to our messages.
 </p>
 <p>
-	The first message to the server is not verified by HMAC because that is the message in which the client actually SENDS the key to HMAC messages. Thus, an adversary could potentially forge a message with a different AES key. Instead we sign it with the client's private key which cannot be forged.
+    We believe our keyring solution is fairly elegant. Although we use lazy revocation I believe it handles the difficult task of file leakage in a very painless way without creating any unnecessary bandwidth bottlenecks.
+</p>
+<p>
+    <b>Note on the special case HMAC during the handshake:</b>
+	The first message to the server is verified by a different type of HMAC than we use for our typical AES encrypted communication because that is the message in which the client actually SENDS the fresh HMAC key to the server. If we use the HMAC key we send to the server to HMAC the first message, an adversary could potentially forge a message with a different HMAC key and public key other than the authentic client's. Instead, to prevent this, we initialize the first HMAC with the client's private key which cannot be forged. The server then verifies this HMAC with the attached public key. If the adversary modifies this public key, the HMAC verification will fail. Thus we prevent an active man in the middle attacker from sitting in the middle of a session authentication handshake.
 </p>
 <!-- <p>Conclude with a paragraph or two discussing the interplay between your
 proposed mechanisms, and commenting on the design process that your group
