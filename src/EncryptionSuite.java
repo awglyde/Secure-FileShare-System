@@ -30,6 +30,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Scanner;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import javax.xml.bind.DatatypeConverter;
@@ -283,6 +284,34 @@ public class EncryptionSuite
 
         return encoded;
 
+    }
+
+    public static byte[] encryptFile(ArrayList<Key> keys, byte[] file) throws Exception
+    {
+        // create new encryption suite object with last key
+        EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
+
+        // encrypt the file and return the encrypted bytes
+        return encryptionKey.encryptBytes(file,  encrypt);
+    }
+
+    public static byte[] decryptFile(ArrayList<Key> keys, int version, byte[] encryptedFile) throws Exception
+    {
+        // create new encryption suite object with key at index - version
+        EncryptionSuite decryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
+
+        // decrypt the file and return the decrypted bytes
+        return decryptionKey.encryptBytes(encryptedFile, decrypt);
+    }
+
+    public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
+    {
+        Cipher cipher = this.getCipher(encrypt);
+
+        byte[] outputBytes = new byte[cipher.getOutputSize(inputBytes.length)];
+        int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
+        cipher.doFinal(outputBytes, outputLength);
+        return outputBytes;
     }
 
 	public Envelope getEncryptedMessage(Envelope message) throws Exception

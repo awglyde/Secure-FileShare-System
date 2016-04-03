@@ -536,7 +536,7 @@ public class GroupThread extends Thread
         }
     }
 
-    private boolean createGroup(String groupName, String requester)
+    private boolean createGroup(String groupName, String requester) throws Exception
     {
 
         //Check if requester exists (creator of group)
