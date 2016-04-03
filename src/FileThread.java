@@ -97,7 +97,7 @@ public class FileThread extends Thread
 						}
                     }
 
-                    // Generate an HMAC of our message for server to verify
+                    // Generate an HMAC of our message for client to verify
                     response.addObject(this.session.generateHmac(response));
 
                     output.writeObject(session.getEncryptedMessage(response));
@@ -148,24 +148,20 @@ public class FileThread extends Thread
                     if(message.getObjContents().size() < 3)
                     {
                         response.setMessage("FAIL-BADCONTENTS");
-                        output.writeObject(session.getEncryptedMessage(response));
                     }
                     else
                     {
                         if(message.getObjContents().get(0) == null)
                         {
                             response.setMessage("FAIL-BADPATH");
-                            output.writeObject(session.getEncryptedMessage(response));
                         }
                         else if(message.getObjContents().get(1) == null)
                         {
                             response.setMessage("FAIL-BADGROUP");
-                            output.writeObject(session.getEncryptedMessage(response));
                         }
                         else if(message.getObjContents().get(2) == null)
                         {
                             response.setMessage("FAIL-BADTOKEN");
-                            output.writeObject(session.getEncryptedMessage(response));
                         }
                         else
                         {
@@ -203,21 +199,16 @@ public class FileThread extends Thread
 
                                     FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath, keyVersion);
 
-                                    response = new Envelope("OK"); //Success
-                                    response.addObject(this.session.getSequenceNum());
-
-                                    // Generate an HMAC of our message for server to verify
-                                    response.addObject(session.generateHmac(response));
-
-                                    output.writeObject(session.getEncryptedMessage(response));
+                                    response.setMessage("OK"); //Success
                                 }
-                            }
-                            else
-                            {
-                                output.writeObject(session.getEncryptedMessage(response));
                             }
                         }
                     }
+
+                    // Generate an HMAC of our message for server to verify
+                    response.addObject(session.generateHmac(response));
+
+                    output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().compareTo("DOWNLOADF") == 0)
                 {
