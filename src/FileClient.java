@@ -34,15 +34,17 @@ public class FileClient extends Client implements FileClientInterface
         try
         {
 
+            env.addObject(this.session.generateHmac(env));
             // Get encrypted message from our EncryptionSuite
             env = this.session.getEncryptedMessage(env);
             output.writeObject(env);
+
 
             //Get the response from the server
             env = this.session.getDecryptedMessage((Envelope)input.readObject());
             env = this.session.clientSequenceNumberHandler(env);
 
-            if(env.getMessage().compareTo("OK") == 0)
+            if(env.getMessage().equals("OK"))
             {
                 System.out.printf("File %s deleted successfully\n", filename);
             }
@@ -85,6 +87,7 @@ public class FileClient extends Client implements FileClientInterface
                 env.addObject(this.session.getSequenceNum());
                 env.addObject(sourceFile);
                 env.addObject(token);
+                env.addObject(session.generateHmac(env));
                 // Get encrypted message from our EncryptionSuite
                 env = this.session.getEncryptedMessage(env);
                 output.writeObject(env);
@@ -134,9 +137,12 @@ public class FileClient extends Client implements FileClientInterface
             message = new Envelope("LFILES");
             message.addObject(this.session.getSequenceNum());
             message.addObject(token); //Add requester's token
+
+            // Generate an HMAC of our message for server to verify
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
 
             output.writeObject(message);
 
@@ -193,12 +199,16 @@ public class FileClient extends Client implements FileClientInterface
 
             message.addObject(fileBytes); // add file bytes to message
 
+            // Generate an HMAC of our message for server to verify
+            message.addObject(session.generateHmac(message));
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
 
             output.writeObject(message);
 
             env = this.session.getDecryptedMessage((Envelope)input.readObject());
+            env = this.session.clientHmacVerify(env);
             env = this.session.clientSequenceNumberHandler(env);
 
             //If server indicates success, return the member list
@@ -264,6 +274,7 @@ public class FileClient extends Client implements FileClientInterface
 	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken, EncryptionSuite fileServerPublicKey) throws Exception
     {
 		// 1) Generate a challenge.
+        this.session.setHmacKey();
 		SecureRandom prng = new SecureRandom();
         byte[] challenge = new byte[16];
         prng.nextBytes(challenge);
@@ -278,6 +289,10 @@ public class FileClient extends Client implements FileClientInterface
 
             // Add challenge and client pub key hash to envelope
 			message.addObject(challenge);
+			message.addObject(this.session.getHmacKey().getEncryptionKey()); // add the hmac key to our message
+
+            // Add an HMAC of our message created using the user's public RSA key
+            message.addObject(userKeys.generateHmac(this.session.getEnvelopeBytes(message)));
 
             // 2) Encrypt challenge with GS public key
 			Envelope encryptedMessage = this.session.getEncryptedMessageTargetKey(message);
@@ -286,6 +301,8 @@ public class FileClient extends Client implements FileClientInterface
 
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
+
+            response = this.session.clientHmacVerify(response);
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))

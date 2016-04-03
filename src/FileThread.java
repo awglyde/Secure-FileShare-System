@@ -61,10 +61,16 @@ public class FileThread extends Thread
                 }
                 else if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
                 {
-                    // gets shared AES for the correct client
+
 					message = session.getDecryptedMessage(message);
-                    // Handle the client's sequence number. if it's wrong, send a disconnect message
-                    message = session.serverSequenceNumberHandler(message);
+                    if (message.getObjContents().get(0) != null &&
+                        message.getObjContents().get(message.getObjContents().size()-1) != null)
+                    {
+                        // Verify the HMAC the client sent is valid. If it's wrong, send a disconnect message
+                        message = session.serverHmacVerify(message);
+                        // Handle the client's sequence number. if it's wrong, send a disconnect message
+                        message = session.serverSequenceNumberHandler(message);
+                    }
                 }
 
                 System.out.println("Request received: " + message.getMessage());
@@ -95,30 +101,47 @@ public class FileThread extends Thread
 						}
                     }
 
+                    // Generate an HMAC of our message for server to verify
+                    response.addObject(this.session.generateHmac(response));
+
                     output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("AUTHCHALLENGE"))
                 {
-					EncryptionSuite clientKeys = null;
-                    if(message.getObjContents().size() >= 1)
+                    if(message.getObjContents().size() >= 3)
                     {
-                        if(message.getObjContents().get(0) != null)
+                        // Checking first param isn't null
+                        if(message.getObjContents().get(0) != null &&
+                            message.getObjContents().get(1) != null &&
+                            message.getObjContents().get(2) != null)
                         {
 		                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
+                            Key hmacKey = (Key)message.getObjContents().get(1);
+                            byte[] messageHmac = (byte[])message.removeObject(2);
 
-		                    // Generating a new AES session key
-							session.setAESKey();
+                            // If we verify the message is from the person who sent it
+                            if (this.session.getTargetKey().verifyHmac(messageHmac, this.session.getEnvelopeBytes(message)))
+                            {
+                                // Creating an E.S. for our Hmac key from the client
+                                session.setHmacKey(hmacKey);
+    		                    // Generating a new AES session key
+    							session.setAESKey();
+    							// Setting the nonce
+    							session.setNonce(challenge);
+    		                    // Constructing the envelope
+    		                    response.setMessage("OK");
 
-							// Setting the nonce
-							session.setNonce(challenge);
+    		                    // Completing challenge
+    		                    response.addObject(session.completeChallenge());
+    		                    // Adding new AES session key
+    		                    response.addObject(session.getAESKey().getEncryptionKey());
+                            }
 
-		                    response.setMessage("OK");
-		                    // Adding completed challenge
-		                    response.addObject(session.completeChallenge());
-		                    // Adding new AES session key
-		                    response.addObject(session.getAESKey().getEncryptionKey());
 						}
 					}
+
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
 
                     // Encrypting it all and sending it along
                     output.writeObject(session.getEncryptedMessageTargetKey(response));
@@ -185,6 +208,10 @@ public class FileThread extends Thread
 
                                     response = new Envelope("OK"); //Success
                                     response.addObject(this.session.getSequenceNum());
+
+                                    // Generate an HMAC of our message for server to verify
+                                    response.addObject(session.generateHmac(response));
+
                                     output.writeObject(session.getEncryptedMessage(response));
                                 }
                             }

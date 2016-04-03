@@ -62,8 +62,6 @@ public class GroupThread extends Thread
                 }
                 else if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
                 {
-
-                    // gets shared AES for the correct client
 					message = session.getDecryptedMessage(message);
                     if (message.getObjContents().get(0) != null &&
                         message.getObjContents().get(message.getObjContents().size()-1) != null)
@@ -104,8 +102,7 @@ public class GroupThread extends Thread
                 }
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {
-					EncryptionSuite clientKeys = null;
-                    if(message.getObjContents().size() >= 2)
+                    if(message.getObjContents().size() >= 3)
                     {
                         // Checking first param isn't null
                         if(message.getObjContents().get(0) != null &&
@@ -136,7 +133,7 @@ public class GroupThread extends Thread
 
 						}
 					}
-
+                    // Generate an HMAC of the auth response for the client to verify
                     response.addObject(session.generateHmac(response));
 
                     // Encrypting it all with the client's pub key and sending it along
