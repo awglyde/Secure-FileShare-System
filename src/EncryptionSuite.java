@@ -49,6 +49,7 @@ public class EncryptionSuite
     public static final String ENCRYPTION_BLOWFISH = "Blowfish";
     public static final String ENCRYPTION_RSA = "RSA";
     public static final String SIGNATURE_SHA512_RSA = "SHA512WithRSAEncryption";
+    public static final String SIGNATURE_SHA1_RSA = "SHA1withRSA";
     public static final String HASH_ALGORITHM = "SHA-256";
     public static final String PROVIDER = "BC";
 	public static final String HMAC_ALGORITHM = "HmacSHA1";

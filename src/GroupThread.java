@@ -109,24 +109,30 @@ public class GroupThread extends Thread
                     {
                         // Checking first param isn't null
                         if(message.getObjContents().get(0) != null &&
-                            message.getObjContents().get(1) != null)
+                            message.getObjContents().get(1) != null &&
+                            message.getObjContents().get(2) != null)
                         {
 		                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
                             Key hmacKey = (Key)message.getObjContents().get(1);
+                            byte[] messageHmac = (byte[])message.removeObject(2);
 
-                            // Creating an E.S. for our Hmac key from the client
-                            session.setHmacKey(hmacKey);
-		                    // Generating a new AES session key
-							session.setAESKey();
-							// Setting the nonce
-							session.setNonce(challenge);
-		                    // Constructing the envelope
-		                    response.setMessage("OK");
+                            // If we verify the message is from the person who sent it
+                            if (this.session.getTargetKey().verifyHmac(messageHmac, this.session.getEnvelopeBytes(message)))
+                            {
+                                // Creating an E.S. for our Hmac key from the client
+                                session.setHmacKey(hmacKey);
+    		                    // Generating a new AES session key
+    							session.setAESKey();
+    							// Setting the nonce
+    							session.setNonce(challenge);
+    		                    // Constructing the envelope
+    		                    response.setMessage("OK");
 
-		                    // Completing challenge
-		                    response.addObject(session.completeChallenge());
-		                    // Adding new AES session key
-		                    response.addObject(session.getAESKey().getEncryptionKey());
+    		                    // Completing challenge
+    		                    response.addObject(session.completeChallenge());
+    		                    // Adding new AES session key
+    		                    response.addObject(session.getAESKey().getEncryptionKey());
+                            }
 
 						}
 					}

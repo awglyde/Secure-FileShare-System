@@ -420,7 +420,6 @@ public class GroupClient extends Client implements GroupClientInterface
 	{
 
 		// 1) Generate a challenge.
-
 		// TODO: add hmac
         this.session.setHmacKey();
 		SecureRandom prng = new SecureRandom();
@@ -433,6 +432,15 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("AUTHCHALLENGE");
 			message.addObject(challenge); // Add the nonce to our message
 			message.addObject(this.session.getHmacKey().getEncryptionKey()); // add the hmac key to our message
+            // Add an HMAC of our message created using the user's public RSA key
+            message.addObject(userKeys.generateHmac(this.session.getEnvelopeBytes(message)));
+
+            /*
+            System.out.println("Key Bytes: "+this.session.getHmacKey().getEncryptionKey().getEncoded().length);
+            System.out.println("Message Hash Bytes: "+userKeys.hashBytes(this.session.getEnvelopeBytes(message)).length);
+            // message.addObject(userKeys.generateSignature(userKeys.hashBytes(this.session.getEnvelopeBytes(message))));
+            System.out.println("Message Bytes: "+this.session.getEnvelopeBytes(message).length);
+            */
 
             // 2) Encrypt challenge with GS public key
 			Envelope encryptedMessage = this.session.getEncryptedMessageTargetKey(message);
