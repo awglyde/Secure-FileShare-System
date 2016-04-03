@@ -198,8 +198,6 @@ public class FileClient extends Client implements FileClientInterface
 
             output.writeObject(message);
 
-            FileInputStream fis = new FileInputStream(sourceFile);
-
             env = this.session.getDecryptedMessage((Envelope)input.readObject());
             env = this.session.clientSequenceNumberHandler(env);
 

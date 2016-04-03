@@ -1,6 +1,9 @@
 /* File worker thread handles the business of uploading, downloading, and removing files for clients with valid tokens */
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.net.Socket;
 import java.util.List;
 import java.security.Key;
@@ -70,8 +73,6 @@ public class FileThread extends Thread
 
                 if (!message.getMessage().equals("AUTHCHALLENGE") && !message.getMessage().equals("GPUBLICKEY"))
                     response.addObject(this.session.getSequenceNum());
-
-                System.out.println("Sequence Number: " + session.getSequenceNum());
 
                 // Handler to list files that this user is allowed to see
                 if(message.getMessage().equals("GPUBLICKEY"))
@@ -214,7 +215,7 @@ public class FileThread extends Thread
                         }
                         else
                         {
-
+                            // TODO: CLEAN THIS UP
                             try
                             {
                                 File f = new File("shared_files/_" + remotePath.replace('/', '_'));
@@ -227,10 +228,9 @@ public class FileThread extends Thread
                                 else
                                 {
                                     response.setMessage("FILE");
-                                    byte[] fileBytes = new byte[(int)f.length()];
-                                    FileInputStream fis = new FileInputStream(f);
-                                    fis.read(fileBytes);
-                                    fis.close();
+
+                                    Path path = Paths.get("shared_files/_" + remotePath.replace('/', '_'));
+                                    byte[] fileBytes = Files.readAllBytes(path);
 
                                     response.addObject(fileBytes);
 
