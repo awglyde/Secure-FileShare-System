@@ -36,6 +36,11 @@ public class Envelope implements java.io.Serializable
         return this.objContents.remove(object);
     }
 
+    public Object removeObject(int index)
+    {
+        return this.objContents.remove(index);
+    }
+
     public void addObject(Object object)
     {
         this.objContents.add(object);

@@ -133,8 +133,7 @@ public class Session
 
 	public Envelope clientSequenceNumberHandler(Envelope message)
 	{
-        int newSequenceNum = (int)message.getObjContents().get(0);
-        message.removeObject((int)message.getObjContents().get(0));
+        int newSequenceNum = (int)message.removeObject(0);
         if (!this.verifySequenceNumber(newSequenceNum))
         {
             System.out.println("Sequence number out of order! Session may be compromised. Exiting.");
@@ -150,8 +149,7 @@ public class Session
 		Envelope oldMessage = message;
         if (message.getObjContents().get(0) != null)
         {
-            int sequenceNum = (int)message.getObjContents().get(0);
-            message.removeObject(message.getObjContents().get(0));
+            int sequenceNum = (int)message.removeObject(0);
             if (this.getSequenceNum() == -1 || this.verifySequenceNumber(sequenceNum))
             {
                 this.setSequenceNum(sequenceNum);
@@ -169,8 +167,7 @@ public class Session
 
 	public Envelope clientHmacVerify(Envelope message) throws Exception
 	{
-        byte[] hmac = (byte[])message.getObjContents().get(message.getObjContents().size()-1);
-		message.removeObject(message.getObjContents().get(message.getObjContents().size()-1));
+        byte[] hmac = (byte[])message.removeObject(message.getObjContents().size()-1);
         if (!this.verifyHmac(hmac, this.getEnvelopeBytes(message)))
         {
             System.out.println("HMAC not verified! Session may be compromised. Exiting.");
@@ -181,8 +178,7 @@ public class Session
 
 	public Envelope serverHmacVerify(Envelope message) throws Exception
 	{
-        byte[] hmac = (byte[])message.getObjContents().get(message.getObjContents().size()-1);
-		message.removeObject(message.getObjContents().get(message.getObjContents().size()-1));
+        byte[] hmac = (byte[])message.removeObject(message.getObjContents().size()-1);
         if (!this.verifyHmac(hmac, this.getEnvelopeBytes(message)))
         {
             System.out.println("HMAC not verified! Session may be compromised. Disconnecting.");
