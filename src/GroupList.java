@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Map;
 import java.security.Key;
 
 /* This list represents the users on the server */
@@ -78,6 +79,33 @@ public class GroupList implements java.io.Serializable
         return this.getGroup(groupName).getMemberNames();
     }
 
+    public synchronized ArrayList<Key> getGroupKeys(String groupName)
+    {
+        if(this.getGroup(groupName) == null)
+            return null;
+
+        return this.getGroup(groupName).getGroupKeys();
+    }
+
+    public synchronized Hashtable<String, ArrayList<Key>> getGroupsAndKeys(String userName)
+    {
+        Hashtable<String, ArrayList<Key>> hashmap = new Hashtable<String, ArrayList<Key>>();
+        
+        // generate hash map of group name to key list
+        for (Map.Entry<String, Group> entry : this.list.entrySet()) {
+            String groupName = entry.getKey();
+            Group group = entry.getValue();
+
+            // verify user is a memeber of the group
+            if(group.isMember(userName))
+            {
+                // add groupname and keys to hashmap
+                hashmap.put(groupName, group.getGroupKeys());
+            }
+        }
+        return hashmap;
+    }
+
     public static class Group implements java.io.Serializable
     {
         private static final long serialVersionUID = -6688886336399711764L;
@@ -100,7 +128,7 @@ public class GroupList implements java.io.Serializable
             this.owner = owner;
         }
 
-        public ArrayList<Key> getKeys()
+        public ArrayList<Key> getGroupKeys()
         {
             return this.keys;
         }
