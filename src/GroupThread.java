@@ -134,6 +134,13 @@ public class GroupThread extends Thread
 						}
 					}
 
+                    System.out.println("Message bytes: "+javax.xml.bind.DatatypeConverter.printHexBinary(this.session.getEnvelopeBytes(response)));
+                    System.out.println("Server HMAC Key: "+this.session.getHmacKey().encryptionKeyToString());
+                    byte[] hmac1 = this.session.generateHmac(response);
+                    byte[] hmac2 = this.session.generateHmac(response);
+                    System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac1));
+                    System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac2));
+
                     response.addObject(session.generateHmac(response));
                     // Encrypting it all with the client's pub key and sending it along
                     output.writeObject(session.getEncryptedMessageTargetKey(response));
