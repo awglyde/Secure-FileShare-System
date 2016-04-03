@@ -137,6 +137,10 @@ public class FileClient extends Client implements FileClientInterface
                         return false;
                     }
                 }
+                else if (env.getMessage().equals("FAIL"))
+                {
+                    return false;
+                }
 
             }
             else
@@ -193,6 +197,10 @@ public class FileClient extends Client implements FileClientInterface
             if(response.getMessage().equals("OK"))
             {
                 return (List<String>) response.getObjContents().get(0); //This cast creates compiler warnings. Sorry.
+            }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return null;
             }
 
             return null;
@@ -383,6 +391,10 @@ public class FileClient extends Client implements FileClientInterface
                 Key session = (Key)response.getObjContents().get(1); // New session key from file server
 				this.session.setAESKey(session);
                 return true;
+            }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
             }
         }
         catch(Exception e)

@@ -63,6 +63,10 @@ public class GroupClient extends Client implements GroupClientInterface
                     return new Pair<UserToken, Hashtable<String, ArrayList<Key>>>(token, keyRing);
                 }
             }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return null;
+            }
 
             return null;
         }
@@ -107,6 +111,10 @@ public class GroupClient extends Client implements GroupClientInterface
             if(response.getMessage().equals("OK"))
             {
                 return true;
+            }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
             }
 
             return true;
@@ -153,6 +161,11 @@ public class GroupClient extends Client implements GroupClientInterface
             {
                 return true;
             }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
+            }
+
 
             return false;
         }
@@ -198,6 +211,10 @@ public class GroupClient extends Client implements GroupClientInterface
             {
                 return true;
             }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
+            }
 
             return false;
         }
@@ -241,6 +258,10 @@ public class GroupClient extends Client implements GroupClientInterface
             if(response.getMessage().equals("OK"))
             {
                 return true;
+            }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
             }
 
             return false;
@@ -286,6 +307,10 @@ public class GroupClient extends Client implements GroupClientInterface
             {
                 return true;
             }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
+            }
 
             return false;
         }
@@ -330,6 +355,10 @@ public class GroupClient extends Client implements GroupClientInterface
             if(response.getMessage().equals("OK"))
             {
                 return (List<String>) response.getObjContents().get(0); //This cast creates compiler warnings. Sorry.
+            }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return null;
             }
 
             return null;
@@ -377,6 +406,10 @@ public class GroupClient extends Client implements GroupClientInterface
             {
                 return true;
             }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
+            }
 
             return false;
         }
@@ -422,6 +455,10 @@ public class GroupClient extends Client implements GroupClientInterface
             {
                 return true;
             }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
+            }
 
             return false;
         }
@@ -462,6 +499,10 @@ public class GroupClient extends Client implements GroupClientInterface
             if(response.getMessage().equals("OK"))
             {
                 return true;
+            }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
             }
         }
         catch(Exception e)
@@ -521,6 +562,10 @@ public class GroupClient extends Client implements GroupClientInterface
 				this.session.setAESKey(sessionKey);
                 return true;
             }
+            else if (response.getMessage().equals("FAIL"))
+            {
+                return false;
+            }
         }
         catch(Exception e)
         {
@@ -562,6 +607,9 @@ public class GroupClient extends Client implements GroupClientInterface
 
             // Get the decrypted response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
 
             // Validate the sequence number from the server
             response = this.session.clientSequenceNumberHandler(response);

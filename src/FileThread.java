@@ -325,10 +325,27 @@ public class FileThread extends Thread
 
                     output.writeObject(session.getEncryptedMessage(response));
                 }
-                else if(message.getMessage().equals("DISCONNECT"))
+                else if (message.getMessage().equals("DISCONNECT"))
                 {
                     socket.close();
                     proceed = false;
+                }
+                else if (message.getMessage().equals("FAIL"))
+                {
+
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
+
+                    output.writeObject(session.getEncryptedMessage(response));
+                }
+                else
+                {
+                    response.setMessage("FAIL"); //Server does not understand client request
+
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
+
+                    output.writeObject(session.getEncryptedMessage(response));
                 }
             } while(proceed);
         }
