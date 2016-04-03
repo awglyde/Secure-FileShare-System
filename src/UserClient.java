@@ -350,6 +350,11 @@ public class UserClient
                 case "1":
                     System.out.println("List of files: \n");
                     List<String> fileList = fileClient.listFiles(userToken);
+					if (fileList == null)
+					{
+						System.out.println("File List was null. Please retrieve a token before attempting to list files");
+						break;
+					}
                     for (String file : fileList)
                      System.out.println(file);
 

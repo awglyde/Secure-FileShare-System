@@ -89,15 +89,18 @@ public class FileClient extends Client implements FileClientInterface
                 FileOutputStream fos = new FileOutputStream(file);
 
                 Envelope env = new Envelope("DOWNLOADF"); //Success
+                // Add the most recent sequence number to our message
                 env.addObject(this.session.getSequenceNum());
                 env.addObject(sourceFile);
                 env.addObject(token);
+                // Generate an HMAC of our message for file server to verify
                 env.addObject(session.generateHmac(env));
                 // Get encrypted message from our EncryptionSuite
                 env = this.session.getEncryptedMessage(env);
+                // Write the message to the server
                 output.writeObject(env);
 
-                //Get the response from the server
+                //Get the decrypted response from the server
                 env = this.session.getDecryptedMessage((Envelope)input.readObject());
 
     			// Verify the HMAC sent by the file server
@@ -109,12 +112,23 @@ public class FileClient extends Client implements FileClientInterface
                 if (env.getMessage().equals("FILE"))
                 {
                     byte[] encryptedFileBytes = (byte[])env.getObjContents().get(0);
+                    // Group that owns the file we downloaded. Used to find the right key
                     String group = (String)env.getObjContents().get(1);
+                    // Retrieve the relevant version number. Used to find the right key
                     int keyVersion = (int)env.getObjContents().get(2);
-
-                    fos.write(EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes));
-                    fos.close();
-                    System.out.println("SUCCESSFULLY DOWNLOADED THE FILE!");
+                    // Make sure our key ring is not null before we try to decrypt anything
+                    if (!(keyRing == null))
+                    {
+                        // With the right key version, decrypt the file retrieved from the file server
+                        fos.write(EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes));
+                        fos.close();
+                        System.out.println("SUCCESSFULLY DOWNLOADED THE FILE!");
+                    }
+                    else
+                    {
+                        System.out.println("Failed to unencrypt file. Please retrieve a token and keyring from group server and try again.");
+                        return false;
+                    }
                 }
 
             }
@@ -123,7 +137,6 @@ public class FileClient extends Client implements FileClientInterface
                 System.out.printf("Error couldn't create file %s\n", destFile);
                 return false;
             }
-
 
         }
         catch(IOException e1)
@@ -198,6 +211,7 @@ public class FileClient extends Client implements FileClientInterface
         {
 
             Envelope message = null, env = null;
+            byte[] fileBytes = null;
             //Tell the server to return the member list
             message = new Envelope("UPLOADF");
             message.addObject(this.session.getSequenceNum());
@@ -205,14 +219,34 @@ public class FileClient extends Client implements FileClientInterface
             message.addObject(group);
             message.addObject(token); //Add requester's token
 
-            Path path = Paths.get(sourceFile);
-            byte[] fileBytes = Files.readAllBytes(path);
+            File f = new File(sourceFile);
+            // Check to make sure f exists before we read its bytes
+            if(f.exists() && !f.isDirectory())
+            {
+                Path path = Paths.get(sourceFile);
+                fileBytes = Files.readAllBytes(path);
+            }
+            else
+            {
+                return false;
+            }
 
-            message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), fileBytes)); // add file bytes to message
+            // Can't encrypt file if our keyring is empty. Need to retrieve one from group server if so
+            if (!(keyRing == null) && !(fileBytes == null))
+            {
+                message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), fileBytes)); // add file bytes to message
 
-            // add the version number of the encrypted file
-            System.out.println(keyRing.get(group).size()-1);
-            message.addObject(keyRing.get(group).size()-1);
+                // add the version number of the encrypted file
+                // TODO: REMOVE LATER
+                System.out.println(keyRing.get(group).size()-1);
+                message.addObject(keyRing.get(group).size()-1);
+            }
+            else
+            {
+                System.out.println("Keyring was empty or file is null. Please retrieve a token from the group server before attempting to add or download a file.");
+                return false;
+            }
+
 
             // Generate an HMAC of our message for server to verify
             message.addObject(session.generateHmac(message));
@@ -222,6 +256,7 @@ public class FileClient extends Client implements FileClientInterface
 
             output.writeObject(message);
 
+            // Get decrypted response from server
             env = this.session.getDecryptedMessage((Envelope)input.readObject());
 
 			// Verify the HMAC sent by the file server
@@ -292,7 +327,7 @@ public class FileClient extends Client implements FileClientInterface
 
 	public boolean authChallenge(EncryptionSuite userKeys, UserToken userToken, EncryptionSuite fileServerPublicKey) throws Exception
     {
-		// 1) Generate a challenge.
+		// 1) Generate a challenge and a new HMAC key
         this.session.setHmacKey();
 		SecureRandom prng = new SecureRandom();
         byte[] challenge = new byte[16];

@@ -476,8 +476,7 @@ public class GroupClient extends Client implements GroupClientInterface
 	public boolean authChallenge(EncryptionSuite userKeys) throws Exception
 	{
 
-		// 1) Generate a challenge.
-		// TODO: add hmac
+		// 1) Generate a challenge & set HMAC
         this.session.setHmacKey();
 		SecureRandom prng = new SecureRandom();
         byte[] challenge = new byte[16];
@@ -535,8 +534,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
 	public boolean authLogin(EncryptionSuite userKeys) throws Exception
 	{
-		// 1) Enter userName and password (SECURELY. SANITIZE INPUTS)
-
+		// 1) Enter username and password
 		SecureRandom prng = new SecureRandom();
         int sequenceNumber = prng.nextInt();
         this.session.setSequenceNum(Math.abs(sequenceNumber));
@@ -551,16 +549,21 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             //Tell the server to return its public key
             message = new Envelope("AUTHLOGIN");
+            // Add our new sequence number to the message
             message.addObject(this.session.getSequenceNum());
 			message.addObject(UserClient.userName);
             message.addObject(password);
+            // Generate an HMAC for the server to verify
             message.addObject(session.generateHmac(message));
 
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
             output.writeObject(message);
 
+            // Get the decrypted response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+            // Validate the sequence number from the server
             response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true

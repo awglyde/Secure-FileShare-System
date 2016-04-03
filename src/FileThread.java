@@ -144,8 +144,7 @@ public class FileThread extends Thread
                 }
                 else if(message.getMessage().equals("UPLOADF"))
                 {
-                    // TODO: CLEAN THIS UP
-                    if(message.getObjContents().size() < 3)
+                    if(message.getObjContents().size() < 5)
                     {
                         response.setMessage("FAIL-BADCONTENTS");
                     }
