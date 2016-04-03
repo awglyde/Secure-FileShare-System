@@ -231,17 +231,20 @@ public class FileClient extends Client implements FileClientInterface
                 return false;
             }
 
-            // Can't encrypt file if our keyring is empty. Need to retrieve one from group server if so
-            if (!(keyRing == null) && !(fileBytes == null))
+            // Can't encrypt file if our keyring is empty, file is null, we're not a member of the group we're trying to upload to.
+            // Need to retrieve one from group server if so
+            if (!(keyRing == null) && !(fileBytes == null) && !(keyRing.get(group) == null))
             {
                 message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), fileBytes)); // add file bytes to message
 
                 // add the version number of the encrypted file
+                // TODO: REMOVE LATER
+                System.out.println(keyRing.get(group).size()-1);
                 message.addObject(keyRing.get(group).size()-1);
             }
             else
             {
-                System.out.println("Keyring was empty or file is null. Please retrieve a token from the group server before attempting to add or download a file.");
+                System.out.println("Keyring was empty, file is null, or you're not a member of the group you were uploading to. Please retrieve a token from the group server before attempting to add or download a file.");
                 return false;
             }
 
