@@ -132,7 +132,7 @@ public class FileClient extends Client implements FileClientInterface
                         fos.close();
 
                         // Weird hack to truncate end of file.
-                        // Random ^@^@^@ was appearing on last line of file
+                        // Random ^@^@^@ was appearing at EOF
                         // So I seek to end of file, work backwards in a loop until
                         // I find a line feed character. Truncate the file after that char
                         // TODO: Get rid of this
