@@ -37,8 +37,8 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
-            response = this.session.clientSequenceNumberHandler(response);
             response = this.session.clientHmacVerify(response);
+            response = this.session.clientSequenceNumberHandler(response);
 
             //Successful response
             if(response.getMessage().equals("OK"))
@@ -283,8 +283,8 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
-            response = this.session.clientSequenceNumberHandler(response);
             response = this.session.clientHmacVerify(response);
+            response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return the member list
             if(response.getMessage().equals("OK"))
@@ -503,7 +503,7 @@ public class GroupClient extends Client implements GroupClientInterface
 			message.addObject(UserClient.userName);
             message.addObject(password);
             message.addObject(session.generateHmac(message));
-            
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
             output.writeObject(message);
