@@ -13,7 +13,7 @@ public class GroupList implements java.io.Serializable
     {
         return this.getGroup("ADMIN").isMember(username);
     }
-    public synchronized void addGroup(String owner, String groupName)
+    public synchronized void addGroup(String owner, String groupName) throws Exception
     {
         Group newGroup = new Group(owner);
         this.list.put(groupName, newGroup);
@@ -88,7 +88,7 @@ public class GroupList implements java.io.Serializable
         // list of keys, the index will represent the verison number
         private ArrayList<Key> keys;
 
-        public Group(String owner)
+        public Group(String owner) throws Exception
         {
             this.groupMembers = new ArrayList<String>();
             groupMembers.add(owner);
