@@ -443,10 +443,12 @@ public class GroupClient extends Client implements GroupClientInterface
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
 
             response = this.session.clientHmacVerify(response);
+
+            /*
             System.out.println("Response bytes: "+javax.xml.bind.DatatypeConverter.printHexBinary(this.session.getEnvelopeBytes(response)));
             System.out.println("Client HMAC Key: "+this.session.getHmacKey().encryptionKeyToString());
             byte[] hmac1 = this.session.generateHmac(response);
-            System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac1));
+            System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac1));*/
 
 
             //If server indicates success, return true
@@ -500,6 +502,8 @@ public class GroupClient extends Client implements GroupClientInterface
             message.addObject(this.session.getSequenceNum());
 			message.addObject(UserClient.userName);
             message.addObject(password);
+            message.addObject(session.generateHmac(message));
+            
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
             output.writeObject(message);
