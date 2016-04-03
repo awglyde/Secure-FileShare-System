@@ -52,9 +52,6 @@ public class GroupThread extends Thread
 
                         Key clientPublicKey = (Key)message.getObjContents().get(1);
 						session.setTargetKey(clientPublicKey);
-						// TODO: Remove this property. Deprecated with new protocol
-	                    // my_gs.mapClientCodeToPublicKey((Integer)key.hashCode(), key);
-						// Add the server's public key to the envelope and send it back.
 					}
 
 				}
