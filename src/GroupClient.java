@@ -444,13 +444,6 @@ public class GroupClient extends Client implements GroupClientInterface
 
             response = this.session.clientHmacVerify(response);
 
-            /*
-            System.out.println("Response bytes: "+javax.xml.bind.DatatypeConverter.printHexBinary(this.session.getEnvelopeBytes(response)));
-            System.out.println("Client HMAC Key: "+this.session.getHmacKey().encryptionKeyToString());
-            byte[] hmac1 = this.session.generateHmac(response);
-            System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac1));*/
-
-
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
