@@ -44,8 +44,7 @@ public class FileThread extends Thread
                     // Checking first param isn't null
                     if(message.getObjContents().get(1) != null)
                     {
-						// Map the client's hash of their key to their key, so we know who we're talking to in the future
-
+                        // Getting the current client's public key
                         Key clientPublicKey = (Key)message.getObjContents().get(1);
 						session.setTargetKey(clientPublicKey);
 					}
@@ -57,8 +56,9 @@ public class FileThread extends Thread
                 }
                 else if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_AES))
                 {
+                    // Decrypt the message with the shared session AES key
+                    message = session.getDecryptedMessage(message);
 
-					message = session.getDecryptedMessage(message);
                     if (message.getObjContents().get(0) != null &&
                         message.getObjContents().get(message.getObjContents().size()-1) != null)
                     {
@@ -224,14 +224,12 @@ public class FileThread extends Thread
                         {
                             System.out.printf("Error: File %s doesn't exist\n", remotePath);
                             response.setMessage("ERROR_FILEMISSING");
-                            output.writeObject(session.getEncryptedMessage(response));
 
                         }
                         else if(!yourToken.getGroups().contains(sf.getGroup()))
                         {
                             System.out.printf("Error user %s doesn't have permission\n", yourToken.getSubject());
                             response.setMessage("ERROR_PERMISSION");
-                            output.writeObject(session.getEncryptedMessage(response));
                         }
                         else
                         {
@@ -242,7 +240,6 @@ public class FileThread extends Thread
                                 {
                                     System.out.printf("Error file %s missing from disk\n", "_" + remotePath.replace('/', '_'));
                                     response.setMessage("ERROR_NOTONDISK");
-                                    output.writeObject(session.getEncryptedMessage(response));
                                 }
                                 else
                                 {
@@ -255,7 +252,6 @@ public class FileThread extends Thread
                                     response.addObject(sf.getGroup());
                                     response.addObject(sf.getEncryptionVersion());
 
-                                    output.writeObject(session.getEncryptedMessage(response));
                                 }
                             }
                             catch(Exception e1)
@@ -265,6 +261,11 @@ public class FileThread extends Thread
                             }
                         }
                     }
+
+                    // Generate an HMAC of our message for server to verify
+                    response.addObject(session.generateHmac(response));
+
+                    output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().compareTo("DELETEF") == 0)
                 {
@@ -315,6 +316,10 @@ public class FileThread extends Thread
                             }
                         }
                     }
+
+                    // Generate an HMAC of our message for server to verify
+                    response.addObject(session.generateHmac(response));
+
                     output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("DISCONNECT"))

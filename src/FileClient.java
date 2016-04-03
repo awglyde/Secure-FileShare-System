@@ -44,6 +44,11 @@ public class FileClient extends Client implements FileClientInterface
 
             //Get the response from the server
             env = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the file server
+            env = this.session.clientHmacVerify(env);
+
+			// Verify the sequence number sent by the file server
             env = this.session.clientSequenceNumberHandler(env);
 
             if(env.getMessage().equals("OK"))
@@ -94,6 +99,11 @@ public class FileClient extends Client implements FileClientInterface
 
                 //Get the response from the server
                 env = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+    			// Verify the HMAC sent by the file server
+                env = this.session.clientHmacVerify(env);
+
+    			// Verify the sequence number sent by the file server
                 env = this.session.clientSequenceNumberHandler(env);
 
                 if (env.getMessage().equals("FILE"))
@@ -152,6 +162,11 @@ public class FileClient extends Client implements FileClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the file server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the file server
             response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return the member list
@@ -208,7 +223,11 @@ public class FileClient extends Client implements FileClientInterface
             output.writeObject(message);
 
             env = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the file server
             env = this.session.clientHmacVerify(env);
+
+			// Verify the sequence number sent by the file server
             env = this.session.clientSequenceNumberHandler(env);
 
             //If server indicates success, return the member list
@@ -302,6 +321,7 @@ public class FileClient extends Client implements FileClientInterface
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
 
+            // Verify the hmac sent by the file server
             response = this.session.clientHmacVerify(response);
 
             //If server indicates success, return true
