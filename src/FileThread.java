@@ -71,6 +71,8 @@ public class FileThread extends Thread
                 if (!message.getMessage().equals("AUTHCHALLENGE") && !message.getMessage().equals("GPUBLICKEY"))
                     response.addObject(this.session.getSequenceNum());
 
+                System.out.println("Sequence Number: " + session.getSequenceNum());
+
                 // Handler to list files that this user is allowed to see
                 if(message.getMessage().equals("GPUBLICKEY"))
                 {
@@ -145,6 +147,7 @@ public class FileThread extends Thread
                             String remotePath = (String) message.getObjContents().get(0);
                             String group = (String) message.getObjContents().get(1);
                             UserToken yourToken = (UserToken) message.getObjContents().get(2); //Extract token
+                            byte[] fileBytes = (byte[])message.getObjContents().get(3);
 
                             // Verify token signature and make sure it isn't expired
                             response.setMessage("FAIL-BADTOKEN");
@@ -164,49 +167,19 @@ public class FileThread extends Thread
                                 {
                                     File file = new File("shared_files/" + remotePath.replace('/', '_'));
                                     file.createNewFile();
+
                                     FileOutputStream fos = new FileOutputStream(file);
                                     System.out.printf("Successfully created file %s\n", remotePath.replace('/', '_'));
 
-                                    response = new Envelope("READY"); //Success
+                                    fos.write(fileBytes);
+                                    fos.close();
+                                    System.out.println("Successfully received the file from the client.");
+
+                                    FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath);
+
+                                    response = new Envelope("OK"); //Success
                                     response.addObject(this.session.getSequenceNum());
                                     output.writeObject(session.getEncryptedMessage(response));
-
-                                    message = (Envelope) input.readObject();
-                                    message = session.getDecryptedMessage(message);
-                                    message = session.serverSequenceNumberHandler(message);
-
-                                    if (message.getMessage().equals("FILE"))
-                                    {
-                                        fos.write((byte[])message.getObjContents().get(0));
-                                        fos.close();
-                                        System.out.println("Successfully received the file from the client.");
-                                    }
-                                    /*
-                                    while(message.getMessage().compareTo("CHUNK") == 0)
-                                    {
-                                        fos.write((byte[]) message.getObjContents().get(0), 0, (Integer) message.getObjContents().get(1));
-                                        response = new Envelope("READY"); //Success
-                                        response.addObject(this.session.getSequenceNum());
-                                        output.writeObject(session.getEncryptedMessage(response));
-                                        message = (Envelope) input.readObject();
-                                        message = session.getDecryptedMessage(message);
-                                        message = session.serverSequenceNumberHandler(message);
-                                    }
-
-                                    if(message.getMessage().compareTo("EOF") == 0)
-                                    {
-                                        System.out.printf("Transfer successful file %s\n", remotePath);
-                                        FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath);
-                                        response = new Envelope("OK"); //Success
-                                        response.addObject(this.session.getSequenceNum());
-                                    }
-                                    else
-                                    {
-                                        System.out.printf("Error reading file %s from client\n", remotePath);
-                                        response = new Envelope("ERROR-TRANSFER"); //Success
-                                        response.addObject(this.session.getSequenceNum());
-                                    }
-                                    */
                                 }
                             }
                             else
@@ -215,7 +188,6 @@ public class FileThread extends Thread
                             }
                         }
                     }
-
                 }
                 else if(message.getMessage().compareTo("DOWNLOADF") == 0)
                 {

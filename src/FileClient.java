@@ -187,6 +187,12 @@ public class FileClient extends Client implements FileClientInterface
             message.addObject(destFile);
             message.addObject(group);
             message.addObject(token); //Add requester's token
+
+            Path path = Paths.get(sourceFile);
+            byte[] fileBytes = Files.readAllBytes(path);
+
+            message.addObject(fileBytes); // add file bytes to message
+
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
 
@@ -198,99 +204,15 @@ public class FileClient extends Client implements FileClientInterface
             env = this.session.clientSequenceNumberHandler(env);
 
             //If server indicates success, return the member list
-            if(env.getMessage().equals("READY"))
+            if(env.getMessage().equals("OK"))
             {
-                System.out.printf("Meta data upload successful\n");
+                System.out.printf("File was uploaded successful\n");
             }
             else
             {
                 System.out.printf("Upload failed: %s\n", env.getMessage());
                 return false;
             }
-
-            env = new Envelope("FILE");
-            env.addObject(this.session.getSequenceNum());
-            Path path = Paths.get(sourceFile);
-            byte[] fileBytes = Files.readAllBytes(path);
-
-            env.addObject(fileBytes);
-
-            output.writeObject(session.getEncryptedMessage(env));
-
-            /*
-            do
-            {
-                byte[] buf = new byte[4096];
-                if(env.getMessage().compareTo("READY") != 0)
-                {
-                    System.out.printf("Server error: %s\n", env.getMessage());
-                    return false;
-                }
-                message = new Envelope("CHUNK");
-                message.addObject(this.session.getSequenceNum());
-                int n = fis.read(buf); //can throw an IOException
-                if(n > 0)
-                {
-                    System.out.printf(".");
-                }
-                else if(n < 0)
-                {
-                    System.out.println("Read error");
-                    return false;
-                }
-
-                message.addObject(buf);
-                message.addObject(new Integer(n));
-
-                // Get encrypted message from our EncryptionSuite
-                message = this.session.getEncryptedMessage(message);
-                // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-
-                output.writeObject(message);
-
-                env = this.session.getDecryptedMessage((Envelope)input.readObject());
-                env = this.session.clientSequenceNumberHandler(env);
-
-
-            }
-            while(fis.available() > 0);
-
-            //If server indicates success, return the member list
-            if(env.getMessage().compareTo("READY") == 0)
-            {
-
-                message = new Envelope("EOF");
-                message.addObject(this.session.getSequenceNum());
-
-                // Get encrypted message from our EncryptionSuite
-                message = this.session.getEncryptedMessage(message);
-                // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
-
-                output.writeObject(message);
-
-                env = this.session.getDecryptedMessage((Envelope)input.readObject());
-                env = this.session.clientSequenceNumberHandler(env);
-
-                if(env.getMessage().compareTo("OK") == 0)
-                {
-                    System.out.printf("\nFile data upload successful\n");
-                }
-                else
-                {
-
-                    System.out.printf("\nUpload failed: %s\n", env.getMessage());
-                    return false;
-                }
-
-            }
-            else
-            {
-
-                System.out.printf("Upload failed: %s\n", env.getMessage());
-                return false;
-            }
-            */
-
         }
         catch(Exception e1)
         {
