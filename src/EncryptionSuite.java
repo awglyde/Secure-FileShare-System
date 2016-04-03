@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import javax.xml.bind.DatatypeConverter;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 
 public class EncryptionSuite
 {
@@ -195,8 +197,6 @@ public class EncryptionSuite
 	    Mac mac = Mac.getInstance(HMAC_ALGORITHM);
 	    mac.init(this.encryptionKey);
 
-	    // byte[] digest = mac.doFinal(messageBytes);
-		// return digest;
 	    return mac.doFinal(messageBytes);
 	}
 
@@ -286,22 +286,33 @@ public class EncryptionSuite
 
     }
 
-    public static byte[] encryptFile(ArrayList<Key> keys, byte[] file) throws Exception
+    public static byte[] encryptFile(ArrayList<Key> keys, FileInputStream fis, int fileSize) throws Exception
     {
         // create new encryption suite object with last key
         EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
 
+        byte[] encryptedFile = new byte[fileSize];
+
+        CipherInputStream cipherStream = new CipherInputStream(fis, encryptionKey.getCipher(encrypt));
+
+        cipherStream.read(encryptedFile);
+
         // encrypt the file and return the encrypted bytes
-        return encryptionKey.encryptBytes(file,  encrypt);
+        return encryptedFile;
     }
 
-    public static byte[] decryptFile(ArrayList<Key> keys, int version, byte[] encryptedFile) throws Exception
+    public static byte[] decryptFile(ArrayList<Key> keys, int version, FileOutputStream fos, int fileSize) throws Exception
     {
         // create new encryption suite object with key at index - version
         EncryptionSuite decryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
 
+        byte[] decryptedFile = new byte[fileSize];
+
+        CipherOutputStream cipherStream = new CipherOutputStream(fos, decryptionKey.getCipher(decrypt));
+        cipherStream.write(decryptedFile);
+
         // decrypt the file and return the decrypted bytes
-        return decryptionKey.encryptBytes(encryptedFile, decrypt);
+        return decryptedFile;
     }
 
     public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception

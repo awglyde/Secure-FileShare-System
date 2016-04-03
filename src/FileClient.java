@@ -1,6 +1,7 @@
 /* FileClient provides all the client functionality regarding the file server */
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
@@ -117,11 +118,17 @@ public class FileClient extends Client implements FileClientInterface
                     // Retrieve the relevant version number. Used to find the right key
                     int keyVersion = (int)env.getObjContents().get(2);
                     // Make sure our key ring is not null before we try to decrypt anything
-                    if (!(keyRing == null))
+                    if (!(keyRing == null) && !(keyRing.get(group) == null))
                     {
+                        System.out.println("file length: " + encryptedFileBytes.length);
+
                         // With the right key version, decrypt the file retrieved from the file server
-                        fos.write(EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes));
+                        byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, fos, encryptedFileBytes.length);
+
+                        System.out.println("file length: " + decryptedFileBytes.length);
+                        fos.write(decryptedFileBytes);
                         fos.close();
+
                         System.out.println("SUCCESSFULLY DOWNLOADED THE FILE!");
                     }
                     else
@@ -235,7 +242,7 @@ public class FileClient extends Client implements FileClientInterface
             // Need to retrieve one from group server if so
             if (!(keyRing == null) && !(fileBytes == null) && !(keyRing.get(group) == null))
             {
-                message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), fileBytes)); // add file bytes to message
+                message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), new FileInputStream(sourceFile), fileBytes.length)); // add file bytes to message
 
                 // add the version number of the encrypted file
                 message.addObject(keyRing.get(group).size()-1);

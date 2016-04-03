@@ -1,6 +1,7 @@
 /* File worker thread handles the business of uploading, downloading, and removing files for clients with valid tokens */
 
 import java.io.*;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
@@ -192,8 +193,10 @@ public class FileThread extends Thread
                                     FileOutputStream fos = new FileOutputStream(file);
                                     System.out.printf("Successfully created file %s\n", remotePath.replace('/', '_'));
 
+                                    System.out.println("File length: " + fileBytes.length);
                                     fos.write(fileBytes);
                                     fos.close();
+
                                     System.out.println("Successfully received the file from the client.");
 
                                     FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath, keyVersion);
@@ -247,6 +250,7 @@ public class FileThread extends Thread
                                     Path path = Paths.get("shared_files/_" + remotePath.replace('/', '_'));
                                     byte[] fileBytes = Files.readAllBytes(path);
 
+                                    System.out.println("encrypted file length: " + fileBytes.length);
                                     response.addObject(fileBytes);
                                     response.addObject(sf.getGroup());
                                     response.addObject(sf.getEncryptionVersion());
