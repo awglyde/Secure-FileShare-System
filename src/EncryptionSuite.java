@@ -306,7 +306,7 @@ public class EncryptionSuite
 
     public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
     {
-        Cipher cipher = this.getCipher(encrypt);
+        Cipher cipher = this.getCipher(mode);
 
         byte[] outputBytes = new byte[cipher.getOutputSize(inputBytes.length)];
         int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
