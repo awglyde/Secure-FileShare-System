@@ -1,6 +1,7 @@
 /* FileClient provides all the client functionality regarding the file server */
 
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -130,6 +131,32 @@ public class FileClient extends Client implements FileClientInterface
                         fos.write(decryptedFileBytes);
                         fos.close();
 
+                        // Weird hack to truncate end of file.
+                        // Random ^@^@^@ was appearing on last line of file
+                        // So I seek to end of file, work backwards in a loop until
+                        // I find a line feed character. Truncate the file after that char
+                        // TODO: Get rid of this
+                        RandomAccessFile downloadedFile = new RandomAccessFile(destFile, "rw");
+
+                        // Get file length
+                        long fileLen = downloadedFile.length() - 1;
+
+                        byte currentByte = 0;
+
+                        do
+                        {
+                            fileLen -= 1;
+                            // Seek to end of the file
+                            downloadedFile.seek(fileLen);
+                            currentByte = downloadedFile.readByte();
+                        } // If we find b to be a linefeed character, exit
+                        while(currentByte != 10 && fileLen > 0);
+
+                        // Truncate the file after the length we found to be the real end of the file
+                        downloadedFile.setLength(fileLen+1);
+
+                        // Close our file
+                        downloadedFile.close();
                         return true;
                     }
                     else
@@ -284,7 +311,6 @@ public class FileClient extends Client implements FileClientInterface
             //If server indicates success, return the member list
             if(env.getMessage().equals("OK"))
             {
-                System.out.printf("File was uploaded successfully\n");
                 return true;
             }
             else
