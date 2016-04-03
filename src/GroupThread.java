@@ -68,8 +68,12 @@ public class GroupThread extends Thread
 
                     // gets shared AES for the correct client
 					message = session.getDecryptedMessage(message);
-                    if (message.getObjContents().get(0) != null)
+                    if (message.getObjContents().get(0) != null &&
+                        message.getObjContents().get(message.getObjContents().size()-1) != null)
+                    {
+                        message = session.serverHmacVerify(message);
                         message = session.serverSequenceNumberHandler(message);
+                    }
                 }
 
                 System.out.println("Request received: " + message.getMessage());
@@ -78,7 +82,9 @@ public class GroupThread extends Thread
 
                 // Adding incremented sequence number
                 if (!message.getMessage().equals("AUTHCHALLENGE"))
+                {
                     response.addObject(this.session.getSequenceNum());
+                }
 
                 if(message.getMessage().equals("UNLOCKUSER"))
                 {
@@ -102,13 +108,17 @@ public class GroupThread extends Thread
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {
 					EncryptionSuite clientKeys = null;
-                    if(message.getObjContents().size() >= 1)
+                    if(message.getObjContents().size() >= 2)
                     {
                         // Checking first param isn't null
-                        if(message.getObjContents().get(0) != null)
+                        if(message.getObjContents().get(0) != null &&
+                            message.getObjContents().get(1) != null)
                         {
 		                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
+                            Key hmacKey = (Key)message.getObjContents().get(1);
 
+                            // Creating an E.S. for our Hmac key from the client
+                            session.setHmacKey(hmacKey);
 		                    // Generating a new AES session key
 							session.setAESKey();
 							// Setting the nonce
@@ -120,9 +130,11 @@ public class GroupThread extends Thread
 		                    response.addObject(session.completeChallenge());
 		                    // Adding new AES session key
 		                    response.addObject(session.getAESKey().getEncryptionKey());
+
 						}
 					}
 
+                    response.addObject(session.generateHmac(response));
                     // Encrypting it all with the client's pub key and sending it along
                     output.writeObject(session.getEncryptedMessageTargetKey(response));
                 }
@@ -181,6 +193,11 @@ public class GroupThread extends Thread
                     }
 
                     response.addObject(yourToken);
+                    // TODO: KEYRING GO HERE
+
+                    // Generate Hmac for our message
+                    response.addObject(session.generateHmac(response));
+
                     output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("CUSER")) //Client wants to create a user
@@ -278,6 +295,8 @@ public class GroupThread extends Thread
                             {
                                 response.setMessage("OK"); //Success
                                 response.addObject(members);
+                                response.addObject(session.generateHmac(response));
+
                             }
                         }
                     }
@@ -288,8 +307,7 @@ public class GroupThread extends Thread
                 {
                     if(message.getObjContents().size() >= 3)
                     {
-                        if( message.getObjContents().get(0) != null && message.getObjContents().get(1) != null
-                                                                    && message.getObjContents().get(2) != null)
+                        if( message.getObjContents().get(0) != null && message.getObjContents().get(1) != null && message.getObjContents().get(2) != null)
                         {
                             // Checking second param isn't null
                             String userName = (String) message.getObjContents().get(0); //Extract the userName

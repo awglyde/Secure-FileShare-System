@@ -36,7 +36,8 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
-            response = session.clientSequenceNumberHandler(response);
+            response = this.session.clientSequenceNumberHandler(response);
+            response = this.session.clientHmacVerify(response);
 
             //Successful response
             if(response.getMessage().equals("OK"))
@@ -282,6 +283,7 @@ public class GroupClient extends Client implements GroupClientInterface
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
             response = this.session.clientSequenceNumberHandler(response);
+            response = this.session.clientHmacVerify(response);
 
             //If server indicates success, return the member list
             if(response.getMessage().equals("OK"))
@@ -429,7 +431,7 @@ public class GroupClient extends Client implements GroupClientInterface
             Envelope message = null, response = null;
             message = new Envelope("AUTHCHALLENGE");
 			message.addObject(challenge); // Add the nonce to our message
-			// message.addObject(hmac.getEncryptionKey()); // add the hmac key to our message
+			message.addObject(this.session.getHmacKey().getEncryptionKey()); // add the hmac key to our message
 
             // 2) Encrypt challenge with GS public key
 			Envelope encryptedMessage = this.session.getEncryptedMessageTargetKey(message);
@@ -438,6 +440,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
+            response = this.session.clientHmacVerify(response);
 
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))

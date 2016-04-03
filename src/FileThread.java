@@ -125,23 +125,28 @@ public class FileThread extends Thread
                 }
                 else if(message.getMessage().equals("UPLOADF"))
                 {
+                    // TODO: CLEAN THIS UP
                     if(message.getObjContents().size() < 3)
                     {
                         response.setMessage("FAIL-BADCONTENTS");
+                        output.writeObject(session.getEncryptedMessage(response));
                     }
                     else
                     {
                         if(message.getObjContents().get(0) == null)
                         {
                             response.setMessage("FAIL-BADPATH");
+                            output.writeObject(session.getEncryptedMessage(response));
                         }
-                        if(message.getObjContents().get(1) == null)
+                        else if(message.getObjContents().get(1) == null)
                         {
                             response.setMessage("FAIL-BADGROUP");
+                            output.writeObject(session.getEncryptedMessage(response));
                         }
-                        if(message.getObjContents().get(2) == null)
+                        else if(message.getObjContents().get(2) == null)
                         {
                             response.setMessage("FAIL-BADTOKEN");
+                            output.writeObject(session.getEncryptedMessage(response));
                         }
                         else
                         {

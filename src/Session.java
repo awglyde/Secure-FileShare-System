@@ -109,11 +109,16 @@ public class Session
 
 	public byte[] generateHmac(Envelope message) throws Exception
 	{
+        byte[] messageBytes = this.getEnvelopeBytes(message);
+		return this.generateHmac(messageBytes);
+	}
+
+	public byte[] getEnvelopeBytes(Envelope message) throws Exception
+	{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(baos);
         out.writeObject(message);
-        byte[] messageBytes = baos.toByteArray();
-		return this.generateHmac(messageBytes);
+        return baos.toByteArray();
 	}
 
 	public boolean verifyHmac(byte[] hmacMesssage, byte[] messageBytes) throws Exception
@@ -160,6 +165,30 @@ public class Session
 			}
         }
 		return new Envelope("DISCONNECT");
+	}
+
+	public Envelope clientHmacVerify(Envelope message) throws Exception
+	{
+        byte[] hmac = (byte[])message.getObjContents().get(message.getObjContents().size()-1);
+        message.removeObject(message.getObjContents().size()-1);
+        if (!this.verifyHmac(hmac, this.getEnvelopeBytes(message)))
+        {
+            System.out.println("HMAC not verified! Session may be compromised. Exiting.");
+            System.exit(0);
+        }
+		return message;
+	}
+
+	public Envelope serverHmacVerify(Envelope message) throws Exception
+	{
+        byte[] hmac = (byte[])message.getObjContents().get(message.getObjContents().size()-1);
+        message.removeObject(message.getObjContents().size()-1);
+        if (!this.verifyHmac(hmac, this.getEnvelopeBytes(message)))
+        {
+            System.out.println("HMAC not verified! Session may be compromised. Disconnecting.");
+			return new Envelope("DISCONNECT");
+        }
+		return message;
 	}
 
 }
