@@ -94,6 +94,9 @@ public class GroupThread extends Thread
                         }
                     }
 
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
+
                     // Encrypting it all and sending it along
                     output.writeObject(session.getEncryptedMessage(response));
                 }
@@ -160,6 +163,9 @@ public class GroupThread extends Thread
                         }
                     }
 
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
+
                     output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("ISADMIN"))
@@ -174,6 +180,9 @@ public class GroupThread extends Thread
                                     response.setMessage("OK"); //Success
                         }
                     }
+
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
 
                     output.writeObject(session.getEncryptedMessage(response));
                 }
@@ -232,6 +241,9 @@ public class GroupThread extends Thread
                         }
                     }
 
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
+
                     output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("DUSER")) //Client wants to delete a user
@@ -249,6 +261,9 @@ public class GroupThread extends Thread
                             }
                         }
                     }
+
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
 
                     output.writeObject(session.getEncryptedMessage(response));
                 }
@@ -268,6 +283,9 @@ public class GroupThread extends Thread
                         }
                     }
 
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
+
                     output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("DGROUP")) //Client wants to delete a group
@@ -285,6 +303,9 @@ public class GroupThread extends Thread
                             }
                         }
                     }
+
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
 
                     output.writeObject(session.getEncryptedMessage(response));
                 }
@@ -307,7 +328,9 @@ public class GroupThread extends Thread
                         }
                     }
 
+                    // Generate an HMAC of the auth response for the client to verify
                     response.addObject(session.generateHmac(response));
+
                     output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("AUSERTOGROUP")) //Client wants to add user to a group
@@ -327,6 +350,9 @@ public class GroupThread extends Thread
                             }
                         }
                     }
+
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
 
                     output.writeObject(session.getEncryptedMessage(response));
                 }
@@ -358,6 +384,9 @@ public class GroupThread extends Thread
                             }
                         }
                     }
+
+                    // Generate an HMAC of the auth response for the client to verify
+                    response.addObject(session.generateHmac(response));
 
                     output.writeObject(session.getEncryptedMessage(response));
                 }
