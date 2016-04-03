@@ -238,8 +238,6 @@ public class FileClient extends Client implements FileClientInterface
                 message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), fileBytes)); // add file bytes to message
 
                 // add the version number of the encrypted file
-                // TODO: REMOVE LATER
-                System.out.println(keyRing.get(group).size()-1);
                 message.addObject(keyRing.get(group).size()-1);
             }
             else
