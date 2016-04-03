@@ -142,7 +142,7 @@ public class GroupThread extends Thread
                     System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac1));
                     System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac2));
                     */
-                    
+
                     response.addObject(session.generateHmac(response));
 
                     // Encrypting it all with the client's pub key and sending it along
@@ -305,12 +305,12 @@ public class GroupThread extends Thread
                             {
                                 response.setMessage("OK"); //Success
                                 response.addObject(members);
-                                response.addObject(session.generateHmac(response));
 
                             }
                         }
                     }
 
+                    response.addObject(session.generateHmac(response));
                     output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().equals("AUSERTOGROUP")) //Client wants to add user to a group
