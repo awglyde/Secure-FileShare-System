@@ -93,38 +93,13 @@ public class FileClient extends Client implements FileClientInterface
                 env = this.session.getDecryptedMessage((Envelope)input.readObject());
                 env = this.session.clientSequenceNumberHandler(env);
 
-                while(env.getMessage().compareTo("CHUNK") == 0)
+                if (env.getMessage().equals("FILE"))
                 {
-                    fos.write((byte[]) env.getObjContents().get(0), 0, (Integer) env.getObjContents().get(1));
-                    System.out.printf(".");
-                    env = new Envelope("DOWNLOADF"); //Success
-                    env.addObject(this.session.getSequenceNum());
-                    // Get encrypted message from our EncryptionSuite
-                    env = this.session.getEncryptedMessage(env);
-                    output.writeObject(env);
-
-                    env = this.session.getDecryptedMessage((Envelope)input.readObject());
-                    env = this.session.clientSequenceNumberHandler(env);
-                }
-                fos.close();
-
-                if(env.getMessage().compareTo("EOF") == 0)
-                {
+                    fos.write((byte[])env.getObjContents().get(0));
                     fos.close();
-                    System.out.printf("\nTransfer successful file %s\n", sourceFile);
-                    env = new Envelope("OK"); //Success
-                    env.addObject(this.session.getSequenceNum());
+                    System.out.println("SUCCESSFULLY DOWNLOADED THE FILE!");
+                }
 
-                    // Get encrypted message from our EncryptionSuite
-                    env = this.session.getEncryptedMessage(env);
-                    output.writeObject(env);
-                }
-                else
-                {
-                    System.out.printf("Error reading file %s (%s)\n", sourceFile, env.getMessage());
-                    file.delete();
-                    return false;
-                }
             }
             else
             {
@@ -197,7 +172,6 @@ public class FileClient extends Client implements FileClientInterface
         fout.write(data);
         fout.close();*/
 
-
         if(destFile.charAt(0) != '/')
         {
             destFile = "/" + destFile;
@@ -227,16 +201,23 @@ public class FileClient extends Client implements FileClientInterface
             if(env.getMessage().equals("READY"))
             {
                 System.out.printf("Meta data upload successful\n");
-
             }
             else
             {
-
                 System.out.printf("Upload failed: %s\n", env.getMessage());
                 return false;
             }
 
+            env = new Envelope("FILE");
+            env.addObject(this.session.getSequenceNum());
+            Path path = Paths.get(sourceFile);
+            byte[] fileBytes = Files.readAllBytes(path);
 
+            env.addObject(fileBytes);
+
+            output.writeObject(session.getEncryptedMessage(env));
+
+            /*
             do
             {
                 byte[] buf = new byte[4096];
@@ -308,6 +289,7 @@ public class FileClient extends Client implements FileClientInterface
                 System.out.printf("Upload failed: %s\n", env.getMessage());
                 return false;
             }
+            */
 
         }
         catch(Exception e1)

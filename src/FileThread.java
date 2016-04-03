@@ -174,6 +174,14 @@ public class FileThread extends Thread
                                     message = (Envelope) input.readObject();
                                     message = session.getDecryptedMessage(message);
                                     message = session.serverSequenceNumberHandler(message);
+
+                                    if (message.getMessage().equals("FILE"))
+                                    {
+                                        fos.write((byte[])message.getObjContents().get(0));
+                                        fos.close();
+                                        System.out.println("Successfully received the file from the client.");
+                                    }
+                                    /*
                                     while(message.getMessage().compareTo("CHUNK") == 0)
                                     {
                                         fos.write((byte[]) message.getObjContents().get(0), 0, (Integer) message.getObjContents().get(1));
@@ -198,20 +206,22 @@ public class FileThread extends Thread
                                         response = new Envelope("ERROR-TRANSFER"); //Success
                                         response.addObject(this.session.getSequenceNum());
                                     }
-                                    fos.close();
+                                    */
                                 }
+                            }
+                            else
+                            {
+                                output.writeObject(session.getEncryptedMessage(response));
                             }
                         }
                     }
 
-                    output.writeObject(session.getEncryptedMessage(response));
                 }
                 else if(message.getMessage().compareTo("DOWNLOADF") == 0)
                 {
 
                     String remotePath = (String) message.getObjContents().get(0);
                     UserToken yourToken = (UserToken) message.getObjContents().get(1); //Extract token
-
                     ShareFile sf = FileServer.fileList.getFile("/" + remotePath);
 
                     // Verify token signature and make sure it isn't expired
@@ -220,15 +230,15 @@ public class FileThread extends Thread
                         if(sf == null)
                         {
                             System.out.printf("Error: File %s doesn't exist\n", remotePath);
-                            message.setMessage("ERROR_FILEMISSING");
-                            output.writeObject(session.getEncryptedMessage(message));
+                            response.setMessage("ERROR_FILEMISSING");
+                            output.writeObject(session.getEncryptedMessage(response));
 
                         }
                         else if(!yourToken.getGroups().contains(sf.getGroup()))
                         {
                             System.out.printf("Error user %s doesn't have permission\n", yourToken.getSubject());
-                            message.setMessage("ERROR_PERMISSION");
-                            output.writeObject(session.getEncryptedMessage(message));
+                            response.setMessage("ERROR_PERMISSION");
+                            output.writeObject(session.getEncryptedMessage(response));
                         }
                         else
                         {
@@ -239,66 +249,20 @@ public class FileThread extends Thread
                                 if(!f.exists())
                                 {
                                     System.out.printf("Error file %s missing from disk\n", "_" + remotePath.replace('/', '_'));
-                                    message.setMessage("ERROR_NOTONDISK");
-                                    output.writeObject(session.getEncryptedMessage(message));
+                                    response.setMessage("ERROR_NOTONDISK");
+                                    output.writeObject(session.getEncryptedMessage(response));
                                 }
                                 else
                                 {
+                                    response.setMessage("FILE");
+                                    byte[] fileBytes = new byte[(int)f.length()];
                                     FileInputStream fis = new FileInputStream(f);
+                                    fis.read(fileBytes);
+                                    fis.close();
 
-                                    do
-                                    {
-                                        byte[] buf = new byte[4096];
-                                        if(message.getMessage().compareTo("DOWNLOADF") != 0)
-                                        {
-                                            System.out.printf("Server error: %s\n", message.getMessage());
-                                            break;
-                                        }
-                                        message = new Envelope("CHUNK");
-                                        message.addObject(this.session.getSequenceNum());
-                                        int n = fis.read(buf); //can throw an IOException
-                                        if(n > 0)
-                                        {
-                                            System.out.printf(".");
-                                        }
-                                        else if(n < 0)
-                                        {
-                                            System.out.println("Read error");
-                                        }
+                                    response.addObject(fileBytes);
 
-                                        message.addObject(buf);
-                                        message.addObject(new Integer(n));
-                                        output.writeObject(session.getEncryptedMessage(message));
-
-                                        message = (Envelope) input.readObject();
-                                        message = session.getDecryptedMessage(message);
-                                        message = session.serverSequenceNumberHandler(message);
-                                    }
-                                    while(fis.available() > 0);
-
-                                    //If server indicates success, return the member list
-                                    if(message.getMessage().compareTo("DOWNLOADF") == 0)
-                                    {
-                                        message = new Envelope("EOF");
-                                        message.addObject(this.session.getSequenceNum());
-                                        output.writeObject(session.getEncryptedMessage(message));
-
-                                        message = (Envelope) input.readObject();
-                                        message = session.getDecryptedMessage(message);
-                                        message = session.serverSequenceNumberHandler(message);
-                                        if(message.getMessage().compareTo("OK") == 0)
-                                        {
-                                            System.out.printf("File data upload successful\n");
-                                        }
-                                        else
-                                        {
-                                            System.out.printf("Upload failed: %s\n", message.getMessage());
-                                        }
-                                    }
-                                    else
-                                    {
-                                        System.out.printf("Upload failed: %s\n", message.getMessage());
-                                    }
+                                    output.writeObject(session.getEncryptedMessage(response));
                                 }
                             }
                             catch(Exception e1)

@@ -51,6 +51,11 @@ public class Session
 		this.hmacKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, hmacKey);
 	}
 
+	public void setHmacKey() throws Exception
+	{
+		this.hmacKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+	}
+
 	public void setAESKey() throws Exception
 	{
 		this.aesSessionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
@@ -132,8 +137,6 @@ public class Session
         }
 		this.setSequenceNum(newSequenceNum);
 		this.incrementSequenceNum();
-		System.out.println("Sequence num from server: "+newSequenceNum);
-		System.out.println("Sequence num after incr: "+this.getSequenceNum());
 		return message;
 	}
 
@@ -146,10 +149,8 @@ public class Session
             message.removeObject(message.getObjContents().get(0));
             if (this.getSequenceNum() == -1 || this.verifySequenceNumber(sequenceNum))
             {
-                System.out.println("Sequence num: "+sequenceNum);
                 this.setSequenceNum(sequenceNum);
                 this.incrementSequenceNum();
-                System.out.println("Responding with sequence num: "+this.getSequenceNum());
 				return message;
             }
 			else

@@ -389,7 +389,7 @@ public class GroupClient extends Client implements GroupClientInterface
 
             // Generate HMAC for message and add it to the envelope
             message.addObject(session.generateHmac(message));
-            
+
             message = this.session.getEncryptedMessage(message);
 
             output.writeObject(message);
@@ -419,7 +419,7 @@ public class GroupClient extends Client implements GroupClientInterface
 		// 1) Generate a challenge.
 
 		// TODO: add hmac
-		// EncryptionSuite hmac = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+        this.session.setHmacKey();
 		SecureRandom prng = new SecureRandom();
         byte[] challenge = new byte[16];
         prng.nextBytes(challenge);
