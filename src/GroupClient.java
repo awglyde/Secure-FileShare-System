@@ -40,7 +40,10 @@ public class GroupClient extends Client implements GroupClientInterface
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
 
+			// Verify the HMAC sent by the group server
             response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
 
             //Successful response
@@ -93,6 +96,11 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
@@ -133,6 +141,11 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
@@ -173,6 +186,11 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
@@ -212,6 +230,11 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
@@ -251,7 +274,13 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
+
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -290,7 +319,11 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
             response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return the member list
@@ -332,7 +365,13 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
+
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -371,7 +410,13 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
+
             //If server indicates success, return true
             if(response.getMessage().equals("OK"))
             {
@@ -406,6 +451,11 @@ public class GroupClient extends Client implements GroupClientInterface
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
+			// Verify the HMAC sent by the group server
+            response = this.session.clientHmacVerify(response);
+
+			// Verify the sequence number sent by the group server
             response = this.session.clientSequenceNumberHandler(response);
 
             //If server indicates success, return true
@@ -450,6 +500,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
 
+			// Verify the HMAC sent by the group server
             response = this.session.clientHmacVerify(response);
 
             //If server indicates success, return true
