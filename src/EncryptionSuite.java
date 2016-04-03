@@ -291,14 +291,16 @@ public class EncryptionSuite
         // create new encryption suite object with last key
         EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
 
-        byte[] encryptedFile = new byte[fileSize];
+        byte[] encryptedFileBytes = new byte[fileSize];
 
-        CipherInputStream cipherStream = new CipherInputStream(fis, encryptionKey.getCipher(encrypt));
+        Cipher cipher = Cipher.getInstance("AES", PROVIDER);
+        cipher.init(encrypt, encryptionKey.getEncryptionKey());
 
-        cipherStream.read(encryptedFile);
+        CipherInputStream cis = new CipherInputStream(fis, cipher);
+        cis.read(encryptedFileBytes);
 
         // encrypt the file and return the encrypted bytes
-        return encryptedFile;
+        return encryptedFileBytes;
     }
 
     public static byte[] decryptFile(ArrayList<Key> keys, int version, FileOutputStream fos, int fileSize) throws Exception
@@ -306,13 +308,16 @@ public class EncryptionSuite
         // create new encryption suite object with key at index - version
         EncryptionSuite decryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
 
-        byte[] decryptedFile = new byte[fileSize];
+        byte[] decryptedFileBytes = new byte[fileSize];
 
-        CipherOutputStream cipherStream = new CipherOutputStream(fos, decryptionKey.getCipher(decrypt));
-        cipherStream.write(decryptedFile);
+        Cipher cipher = Cipher.getInstance("AES", PROVIDER);
+        cipher.init(decrypt, decryptionKey.getEncryptionKey());
+
+        CipherOutputStream cis = new CipherOutputStream(fos, cipher);
+        cis.write(decryptedFileBytes);
 
         // decrypt the file and return the decrypted bytes
-        return decryptedFile;
+        return decryptedFileBytes;
     }
 
     public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
