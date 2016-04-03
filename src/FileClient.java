@@ -292,7 +292,7 @@ public class FileClient extends Client implements FileClientInterface
 			message.addObject(this.session.getHmacKey().getEncryptionKey()); // add the hmac key to our message
 
             // Add an HMAC of our message created using the user's public RSA key
-            message.addObject(userKeys.generateHmac(this.session.getEnvelopeBytes(message)));
+            message.addObject(userKeys.generateHmac(this.session.getBytes(message)));
 
             // 2) Encrypt challenge with GS public key
 			Envelope encryptedMessage = this.session.getEncryptedMessageTargetKey(message);

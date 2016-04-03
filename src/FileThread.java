@@ -120,7 +120,7 @@ public class FileThread extends Thread
                             byte[] messageHmac = (byte[])message.removeObject(2);
 
                             // If we verify the message is from the person who sent it
-                            if (this.session.getTargetKey().verifyHmac(messageHmac, this.session.getEnvelopeBytes(message)))
+                            if (this.session.getTargetKey().verifyHmac(messageHmac, this.session.getBytes(message)))
                             {
                                 // Creating an E.S. for our Hmac key from the client
                                 session.setHmacKey(hmacKey);

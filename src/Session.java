@@ -2,6 +2,10 @@ import java.security.Key;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+import javax.xml.bind.DatatypeConverter;
+
 public class Session
 {
 	EncryptionSuite hmacKey;
@@ -109,16 +113,23 @@ public class Session
 
 	public byte[] generateHmac(Envelope message) throws Exception
 	{
-        byte[] messageBytes = this.getEnvelopeBytes(message);
+        byte[] messageBytes = this.getBytes(message);
 		return this.generateHmac(messageBytes);
 	}
 
-	public byte[] getEnvelopeBytes(Envelope message) throws Exception
+	public byte[] getBytes(Object message) throws Exception
 	{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(baos);
         out.writeObject(message);
         return baos.toByteArray();
+	}
+
+	public Object getObjectFromBytes(byte[] bytes) throws Exception
+	{
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		ObjectInputStream ois = new ObjectInputStream(bais);
+		return ois.readObject();
 	}
 
 	public boolean verifyHmac(byte[] hmacMesssage, byte[] messageBytes) throws Exception
@@ -168,7 +179,8 @@ public class Session
 	public Envelope clientHmacVerify(Envelope message) throws Exception
 	{
         byte[] hmac = (byte[])message.removeObject(message.getObjContents().size()-1);
-        if (!this.verifyHmac(hmac, this.getEnvelopeBytes(message)))
+
+        if (!this.verifyHmac(hmac, this.getBytes(message)))
         {
             System.out.println("HMAC not verified! Session may be compromised. Exiting.");
             System.exit(0);
@@ -179,7 +191,8 @@ public class Session
 	public Envelope serverHmacVerify(Envelope message) throws Exception
 	{
         byte[] hmac = (byte[])message.removeObject(message.getObjContents().size()-1);
-        if (!this.verifyHmac(hmac, this.getEnvelopeBytes(message)))
+
+        if (!this.verifyHmac(hmac, this.getBytes(message)))
         {
             System.out.println("HMAC not verified! Session may be compromised. Disconnecting.");
 			return new Envelope("DISCONNECT");

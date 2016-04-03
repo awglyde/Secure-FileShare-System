@@ -1,22 +1,25 @@
 /* Implements the GroupClient Interface */
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Arrays;
 import java.util.List;
 import java.lang.Math;
 import java.security.Key;
 import java.security.SecureRandom;
 import javax.crypto.*;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 
 public class GroupClient extends Client implements GroupClientInterface
 {
     public static final int SERVER_PORT = 8765;
 
-    public UserToken getToken(String userName, Key fileServerPublicKey)
+    @SuppressWarnings("unchecked")
+    public Pair<UserToken, Hashtable<String, ArrayList<Key>>> getToken(String userName, Key fileServerPublicKey)
     {
         try
         {
-            UserToken token = null;
             Envelope message = null, response = null;
 
             //Tell the server to return a token.
@@ -32,11 +35,11 @@ public class GroupClient extends Client implements GroupClientInterface
 
             // Get encrypted message from our EncryptionSuite
             message = this.session.getEncryptedMessage(message);
-            // SESSION KEY MANAGEMENT. Server needs to know which user's session key to decrypt with
             output.writeObject(message);
 
             //Get the response from the server
             response = this.session.getDecryptedMessage((Envelope)input.readObject());
+
             response = this.session.clientHmacVerify(response);
             response = this.session.clientSequenceNumberHandler(response);
 
@@ -47,10 +50,14 @@ public class GroupClient extends Client implements GroupClientInterface
                 ArrayList<Object> temp = null;
                 temp = response.getObjContents();
 
-                if(temp.size() == 1)
+                if(temp.size() == 2)
                 {
-                    token = (UserToken) temp.get(0);
-                    return token;
+                    UserToken token = (UserToken) temp.get(0);
+
+                    Hashtable<String, ArrayList<Key>> keyMap = (Hashtable<String, ArrayList<Key>>) this.session.getObjectFromBytes((byte[])temp.get(1));
+
+                    // return a pair of the user token and the keymap
+                    return new Pair<UserToken, Hashtable<String, ArrayList<Key>>>(token, keyMap);
                 }
             }
 
@@ -433,14 +440,7 @@ public class GroupClient extends Client implements GroupClientInterface
 			message.addObject(challenge); // Add the nonce to our message
 			message.addObject(this.session.getHmacKey().getEncryptionKey()); // add the hmac key to our message
             // Add an HMAC of our message created using the user's public RSA key
-            message.addObject(userKeys.generateHmac(this.session.getEnvelopeBytes(message)));
-
-            /*
-            System.out.println("Key Bytes: "+this.session.getHmacKey().getEncryptionKey().getEncoded().length);
-            System.out.println("Message Hash Bytes: "+userKeys.hashBytes(this.session.getEnvelopeBytes(message)).length);
-            // message.addObject(userKeys.generateSignature(userKeys.hashBytes(this.session.getEnvelopeBytes(message))));
-            System.out.println("Message Bytes: "+this.session.getEnvelopeBytes(message).length);
-            */
+            message.addObject(userKeys.generateHmac(this.session.getBytes(message)));
 
             // 2) Encrypt challenge with GS public key
 			Envelope encryptedMessage = this.session.getEncryptedMessageTargetKey(message);

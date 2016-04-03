@@ -1,9 +1,7 @@
-/* This thread does all the work. It communicates with the client through Envelopes.
- *
- */
-
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Hashtable;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.security.Key;
@@ -31,7 +29,6 @@ public class GroupThread extends Thread
             System.out.println("*** New connection from " + socket.getInetAddress() + ":" + socket.getPort() + "***");
             final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
             final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-
 
             do
             {
@@ -114,7 +111,7 @@ public class GroupThread extends Thread
                             byte[] messageHmac = (byte[])message.removeObject(2);
 
                             // If we verify the message is from the person who sent it
-                            if (this.session.getTargetKey().verifyHmac(messageHmac, this.session.getEnvelopeBytes(message)))
+                            if (this.session.getTargetKey().verifyHmac(messageHmac, this.session.getBytes(message)))
                             {
                                 // Creating an E.S. for our Hmac key from the client
                                 session.setHmacKey(hmacKey);
@@ -183,6 +180,7 @@ public class GroupThread extends Thread
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {
                     UserToken yourToken = null;
+                    Hashtable<String, ArrayList<Key>> keyMap = null;
                     if(message.getObjContents().size() >= 2)
                     {
                         if(message.getObjContents().get(0) != null &&
@@ -192,12 +190,17 @@ public class GroupThread extends Thread
                             //Get the file server's public key who we're intending to connect to
                             Key fileServerPublicKey = (Key)message.getObjContents().get(1);
                             response.setMessage("OK");
+
                             yourToken = createToken(username, fileServerPublicKey);
+                            keyMap = my_gs.groupList.getGroupsAndKeys(username);
                         }
                     }
 
+                    // add token and key map to the sent list
                     response.addObject(yourToken);
-                    // TODO: KEYRING GO HERE
+
+                    // convert key map to byte array to send over socket
+                    response.addObject(this.session.getBytes(keyMap));
 
                     // Generate Hmac for our message
                     response.addObject(session.generateHmac(response));

@@ -90,7 +90,7 @@ public class GroupList implements java.io.Serializable
     public synchronized Hashtable<String, ArrayList<Key>> getGroupsAndKeys(String userName)
     {
         Hashtable<String, ArrayList<Key>> hashmap = new Hashtable<String, ArrayList<Key>>();
-        
+
         // generate hash map of group name to key list
         for (Map.Entry<String, Group> entry : this.list.entrySet()) {
             String groupName = entry.getKey();
@@ -123,7 +123,7 @@ public class GroupList implements java.io.Serializable
 
             // add the first key to the list of keys
             this.keys = new ArrayList<Key>();
-            this.addKey();
+            this.addNewKey();
 
             this.owner = owner;
         }
@@ -133,7 +133,7 @@ public class GroupList implements java.io.Serializable
             return this.keys;
         }
 
-        private void addKey() throws Exception
+        private void addNewKey() throws Exception
         {
             EncryptionSuite newES = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
             this.keys.add(newES.getEncryptionKey());
@@ -161,7 +161,7 @@ public class GroupList implements java.io.Serializable
                 if(this.groupMembers.contains(member))
                 {
                     // if a member was removed add a new key to the groups keys
-                    this.addKey();
+                    this.addNewKey();
 
                     // remove the user from the group
                     return this.groupMembers.remove(member);

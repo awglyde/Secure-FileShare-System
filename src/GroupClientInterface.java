@@ -1,5 +1,7 @@
 import java.util.List;
 import java.security.Key;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * Interface describing the operations that must be supported by the
@@ -33,7 +35,7 @@ public interface GroupClientInterface
      * @return A UserToken describing the permissions of "userName."
      * If this user does not exist, a null value will be returned.
      */
-    public UserToken getToken(final String userName, final Key fileServerPublickey);
+    public Pair<UserToken, Hashtable<String, ArrayList<Key>>> getToken(final String userName, final Key fileServerPublickey);
 
 
     /**
