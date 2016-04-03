@@ -170,7 +170,7 @@ public class Session
 	public Envelope clientHmacVerify(Envelope message) throws Exception
 	{
         byte[] hmac = (byte[])message.getObjContents().get(message.getObjContents().size()-1);
-        message.removeObject(message.getObjContents().size()-1);
+		message.removeObject(message.getObjContents().get(message.getObjContents().size()-1));
         if (!this.verifyHmac(hmac, this.getEnvelopeBytes(message)))
         {
             System.out.println("HMAC not verified! Session may be compromised. Exiting.");
@@ -182,7 +182,7 @@ public class Session
 	public Envelope serverHmacVerify(Envelope message) throws Exception
 	{
         byte[] hmac = (byte[])message.getObjContents().get(message.getObjContents().size()-1);
-        message.removeObject(message.getObjContents().size()-1);
+		message.removeObject(message.getObjContents().get(message.getObjContents().size()-1));
         if (!this.verifyHmac(hmac, this.getEnvelopeBytes(message)))
         {
             System.out.println("HMAC not verified! Session may be compromised. Disconnecting.");

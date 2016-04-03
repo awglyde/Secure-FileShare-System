@@ -140,7 +140,6 @@ public class GroupThread extends Thread
                     byte[] hmac2 = this.session.generateHmac(response);
                     System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac1));
                     System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(hmac2));
-
                     response.addObject(session.generateHmac(response));
                     // Encrypting it all with the client's pub key and sending it along
                     output.writeObject(session.getEncryptedMessageTargetKey(response));
