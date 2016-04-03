@@ -11,6 +11,12 @@ header {
   text-align: center;
 }
 
+.img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* END CHANGES HERE */
   </style>
   <body>
@@ -34,47 +40,149 @@ header {
 <!-- <p>In this section, broadly overview the types of cryptographic techniques that your group has decided to use to address threats T5–T7.</p> -->
 
 <!-- END CHANGES HERE -->
-
-<img src="../doc/t5_6_gs.png" style="width:1000px;">
-<img src="../doc/t5_6_fs.png" style="width:1000px;">
+<h3 style="text-align: center;"><b>Group Server Communication</b></h3>
+<img class="img" src="../doc/t5_6_gs.png" style="width:1000px;">
+<br />
+<h3 style="text-align: center;"><b>File Server Communication</b></h3>
+<img class="img" src="../doc/t5_6_fs.png" style="width:1000px;">
     </section>
     <section id="threat5">
       <h2>Threat T5: Message Reorder, Replay, or Modification</h2>
 <!-- BEGIN CHANGES HERE -->
 
-<p>
-    Add a sequence number to messages during a single session with the file server or group server. This will prevent messages from being replayed or reordered, because they will be out of order with the number the server is expecting. Furthermore, messages sent during the authentication / handshake phase will be signed and verified by their respective senders / receivers.
-</p>
-<p>
-	Replay:
-	<br />
-		&nbsp;- Session key prevents OUT OF session replays.
-	<br />
-		&nbsp;- Sequence numbers prevent IN session replays.
-	<br />
-	Reorder:
-	<br />
-		&nbsp;- Sequence numbers prevent reordering of messages.
-	<br />
-	Modification:
-	<br />
-		&nbsp;- An HMAC will allow each recipient to verify whether the message has been modified or not. We create HMACs and initialize them using the shared AES session key (see phase3-writeup). Messages sent before the session key is exchanged (i.e., during authentication) are verified using RSA signatures since we do not yet have a shared key.
-</p>
+<h3>Describing the Threat</h3>
+This threat can be broken down into multiple categories:
+<ul>
+    <li>
+        <p>
+            <b>In-Session Replay Attacks:</b>
+            <br />
+            These occur when an adversary attempts to replay messages that have been sent to or from the client or server within one particular session.
+        </p>
+        <p>
+            Since we make no effort to verify the order in which messages came in, an old message from the same session would appear completely legitimate to both our client and server. Thus, our P3 implementation is vulnerable to In-Session replay attacks. We will show that adding sequence numbers mitigates this threat.
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Out-of-Session Replay Attacks:</b>
+            <br />
+            These occur when an adversary attempts to replay messages from a previous session that have been sent to or from the client or server AFTER that particular session is over.
+        </p>
+        <p>
+            Due to the fact that the server (file or group) generates the per-session AES keys we have already mitigated this threat in our P3 implementation. This is due to the fact that each session has a session key which is unique to it. If an adversary attempts to replay a message from an old session both the client and the server would reject it due to an invalid session key.
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Reorder Attacks:</b>
+            <br />
+            These occur when an active man-in-the-middle attempts to re-order messages happening within a particular session with the intention of causing something harmful to happen or disrupting the normal flow of communication.
+        </p>
+        <p>
+            Since our P3 implementation makes no effort to validate that a message came in the correct order, it is particularly vulnerable to re-order attacks. We will show that adding sequence numbers to our encrypted communication will prevent this threat.
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Modification Attacks:</b>
+            <br />
+            These occur when an active man-in-the-middle attempts to modify messags happening within a particular session with the intention of causing disruption or preventing normal flow of communication and requests.
+        </p>
+        <p>
+            The only message that is verified by a signature in our P3 implementation was the Token sent to the file server. Every other communication is vulnerable to modification attacks.
+        </p>
+        <p>
+            An HMAC will allow each recipient to verify whether the message has been modified or not. We create HMACs and initialize them using the shared HMAC key for our particular session (see diagrams). Messages sent before the session key is exchanged (i.e., during authentication) are verified an HMAC that is created with the senders private RSA key since since we do not yet have a shared key.
+        </p>
+    </li>
+</ul>
+<h3>Mechanisms to protect against this Threat</h3>
+<ul>
+    <li>
+        <p>
+            <b>In-Session Replay Attacks:</b>
+            <br />
+            To protect against In-Session replay attacks we added sequence numbers to each subsequent message after the handshake is complete. Every message sent to and from the client and server have their sequence number verified by the respective recipient. If a message is out of order, we print a notification and disregard the message while continuing normal behavior. This lets the user know an adversary is potentially replaying old messages or doing someting else such as modifying them.
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Out-of-Session Replay Attacks:</b>
+            <br />
+            As we mentioned in the above section, our P3 implementation largely already protected against out-of-session replay attacks. To further solidfy this protection the client is now also generating a per-session HMAC key which adds freshness from BOTH sides, making it even harder to achieve an out of session replay attack.
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Reorder Attacks:</b>
+            <br />
+            Similar to in-session replay attacks, we protect against reordering attacks by adding a sequence number inside of each encrypted message. When the message is decrypted by either the client or the server, they verify the correct sequence number has been used and send the incremented sequence number in their next message.
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Modification Attacks:</b>
+            <br />
+            Modification attacks are handled by adding an HMAC of the entire message we're sending BEFORE encrypting it. We add the HMAC of the entire message to the message, encrypt the whole message, then send it along. The recipient decrypts the message, removes the HMAC, recomputes the HMAC of the message with the shared HMAC key and thus verifies the integrity of the file.
+        </p>
+    </li>
+</ul>
+<h3>Why This is Sufficient</h3>
+<ul>
+    <li>
+        <p>
+            <b>In-Session Replay Attacks:</b>
+            <br />
+            Sequence numbers adequately address in-session replay attacks because we reject messages with old sequence numbers on both the server and client side. If an adversary attempts to replay an old message from the same session, both the client and the server will attempt to verify that the sequence number is the one that's expected. When the logic fails to verify the sequence number, the old replayed message is rejected.
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Out-of-Session Replay Attacks:</b>
+            <br />
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Reorder Attacks:</b>
+            <br />
+            Sequence numbers adequately address reorder attacks because we reject messages with sequence numbers that are out of order. If an adversary attempts to re-order the messages we sent, both our client and server will provide failure messages and reject the out of order message. The attacker will succeed in disrupting communication, but not in causing anything harmful other than annoyance. The client will have to send the request again if it was ignored due to re-ordering.
+        </p>
+    </li>
+    <li>
+        <p>
+            <b>Modification Attacks:</b>
+            <br />
+            HMACs adequately address modification attacks because we check the integrity of each message which is sent between our client and server. If a message is modified, upon receiving it the recipient will attempt to validate the HMAC against the message contents. If the message has been modified, the HMAC verification will fail and the recipient will be notified. The message will then be rejected. This prevents modified messages from being accepted by the client or the server.
+        </p>
+    </li>
+</ul>
 <!-- END CHANGES HERE -->
     </section>
     <section id="threat6">
       <h2>Threat T6: File Leakage</h2>
 <!-- BEGIN CHANGES HERE -->
-
-<h4>Description of Mechanism</h4>
+<h3>Describing the Threat</h3>
 <p>
-	In the GroupList object, the group server will store a HashMap of Group Name strings to an ArrayList of AES keys. The index in the ArrayList will indicate the 'version' of the key (i.e., ArrayList.get(0) will contain the "first" key in the list, and ArrayList.get(ArrayList.size()) will represent the "latest" or "last" key in the list).
+    File leakage can be seen when a file server decides to become malicious and leak its files to adversaries. This is clearly a problem if the files are not encrypted because then adversaries have access to private files which they should not have access to.
+</p>
+<p>
+    Our P3 implementation stores all files in plaintext on the file server and makes no attempt to obfuscate them. Thus our P3 implementation is particularly vulnerable to file leakage.
+</p>
+<h3>Description of Mechanism</h3>
+<p>
+    To solve the problem, we implemented a system of versioned <b>key rings</b> that are given to users when they request a token as a separate object. These keyrings are tied to a particular group and stored in the GroupList object. When a user requests a token, they are given a keyring which is a HashMap of Group Name strings to an ArrayList of keys. The index of the keys indicates the <b>version number</b> of the key. When a user is removed or deleted from a group on the group server, a new key is generated for all the groups that user was a member of. This ensures they don't have access to newly encrypted files. The version number of the key is stored in the ShareFile for each individual file on the file server. But the file server never has access to the actual keys. This is a <b>lazy revocation</b> technique, as opposed to <b>active re-encryption</b>.
+</p>
+<b>More indepth mechanism description:</b>
+<p>
+	In the GroupList object, the group server will store an arraylist of AES keys. The index in the ArrayList will indicate the 'version' of the key (i.e., ArrayList.get(0) will contain the "first" key in the list, and ArrayList.get(ArrayList.size()) will represent the "latest" or "last" key in the list).
 </p>
 <p>
 	When a client requests a token, they will be given another object as well. This object will be a HashMap of String group names to an ArrayList of keys. The group server will only provide group names (and corresponding keys) that the user is a member of.
 </p>
 <p>
-	When a client uploads a new file to the file server, they will encrypt it with the latest version of the AES key for that group, and append the version number to the encrypted file. When a client downloads a file, they will check the version number appended to the file, and decrypt it using the appropriate key corresponding to that version number.
+	When a client uploads a new file to the file server, they will encrypt it with the latest version of the AES key for that group, and add the version number to the ShareFile of the encrypted file which is stored in the FileList. When a client downloads a file, they will check the version number which is returned, and decrypt it using the appropriate key corresponding to that version number.
 </p>
 <p>
 	To handle the version numbering, our EncryptionSuite class will have an encryptFile and decryptFile method. Both methods will take a file and an arrayList of keys as parameters. The encryptFile will use the latest key then append the index as the version number to the end of the file. The decryptFile method will remove the appended version number, then use the version number to index the appropriate key to decrypt the file.
@@ -82,19 +190,34 @@ header {
 <p>
 	When a user is removed from a group or deleted, the group server will generate new keys for all relevant groups (e.g., if a user is deleted, the group server will generate a new key for each group they were a member of).
 </p>
-
-
+<h3>Why This is Sufficient</h3>
+<p>
+    This largely prevents file leakage because each file sent to the file server will be encrypted with an AES key that is never visible to the file server. It is only visible to the user uploading or downloading the file who has access to the group the file is owned by.
+</p>
+<p>
+    Since the file server never sees the keys, and only receives encrypted files, the only way files can be leaked is if they are leaked to a malicious user who CURRENTLY has access to the group.
+</p>
+<p>
+    If a user is removed from a group or deleted, but stores the keyring they have access to, they will only have access to files they already could have stolen when they became malicious.
+</p>
+<p>
+    Say, for example, a user becomes malicious and downloads all the files they have access to. Presumably an administrator will swiftly remove them from the group or delete them altogether. Since they already would have had access to files encrypted with the old key, there is no reason for <b>active re-encryption</b>. Thus, we took a <b>lazy revocation</b> technique where, when a user is removed or deleted, a new key is generated for that group that the <i>old</i> user would <b>not</b> have access to.
+</p>
 
 <!-- END CHANGES HERE -->
     </section>
     <section id="threat7">
       <h2>Threat T7: Token Theft</h2>
 <!-- BEGIN CHANGES HERE -->
+
+<h4>Describing the Threat</h4>
+<h4>Description of Mechanism</h4>
 <p>
     We are going to create a unique identifier (hash of the public key) that is an immutable field in our token which is unique to the server we're connecting to. So when a token is created, the user will provide the public key hash of a file server they're connecting to. The file server will verify that the public key hash provided in the token is its own. This ensures that a token cannot be used to connect to a DIFFERENT file server than the one that was originally intended.
 
 	When the client initially starts up the application, we request the file server's public key. The client validates whether or not this is the correct public key.
 </p>
+<h4>Why This is Sufficient</h4>
 <!--  The authentication protocol from phase 3 already checks to see if we're connecting to an unauthorized file server so sending a token to an unauthorized file server should not be possible. -->
 
 <!-- END CHANGES HERE -->
