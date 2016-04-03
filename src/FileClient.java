@@ -123,7 +123,7 @@ public class FileClient extends Client implements FileClientInterface
                         System.out.println("file length: " + encryptedFileBytes.length);
 
                         // With the right key version, decrypt the file retrieved from the file server
-                        byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, fos, encryptedFileBytes.length);
+                        byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes);
 
                         System.out.println("file length: " + decryptedFileBytes.length);
                         fos.write(decryptedFileBytes);
@@ -250,7 +250,7 @@ public class FileClient extends Client implements FileClientInterface
             // Need to retrieve one from group server if so
             if (!(keyRing == null) && !(fileBytes == null) && !(keyRing.get(group) == null))
             {
-                message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), new FileInputStream(sourceFile), fileBytes.length)); // add file bytes to message
+                message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), fileBytes)); // add file bytes to message
 
                 // add the version number of the encrypted file
                 message.addObject(keyRing.get(group).size()-1);

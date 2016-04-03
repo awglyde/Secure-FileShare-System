@@ -286,39 +286,22 @@ public class EncryptionSuite
 
     }
 
-    public static byte[] encryptFile(ArrayList<Key> keys, FileInputStream fis, int fileSize) throws Exception
-    {
-        // create new encryption suite object with last key
-        EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
+    public static byte[] encryptFile(ArrayList<Key> keys, byte[] fileBytes) throws Exception
+   {
+       // create new encryption suite object with last key
+       EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
 
-        byte[] encryptedFileBytes = new byte[fileSize];
+       // encrypt the file and return the encrypted bytes
+       return encryptionKey.encryptBytes(fileBytes, encrypt);
+   }
 
-        Cipher cipher = Cipher.getInstance("AES", PROVIDER);
-        cipher.init(encrypt, encryptionKey.getEncryptionKey());
+   public static byte[] decryptFile(ArrayList<Key> keys, int version, byte[] fileBytes) throws Exception
+   {
+       // create new encryption suite object with key at index - version
+       EncryptionSuite decryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
 
-        CipherInputStream cis = new CipherInputStream(fis, cipher);
-        cis.read(encryptedFileBytes);
-
-        // encrypt the file and return the encrypted bytes
-        return encryptedFileBytes;
-    }
-
-    public static byte[] decryptFile(ArrayList<Key> keys, int version, FileOutputStream fos, int fileSize) throws Exception
-    {
-        // create new encryption suite object with key at index - version
-        EncryptionSuite decryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
-
-        byte[] decryptedFileBytes = new byte[fileSize];
-
-        Cipher cipher = Cipher.getInstance("AES", PROVIDER);
-        cipher.init(decrypt, decryptionKey.getEncryptionKey());
-
-        CipherOutputStream cis = new CipherOutputStream(fos, cipher);
-        cis.write(decryptedFileBytes);
-
-        // decrypt the file and return the decrypted bytes
-        return decryptedFileBytes;
-    }
+       return decryptionKey.encryptBytes(fileBytes, decrypt);
+   }
 
     public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
     {
