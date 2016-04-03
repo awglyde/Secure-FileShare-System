@@ -54,10 +54,10 @@ public class GroupClient extends Client implements GroupClientInterface
                 {
                     UserToken token = (UserToken) temp.get(0);
 
-                    Hashtable<String, ArrayList<Key>> keyMap = (Hashtable<String, ArrayList<Key>>) this.session.getObjectFromBytes((byte[])temp.get(1));
+                    Hashtable<String, ArrayList<Key>> keyRing = (Hashtable<String, ArrayList<Key>>) this.session.getObjectFromBytes((byte[])temp.get(1));
 
-                    // return a pair of the user token and the keymap
-                    return new Pair<UserToken, Hashtable<String, ArrayList<Key>>>(token, keyMap);
+                    // return a pair of the user token and the keyRing
+                    return new Pair<UserToken, Hashtable<String, ArrayList<Key>>>(token, keyRing);
                 }
             }
 

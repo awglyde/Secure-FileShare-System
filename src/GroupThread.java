@@ -180,7 +180,7 @@ public class GroupThread extends Thread
                 else if(message.getMessage().equals("GET"))//Client wants a token
                 {
                     UserToken yourToken = null;
-                    Hashtable<String, ArrayList<Key>> keyMap = null;
+                    Hashtable<String, ArrayList<Key>> keyRing = null;
                     if(message.getObjContents().size() >= 2)
                     {
                         if(message.getObjContents().get(0) != null &&
@@ -192,7 +192,7 @@ public class GroupThread extends Thread
                             response.setMessage("OK");
 
                             yourToken = createToken(username, fileServerPublicKey);
-                            keyMap = my_gs.groupList.getGroupsAndKeys(username);
+                            keyRing = my_gs.groupList.getGroupsAndKeys(username);
                         }
                     }
 
@@ -200,7 +200,7 @@ public class GroupThread extends Thread
                     response.addObject(yourToken);
 
                     // convert key map to byte array to send over socket
-                    response.addObject(this.session.getBytes(keyMap));
+                    response.addObject(this.session.getBytes(keyRing));
 
                     // Generate Hmac for our message
                     response.addObject(session.generateHmac(response));

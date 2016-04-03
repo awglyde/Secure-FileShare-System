@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.lang.Math;
 import java.security.Key;
 import java.security.SecureRandom;
@@ -66,7 +68,7 @@ public class FileClient extends Client implements FileClientInterface
         return true;
     }
 
-    public boolean download(String sourceFile, String destFile, UserToken token) throws Exception
+    public boolean download(String sourceFile, String destFile, UserToken token, Hashtable<String, ArrayList<Key>> keyRing) throws Exception
     {
         if(sourceFile.charAt(0) == '/')
         {
@@ -76,8 +78,6 @@ public class FileClient extends Client implements FileClientInterface
         File file = new File(destFile);
         try
         {
-
-
             if(!file.exists())
             {
                 file.createNewFile();
@@ -98,7 +98,11 @@ public class FileClient extends Client implements FileClientInterface
 
                 if (env.getMessage().equals("FILE"))
                 {
-                    fos.write((byte[])env.getObjContents().get(0));
+                    byte[] encryptedFileBytes = (byte[])env.getObjContents().get(0);
+                    String group = (String)env.getObjContents().get(1);
+                    int keyVersion = (int)env.getObjContents().get(2);
+
+                    fos.write(EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes));
                     fos.close();
                     System.out.println("SUCCESSFULLY DOWNLOADED THE FILE!");
                 }
@@ -168,16 +172,8 @@ public class FileClient extends Client implements FileClientInterface
     }
 
     public boolean upload(String sourceFile, String destFile, String group,
-                          UserToken token) throws Exception
+                          UserToken token, Hashtable<String, ArrayList<Key>> keyRing) throws Exception
     {
-        /*Path path = Paths.get(sourceFile);
-        byte[] data = Files.readAllBytes(path);
-        data = session.getAESKey().encryptFile(data);
-
-        FileOutputStream fout = new FileOutputStream(sourceFile);
-        fout.write(data);
-        fout.close();*/
-
         if(destFile.charAt(0) != '/')
         {
             destFile = "/" + destFile;
@@ -197,7 +193,11 @@ public class FileClient extends Client implements FileClientInterface
             Path path = Paths.get(sourceFile);
             byte[] fileBytes = Files.readAllBytes(path);
 
-            message.addObject(fileBytes); // add file bytes to message
+            message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), fileBytes)); // add file bytes to message
+
+            // add the version number of the encrypted file
+            System.out.println(keyRing.get(group).size()-1);
+            message.addObject(keyRing.get(group).size()-1);
 
             // Generate an HMAC of our message for server to verify
             message.addObject(session.generateHmac(message));

@@ -1,5 +1,7 @@
 import java.util.List;
 import java.security.Key;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * Interface describing the operations that must be supported by the
@@ -47,7 +49,7 @@ public interface FileClientInterface
      * @param token      The token of the user uploading the file
      * @return true on success, false on failure
      */
-    public boolean upload(final String sourceFile, final String destFile, final String group, final UserToken token) throws Exception;
+    public boolean upload(final String sourceFile, final String destFile, final String group, final UserToken token,  Hashtable<String, ArrayList<Key>> keyRing) throws Exception;
 
 
     /**
@@ -59,7 +61,7 @@ public interface FileClientInterface
      * @param token      The token of the user uploading the file
      * @return true on success, false on failure
      */
-    public boolean download(final String sourceFile, final String destFile, final UserToken token) throws Exception;
+    public boolean download(final String sourceFile, final String destFile, final UserToken token, Hashtable<String, ArrayList<Key>> keyRing) throws Exception;
 
 
     /**

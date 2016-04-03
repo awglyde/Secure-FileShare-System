@@ -12,7 +12,7 @@ public class UserClient
 	static FileClient fileClient;
     static String userName = "";
     static UserToken userToken = null;
-	static Hashtable<String, ArrayList<Key>> keyMap = null;
+	static Hashtable<String, ArrayList<Key>> keyRing = null;
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
     public static void connectGroupServer(String groupServerName, int groupPort, EncryptionSuite userKeys,
@@ -171,10 +171,10 @@ public class UserClient
                 case "0":
                     return;
 				case "1":
-					// get the token keymap pair and split them
+					// get the token keyRing pair and split them
 					Pair<UserToken, Hashtable<String, ArrayList<Key>>> pair = groupClient.getToken(userName, fileServerPublicKey);
 					userToken = pair.getFirst();
-					keyMap = pair.getSecond();
+					keyRing = pair.getSecond();
 
 					if(userToken != null)
 					{
@@ -366,7 +366,7 @@ public class UserClient
                     String groupName = inputValidation(in.readLine());
 
 
-                    if (fileClient.upload(srcFile, destFile, groupName, userToken))
+                    if (fileClient.upload(srcFile, destFile, groupName, userToken, keyRing))
                         System.out.println("File uploaded successfully!");
                     else
                     {
@@ -383,7 +383,7 @@ public class UserClient
                     System.out.println("Enter a destination file name to download to: ");
                     destFile = inputValidation(in.readLine());
 
-                    if (fileClient.download(srcFile, destFile, userToken))
+                    if (fileClient.download(srcFile, destFile, userToken, keyRing))
                         System.out.println("File downloaded succesfully!");
                     else
                     {

@@ -48,11 +48,7 @@ public class FileThread extends Thread
 
                         Key clientPublicKey = (Key)message.getObjContents().get(1);
 						session.setTargetKey(clientPublicKey);
-						// TODO: Remove this property. Deprecated with new protocol
-	                    // my_gs.mapClientCodeToPublicKey((Integer)key.hashCode(), key);
-						// Add the server's public key to the envelope and send it back.
 					}
-
 				}
 				if (message.getMessage().equals("ENCRYPTEDENV"+EncryptionSuite.ENCRYPTION_RSA))
                 {
@@ -177,6 +173,7 @@ public class FileThread extends Thread
                             String group = (String) message.getObjContents().get(1);
                             UserToken yourToken = (UserToken) message.getObjContents().get(2); //Extract token
                             byte[] fileBytes = (byte[])message.getObjContents().get(3);
+                            int keyVersion = (int)message.getObjContents().get(4);
 
                             // Verify token signature and make sure it isn't expired
                             response.setMessage("FAIL-BADTOKEN");
@@ -204,7 +201,7 @@ public class FileThread extends Thread
                                     fos.close();
                                     System.out.println("Successfully received the file from the client.");
 
-                                    FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath);
+                                    FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath, keyVersion);
 
                                     response = new Envelope("OK"); //Success
                                     response.addObject(this.session.getSequenceNum());
@@ -247,7 +244,6 @@ public class FileThread extends Thread
                         }
                         else
                         {
-                            // TODO: CLEAN THIS UP
                             try
                             {
                                 File f = new File("shared_files/_" + remotePath.replace('/', '_'));
@@ -265,6 +261,8 @@ public class FileThread extends Thread
                                     byte[] fileBytes = Files.readAllBytes(path);
 
                                     response.addObject(fileBytes);
+                                    response.addObject(sf.getGroup());
+                                    response.addObject(sf.getEncryptionVersion());
 
                                     output.writeObject(session.getEncryptedMessage(response));
                                 }
@@ -298,7 +296,6 @@ public class FileThread extends Thread
                         }
                         else
                         {
-
                             try
                             {
                                 File f = new File("shared_files/" + "_" + remotePath.replace('/', '_'));

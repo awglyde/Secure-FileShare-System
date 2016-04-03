@@ -41,6 +41,11 @@ gah33, awg13
 # TODO
     * Validating input - Entering a userName when looking for a group gives an exception
     * Cleaning up error messages. I.e., returning one error message when a requested action fails
+    * UserClient freezes if file exists on file server side... waiting for response
+    * close thread not entire file server / group server when HMAC or sequence number is not correct
+    * test removing a group member for key ring case, should add a key but still be able to decrypt old files
+    * make sure to clear bin files before testing new functionality with key ring
+    * test use cases on 6110
 
 ## Tests
 
