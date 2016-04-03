@@ -472,7 +472,7 @@ public class GroupThread extends Thread
     }
 
     //Method to delete a user
-    private boolean deleteUser(String username, String requester)
+    private boolean deleteUser(String username, String requester) throws Exception
     {
         //Does requester exist?
         if(my_gs.userList.isUser(requester))
@@ -643,7 +643,7 @@ public class GroupThread extends Thread
 
     }
 
-    public boolean deleteUserFromGroup(String username, String groupname, String requester)
+    public boolean deleteUserFromGroup(String username, String groupname, String requester) throws Exception
     {
         // Check to make sure the group is NOT THE ADMIN GROUP AND
         // make sure user being removed is not the OWNER OF THE ADMIN GROUP

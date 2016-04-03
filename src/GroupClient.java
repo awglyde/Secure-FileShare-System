@@ -441,11 +441,6 @@ public class GroupClient extends Client implements GroupClientInterface
 
             // 3) Receive completed challenge and shared AES key
             response = userKeys.getDecryptedMessage((Envelope)input.readObject());
-            /*
-            byte[] newHmac = this.session.generateHmac(response);
-
-            System.out.println("HMACs are equal: "+Arrays.equals(newHmac, (byte[])response.getObjContents().get(response.getObjContents().size()-1)));
-            */
 
             response.removeObject(message.getObjContents().size()-1);
             System.out.println("Response bytes: "+javax.xml.bind.DatatypeConverter.printHexBinary(this.session.getEnvelopeBytes(response)));
