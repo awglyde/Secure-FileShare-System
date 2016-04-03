@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.security.Key;
 
 /* This list represents the users on the server */
 
@@ -60,7 +61,7 @@ public class GroupList implements java.io.Serializable
         return this.getGroup(groupName).getOwnerName();
     }
 
-    public synchronized boolean removeMember(String userName, String groupName)
+    public synchronized boolean removeMember(String userName, String groupName) throws Exception
     {
         boolean ret = this.getGroup(groupName).removeMember(userName);
         if (this.getGroup(groupName).getOwnerName().equals(userName))
@@ -84,11 +85,19 @@ public class GroupList implements java.io.Serializable
         private ArrayList<String> groupMembers;
         String owner;
 
+        // list of keys, the index will represent the verison number
+        private ArrayList<Key> keys;
+
         public Group(String owner)
         {
             this.groupMembers = new ArrayList<String>();
             groupMembers.add(owner);
             this.owner = owner;
+        }
+
+        public ArrayList<Key> getKeys()
+        {
+            return this.keys;
         }
 
         public boolean isMember(String userName)
@@ -106,12 +115,16 @@ public class GroupList implements java.io.Serializable
             return this.groupMembers.add(member);
         }
 
-        public boolean removeMember(String member)
+        public boolean removeMember(String member) throws Exception
         {
             if(!this.groupMembers.isEmpty())
             {
                 if(this.groupMembers.contains(member))
                 {
+                    // if a member was removed add a new key to the groups keys
+                    this.addKey();
+
+                    // remove the user from the group
                     return this.groupMembers.remove(member);
                 }
             }
@@ -135,6 +148,11 @@ public class GroupList implements java.io.Serializable
                 this.owner = owner;
         }
 
+        private void addKey() throws Exception
+        {
+            EncryptionSuite newES = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+            this.keys.add(newES.getEncryptionKey());
+        }
     }
 
 }
