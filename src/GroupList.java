@@ -91,13 +91,24 @@ public class GroupList implements java.io.Serializable
         public Group(String owner)
         {
             this.groupMembers = new ArrayList<String>();
+            this.keys = new ArrayList<Key>();
             groupMembers.add(owner);
+
+            // add the first key to the list of keys
+            this.addKey();
+
             this.owner = owner;
         }
 
         public ArrayList<Key> getKeys()
         {
             return this.keys;
+        }
+
+        private void addKey() throws Exception
+        {
+            EncryptionSuite newES = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+            this.keys.add(newES.getEncryptionKey());
         }
 
         public boolean isMember(String userName)
@@ -148,11 +159,6 @@ public class GroupList implements java.io.Serializable
                 this.owner = owner;
         }
 
-        private void addKey() throws Exception
-        {
-            EncryptionSuite newES = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
-            this.keys.add(newES.getEncryptionKey());
-        }
     }
 
 }
