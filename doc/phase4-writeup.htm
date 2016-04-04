@@ -270,7 +270,11 @@ This threat can be broken down into multiple categories:
     One interplay between the proposed mechanisms is that sequence numbers end up handling both message reorder and message replay attacks. They are a very simple and robust mechanism which allow us to prevent multiple threats without adding much extra bulk or computation to our messages.
 </p>
 <p>
-    We believe our keyring solution is fairly elegant. Although we use lazy revocation I believe it handles the difficult task of file leakage in a very painless way without creating any unnecessary bandwidth bottlenecks.
+    We believe our keyring solution is fairly elegant. Although we use lazy revocation we believe it handles the difficult task of file leakage in a very painless way without creating any unnecessary bandwidth bottlenecks.
+</p>
+<p>
+    <b>Note on forward and backward secrecy:</b>
+    Our keyring provides backward secrecy. That is, compromising the <i>current</i> key ring does not compromise <i>future</i> keys, because they will be newly generated. However, we do not provide <b>forward</b> secrecy. This is due to the fact that a keyring contains all previous key versions. Thus, if a keyring is compromised, all <i>previous</i> keys are also compromised.
 </p>
 <p>
     <b>Note on the special case HMAC during the handshake:</b>
@@ -281,9 +285,6 @@ This threat can be broken down into multiple categories:
 </p>
 <p>
     We believe this session object is much more elegant than the way we handled sessions in P3 and allows us to save a lot of superfluous code.
-</p>
-<p>
-    We also refactored file upload and download. Previously it was using an inefficient "chunk" method of looping through the fle and only sending 4096 bytes at a time. Instead, we send the entire file as a byte array and allow the Transport Layer to handle chunking the message instead of doing it ourselves. This made encrypting and decrypting files uploaded and downloaded from the file server much easier than encrypting it or decrypting it in chunks.
 </p>
 <!-- <p>Conclude with a paragraph or two discussing the interplay between your
 proposed mechanisms, and commenting on the design process that your group
