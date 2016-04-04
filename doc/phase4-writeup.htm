@@ -274,7 +274,7 @@ This threat can be broken down into multiple categories:
 </p>
 <p>
     <b>Note on forward and backward secrecy:</b>
-    Our keyring provides backward secrecy. That is, compromising the <i>current</i> key ring does not compromise <i>future</i> keys, because they will be newly generated. However, we do not provide <b>forward</b> secrecy. This is due to the fact that a keyring contains all previous key versions. Thus, if a keyring is compromised, all <i>previous</i> keys are also compromised.
+    Our keyring provides <b>backward</b> secrecy. That is, compromising the <i>current</i> key ring does not compromise <i>future</i> keys, because they will be newly generated. However, we do not provide <b>forward</b> secrecy. This is due to the fact that a keyring contains all previous key versions. Thus, if a keyring is compromised, all <i>previous</i> keys are also compromised.
 </p>
 <p>
     <b>Note on the special case HMAC during the handshake:</b>
