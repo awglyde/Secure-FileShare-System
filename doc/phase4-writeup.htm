@@ -44,7 +44,7 @@ header {
     For <b>Threat T6</b>, we implemented an AES <b>keyring</b> provided by the Group Server along with the token that contains a mapping of group names to versioned Keys. When a user is removed or deleted from our system altogether the Group Server generates new AES keys for each group which are stored in the Group object and retrieved when a client needs them.
 </p>
 <p>
-    When the user goes to upload or download a file to or from a particular group, they use the appropriate key for that file. The key version used to encrypt a file is stored on the ShareFile object held by the file server. This way, we can keep track of the key used to encrypt a particular file, which allows anyone else actively in the group to decrypt it. When a file is uploaded, the user simply encrypts it with the <i>latest</i> key and the version is stored in the ShareFile associated with that file.
+    When the user goes to upload or download a file to or from a particular group, they use the appropriate key for that file (the newest key if encrypting, or the key the file was encrypted with if decrypting). The key version used to encrypt a file is stored on the ShareFile object held by the file server. This way, we can keep track of the key used to encrypt a particular file, which allows anyone else actively in the group to decrypt it. When a file is uploaded, the user simply encrypts it with the <i>latest</i> key and the version is stored in the ShareFile associated with that file.
 </p>
 <p>
     For <b>Threat T7</b>, we require that tokens are generated with the public key of the file server the user is intending to connect to. We require that our file servers validate that the public key in the user's token corresponds to its own public key. Thus, we prevent tokens from being used with any file server OTHER than the one originally intended.
@@ -115,6 +115,8 @@ This threat can be broken down into multiple categories:
             <b>In-Session Replay Attacks:</b>
             <br />
             To protect against In-Session replay attacks we added sequence numbers to each subsequent message after the handshake is complete. Every message sent to and from the client and server have their sequence number verified by the respective recipient. If a message is out of order, we print a notification and disregard the message while continuing normal behavior. This lets the user know an adversary is potentially replaying old messages or doing someting else such as modifying them.
+
+            Our sequence numbers start at a random value so that   an adversary cannot easily assume a starting point for the sequence number and calculate the correct number to modify a message to. Thus making it even more difficult for the adversary to correctly modify the message.
         </p>
     </li>
     <li>
@@ -156,7 +158,7 @@ This threat can be broken down into multiple categories:
         <p>
             <b>Out-of-Session Replay Attacks:</b>
             <br />
-            See above discussion.
+            See the discussion in "In-Session Replay Attacks."
         </p>
     </li>
     <li>
@@ -192,7 +194,7 @@ This threat can be broken down into multiple categories:
 </p>
 <b>More indepth mechanism description:</b>
 <p>
-	In the GroupList object, the group server will store an arraylist of AES keys. The index in the ArrayList will indicate the 'version' of the key (i.e., ArrayList.get(0) will contain the "first" key in the list, and ArrayList.get(ArrayList.size()) will represent the "latest" or "last" key in the list).
+	In the GroupList object, the group server will store an arraylist of AES keys. The index in the ArrayList will indicate the 'version' of the key (i.e., ArrayList.get(0) will contain the "first" key in the list, and ArrayList.get(ArrayList.size()-1) will represent the "latest" or "last" key in the list).
 </p>
 <p>
 	When a client requests a token, they will be given another object as well. This object will be a HashMap of String group names to an ArrayList of keys. The group server will only provide group names (and corresponding keys) that the user is a member of.
@@ -201,7 +203,7 @@ This threat can be broken down into multiple categories:
 	When a client uploads a new file to the file server, they will encrypt it with the latest version of the AES key for that group, and add the version number to the ShareFile of the encrypted file which is stored in the FileList. When a client downloads a file, they will check the version number which is returned, and decrypt it using the appropriate key corresponding to that version number.
 </p>
 <p>
-	To handle the version numbering, our EncryptionSuite class will have an encryptFile and decryptFile method. The encryptFile will use the latest key then append the index as the version number to the end of the file. The decryptFile method will remove the appended version number, then use the version number to index the appropriate key to decrypt the file.
+	To handle the version numbering, our EncryptionSuite class will have an encryptFile and decryptFile method. The encryptFile will use the latest key to encrypt any files. The decryptFile method will use the passed in version number to index the appropriate key to decrypt the file. Version numbers are stored as a field within a ShareFile object. The ShareFile class represents the meta data for a file stored on the file server.
 </p>
 <p>
 	When a user is removed from a group or deleted, the group server will generate new keys for all relevant groups (e.g., if a user is deleted, the group server will generate a new key for each group they were a member of).
@@ -247,6 +249,9 @@ This threat can be broken down into multiple categories:
 </p>
 <p>
 	When the client initially starts up the application, we request the file server's public key. The client validates whether or not this is the correct public key and then goes on to pass this to the group server which uses it to create a new object.
+</p>
+<p>
+    Because the token is signed and sent to the file server, the file server also validates that the token hasn't been modified. Thus if the public key in the token that represents the target file server is modified to a different file server the new file server will reject it because it will not match the signature of the token.
 </p>
 <h3>Why This is Sufficient</h3>
 <p>
