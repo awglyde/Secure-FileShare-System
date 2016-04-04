@@ -121,42 +121,18 @@ public class FileClient extends Client implements FileClientInterface
                     String group = (String)env.getObjContents().get(1);
                     // Retrieve the relevant version number. Used to find the right key
                     int keyVersion = (int)env.getObjContents().get(2);
+                    // Retrieve the actual size of the file (without padding)
+                    int fileSize = (int)env.getObjContents().get(3);
+
                     // Make sure our key ring is not null before we try to decrypt anything
                     if (!(keyRing == null) && !(keyRing.get(group) == null))
                     {
-
                         // With the right key version, decrypt the file retrieved from the file server
-                        byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes);
+                        byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes, fileSize);
 
                         fos.write(decryptedFileBytes);
                         fos.close();
 
-                        // Weird hack to truncate end of file.
-                        // Random ^@^@^@ was appearing at EOF
-                        // So I seek to end of file, work backwards in a loop until
-                        // I find a line feed character. Truncate the file after that char
-                        // TODO: Get rid of this
-                        RandomAccessFile downloadedFile = new RandomAccessFile(destFile, "rw");
-
-                        // Get file length
-                        long fileLen = downloadedFile.length() - 1;
-
-                        byte currentByte = 0;
-
-                        do
-                        {
-                            fileLen -= 1;
-                            // Seek to end of the file
-                            downloadedFile.seek(fileLen);
-                            currentByte = downloadedFile.readByte();
-                        } // If we find b to be a linefeed character, exit
-                        while(currentByte != 10 && fileLen > 0);
-
-                        // Truncate the file after the length we found to be the real end of the file
-                        downloadedFile.setLength(fileLen+1);
-
-                        // Close our file
-                        downloadedFile.close();
                         return true;
                     }
                     else
@@ -283,6 +259,9 @@ public class FileClient extends Client implements FileClientInterface
 
                 // add the version number of the encrypted file
                 message.addObject(keyRing.get(group).size()-1);
+
+                // add the size of the unencrypted file
+                message.addObject(fileBytes.length);
             }
             else
             {

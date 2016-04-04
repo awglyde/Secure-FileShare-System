@@ -291,22 +291,34 @@ public class EncryptionSuite
        // create new encryption suite object with last key
        EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
 
+       Cipher cipher = encryptionKey.getCipher(encrypt);
+
        // encrypt the file and return the encrypted bytes
-       return encryptionKey.encryptBytes(fileBytes, encrypt);
+       return encryptionKey.encryptBytes(fileBytes, cipher);
    }
 
-   public static byte[] decryptFile(ArrayList<Key> keys, int version, byte[] fileBytes) throws Exception
+   public static byte[] decryptFile(ArrayList<Key> keys, int version, byte[] fileBytes, int fileSize) throws Exception
    {
        // create new encryption suite object with key at index - version
        EncryptionSuite decryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
 
-       return decryptionKey.encryptBytes(fileBytes, decrypt);
+       Cipher cipher = decryptionKey.getCipher(decrypt);
+
+       // get block size
+       int blockSize = cipher.getBlockSize();
+
+       // calculate padding caused by encryption
+       int padding = blockSize - (fileSize - blockSize*(fileSize/blockSize));
+
+       // getting decrypted bytes with padding from encryption
+       byte[] decryptFileWithPadding =  decryptionKey.encryptBytes(fileBytes, cipher);
+
+       // account for padding done by the AES encryption
+       return Arrays.copyOfRange(decryptFileWithPadding, 0, decryptFileWithPadding.length-padding);
    }
 
-    public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
+    public byte[] encryptBytes(byte[] inputBytes, Cipher cipher) throws Exception
     {
-        Cipher cipher = this.getCipher(mode);
-
         byte[] outputBytes = new byte[cipher.getOutputSize(inputBytes.length)];
         int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
         cipher.doFinal(outputBytes, outputLength);

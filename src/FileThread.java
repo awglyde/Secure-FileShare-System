@@ -170,6 +170,7 @@ public class FileThread extends Thread
                             UserToken yourToken = (UserToken) message.getObjContents().get(2); //Extract token
                             byte[] fileBytes = (byte[])message.getObjContents().get(3);
                             int keyVersion = (int)message.getObjContents().get(4);
+                            int actualFileSize = (int)message.getObjContents().get(5);
 
                             // Verify token signature and make sure it isn't expired
                             response.setMessage("FAIL-BADTOKEN");
@@ -193,13 +194,12 @@ public class FileThread extends Thread
                                     FileOutputStream fos = new FileOutputStream(file);
                                     System.out.printf("Successfully created file %s\n", remotePath.replace('/', '_'));
 
-                                    System.out.println("File length: " + fileBytes.length);
                                     fos.write(fileBytes);
                                     fos.close();
 
                                     System.out.println("Successfully received the file from the client.");
 
-                                    FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath, keyVersion);
+                                    FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath, keyVersion, actualFileSize);
 
                                     response.setMessage("OK"); //Success
                                 }
@@ -254,6 +254,7 @@ public class FileThread extends Thread
                                     response.addObject(fileBytes);
                                     response.addObject(sf.getGroup());
                                     response.addObject(sf.getEncryptionVersion());
+                                    response.addObject(sf.getFileSize());
 
                                 }
                             }
