@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CS 1653 Project P1 Writeup</title>
+  <style>
+/* BEGIN CHANGES HERE */
+
+/* In this section, you may add CSS styling if desired */
+header {
+  text-align: center;
+}
+
+/* END CHANGES HERE */
+  </style>
+  <body>
+    <header>
+      <h1>CS 1653 Project P1 Writeup</h1>
+      <h2>
+<!-- BEGIN CHANGES HERE -->
+
+Alex Glyde - awg13@pitt.edu</br>
+George Hoesch - gah33@pitt.edu</br>
+Ethan Welsh - ejw45@pitt.edu</br>
+
+<!-- END CHANGES HERE -->
+      </h2>
+    </header>
+    <section id="properties">
+      <h2>1. Security Properties</h2>
+<!-- BEGIN CHANGES HERE -->
+
+<p>This section should describe the requirements that your group has identified
+as being relevant to the group-based file sharing scenario. You should aim to
+find at least 15--20 such requirements, that together will cover at least two
+different sets of reasonable system assumptions (i.e., threat models). This
+section should be arranged as a bulleted list of properties that may apply to a
+file sharing system.</p>
+
+<ol>
+  <li><b>(i) Password Requirements (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) The password will be alphanumeric, greater than 8 characters.
+        It will contain at least one symbol, and will not use dictionary words.
+        The password cannot contain the username of the user.</li>
+         <li>(iii) A sufficiently complex password is important as it improves the security of the users' password
+         against numerous forms of attack such as brute force and dictionary attacks</li>
+         <li>(iv) User maintains secrecy of password and our dictionary contains most words.</li>
+     </ul>
+  </li>
+  <li><b>(i) Account Creation / Password Recovery (User, Group Owner, Administrator) </b>
+      <ul>
+         <li>(ii) User can request a password change / recovery through the client.
+        The server will send an email that contains a link to allow the user to update their password.
+        The server will verify that the new password follows the aforementioned security requirements.
+        The user will have to pass a captcha when updating their password and upon creating their account.
+        Furthermore, the user will have to successfully answer two security questions which are set during account creation.
+         </li>
+         <li>(iii) Password recovery helps the user maintain a secure password.
+        This allows us to maintain a secure environment if the users' password is compromised,
+        or if the user forgets their password.</li>
+         <li>(iv) We assume the email provided by the user is only accessible by them.</li>
+     </ul>
+  </li>
+  <li><b>(i) Password Management (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) The server will prompt the user to change their password via email at a regular interval.</li>
+         <li>(iii) This helps to ensure the user's password is less likely to be compromised.</li>
+         <li>(iv) We assume the email provided by the user is only accessible by them.</li>
+     </ul>
+  </li>
+  <li><b>(i) Authentication (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) After three incorrect password attempts, the server will time out the user's login.
+        After a timeout, if the user attempts three times incorrectly again, the user's password will be reset.
+        The user will fill out a captcha when creating a user and logging in.
+        We will prevent a user from creating an account twice (no duplicate emails).
+        </li>
+         <li>(iii) This authentication prevents brute force attacks and helps maintain user integrity.
+         </li>
+         <li>(iv) We assume the email provided by the user is only accessible by them.</li>
+     </ul>
+  </li>
+  <li><b>(i) Sensitive Information Storage (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) All files will be encrypted and compressed end to end.
+        Our server will only store the hash of a user's password.
+        We will encrypt the authentication and authorization token a user receives upon logging in successfully.
+        We will present the client with an md5 hash of the file being downloaded for their verification.</li>
+         <li>(iii) This encryption helps maintain integrity and confidentiality.
+        It further helps prevent a malicious entity from breaching our client's confidentiality and privacy.</li>
+         <li>(iv) Assume our encryption algorithms cannot be broken or reverse engineered.</li>
+     </ul>
+  </li>
+  <li><b>(i) Incident Recovery (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) In the case of a major breach of security, administrators can roll the server back to a previous state.
+        Administrators can also restore default permissions to specific (or en masse) users and files.
+        In the case of a massive password breach we will be able to reset all passwords. </li>
+         <li>(iii) In the incident of a breach we want to be able to take quick and effective action
+         to remedy the situation.</li>
+         <li>(iv) We must assume our administrators are not malicious.</li>
+     </ul>
+  </li>
+  <li><b>(i) Size Limits (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) Our server will have a maximum file size.
+        Groups will have a maximum amount of file storage space.</li>
+         <li>(iii) This provides fairness across groups and prevents a group from having a monopoly on storage space.
+        Furthermore, this prevents the server from reaching its maximum storage capacity which could impact availability.</li>
+         <li>(iv) We must assume the limit of storage space we are providing is sufficient for our users.</li>
+     </ul>
+  </li>
+  <li><b>(i) Input Sanitization (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) Any user input will be validated and scanned for malicious code.</li>
+         <li>(iii) This will prevent our server from being compromised by attacks such as SQL injection, etc.</li>
+         <li>(iv) We must assume the scanner we use to validate code is adequate.</li>
+     </ul>
+  </li>
+  <li><b>(i) File Integrity (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) When uploaded, a file will be scanned for malicious code and checked for viruses, malware, etc.
+        The client application will automatically verify a file using the md5 that the server sends to it.</li>
+         <li>(iii) Data integrity is a key component of security. This helps maintain file integrity.</li>
+         <li>(iv) The scanner we use to check the files is adequate.</li>
+     </ul>
+  </li>
+  <li><b>(i) File Permissions (User, Group Owner, Administrator)</b>
+      <ul>
+         <li>(ii) A file will have read, write (overwrite), and delete permissions.
+        The owner of a group will be able to set the read, write, and delete permissions for a user in the group.
+        The uploader of the file will also be able to set read, write, and delete permissions for users in the group (except the group owner).
+        The group owner has ultimate authority over files in the group.</li>
+         <li>(iii) This system helps protect the integrity and confidentiality of the server's files.</li>
+         <li>(iv) The group owner and the original uploader's accounts have not been compromised.</li>
+     </ul>
+  </li>
+  <li><b>(i) User Permissions (User)</b>
+      <ul>
+         <li>(ii) A user can create or delete their account.
+        A user can create (and then become owner of) a group, as well as deleting said group.
+        A user can request access to a group, and upload files to any group they are a member of.
+        A user can leave any group they are a member of.
+        A user can set permissions on a file they uploaded.
+        A user can read, delete, or write to files they have appropriate permissions to.</li>
+         <li>(iii) This system is important to maintain integrity, privacy and confidentiality in our server.</li>
+         <li>(iv) Must assume users with privilege can be trusted.</li>
+     </ul>
+  </li>
+  <li><b>(i) Group Owner Permissions (Group Owner)</b>
+      <ul>
+         <li>(ii) A group owner has ultimate authority over a file's permissions in their group.
+        A group owner may add or remove a user from the group they own.
+        A group owner may delete a group or transfer ownership to another user.</li>
+         <li>(iii) This system is important to maintain integrity, privacy and confidentiality within our groups.</li>
+         <li>(iv) Must assume a group owner is not malicious, as well as a user who has ownership transferred to them.</li>
+     </ul>
+  </li>
+  <li><b>(i) Group Permissions (User)</b>
+      <ul>
+         <li>(ii) User can create a group. User can request permission to join a group.
+        User can upload a file to a group that they are in.
+        Users can only read/write/delete files when they have the appropriate permissions
+        (from the file owner).</li>
+         <li>(iii) It is important to limit a user's access within the scope of a group
+         and the file system itself to maintain privacy and confidentiality for each group.</li>
+         <li>(iv) Administrators / group owners will ensure users are legitimate.</li>
+     </ul>
+  </li>
+  <li><b>(i) Administrator Permissions (Administrator)</b>
+      <ul>
+         <li>(ii) An administrator has ultimate authority over users and group owners.
+        An administrator can delete groups and users.
+        Administrators have full file permissions for every file on the server.
+        Administrators have access to control mechanisms for incident recovery.
+        </li>
+         <li>(iii) This system helps maintain control over our server.</li>
+         <li>(iv) Must assume administrators are not malicious.</li>
+     </ul>
+  </li>
+  <li><b>(i) Availability Protection</b>
+      <ul>
+         <li>(ii) Our server will have mechanisms to prevent DoS attacks.
+        Furthermore, we will try to limit downtime to off hours.</li>
+         <li>(iii) Availability is a crucial aspect of network security.</li>
+         <li>(iv) Must assume our mechanisms are adequate to prevent DoS attacks.</li>
+     </ul>
+  </li>
+</ol>
+
+<!-- END CHANGES HERE -->
+    </section>
+    <section id="models">
+      <h2>2. Threat Models</h2>
+<!-- BEGIN CHANGES HERE -->
+
+<p>This section should describe several sets of trust assumptions that could be
+made regarding the players in the system. Describe several scenarios in which
+you expect the file sharing system to be used, and describe the ways in which
+the various entities with access to the system will be trusted to behave. This
+section should be arranged as follows.</p>
+
+<ol>
+  <li>A paragraph describing a system model: an environment in which you
+  envision your application being deployed.</li>
+  <li>A paragraph describing the trust assumptions that you would make regarding
+  the players in the system, within this particular system model.</li>
+  <li>A bulleted list of relevant security properties from Section 1, each with
+  a sentence or two discussing how it applies to this system / threat model.
+  Note that not all of the security properties you define will necessarily be
+  relevant to all of your threat models.</li>
+  <li>Repeat items 1--3 as needed for additional system / threat models.</li>
+</ol>
+
+<h3><b>Threat Model 1:</b> Company Wide Network</h3>
+
+<p>The file-sharing system will be deployed within a company network across multiple geographic locations allowing employees to share work-related files.
+The servers will be accessible from ethernet-connected company computers,
+the company's WPA-2 + AES protected wireless network within the company's buildings,
+or through a VPN managed by the company itself.
+The file-sharing system will not be accessible to the broader internet with the exception of the company's VPN.</p>
+
+<p>
+We must assume that employees working in the building do not allow non-employees (family, friends, etc.) to utilize their computer when visiting.
+We must assume that employees who connect via the company VPN do not have their machines compromised.
+We must trust the WPA-2 + AES protection to prevent unauthorized users from accessing the company's wireless network.
+Since the network is exposed to the broader internet, we must assume that there is a chance that communications on this network may be intercepted.
+</p>
+
+<p>Here is a brief discussion of the relevant security properties from the section above:</p>
+
+<ul>
+  <li> <b> Password Requirements: </b> All employees will have a password to access the file-sharing system.
+    Additionally, they may be provided with the WPA-2 + AES key to connect to the company's wireless network.</li>
+  <li> <b> Account Creation / Password Recovery: </b> All company employees will create an account and must have access to password recovery.</li>
+  <li> <b> Authentication:</b> This is necessary in case a users' machine with an authorized MAC address is compromised or stolen. </li>
+  <li> <b> Password Management: </b> It will be crucial for employees to keep their account passwords confidential, and in the event that an account has been compromised, it will become important to allow the user to take quick and efficient access to change their password.</li>
+  <li> <b> Sensitive Information Storage:</b> In the case that a malicious entity is able to access our file servers or eavesdrop on our communication,
+	  we want to ensure that the files are encrypted to prevent them being viewed.</li>
+  <li> <b> Size Limits: </b> Limiting the amount of space a team can use on the server provides fairness to all groups and allows the server to be available for use if
+    a specific group has used all of their storage capacity. Without limits, availability could be limited to the entire company if one team abuses the storage space available. </li>
+  <li> <b> File Integrity: </b> Users of the file system may upload files from the internet, or from a machine that has been whitelisted via a USB. Validating files to verify they are
+    not malicious is important to keep the server from being compromised thus keeping all computers in the network from being compromised by the server.</li>
+  <li> <b> Input Sanitization: </b> If a users' computer is compromised, input sanitization would become important to keep the malicious attacker from accessing anything beyond
+    what the user has access to. In other words, this would help prevent the attacker from moving beyond the restrictions of User permissions.</li>
+  <li> <b> Incident Recovery: </b> Incident recovery is critical in the case of a major breach so that data and passwords can be recovered.</li>
+  <li> <b> File Permissions: </b> Employees will be given file permissions only when needed for a particular project. We only want to give permissions that are absolutely necessary. </li>
+  <li> <b> User Permissions: </b> We want our employees to be able to create accounts and groups based on their particular needs.</li>
+  <li> <b> Group Permissions: </b> We are assuming the company will need multiple groups and that information relevant to certain groups might need to be separated and confidential. </li>
+  <li> <b> Administrator Permissions: </b> Higher level company executives will be given administrator privileges.</li>
+</ul>
+
+<h3><b>Threat Model 2:</b> Protected LAN for a University's Computer Science Department Graduate Students and Professors</h3>
+
+<p>The file-sharing system will be deployed within one building, facilitating file-sharing between the Univerity's graduate students and professors.
+This will allow graduate students and professors to share research-related files and material that is not necessarily ready for publication.
+The system will be accessible via ethernet ports only to machines whose MAC addresses have been explicitly authorized (i.e., only machines belonging to graduate students and professors).
+This will help prevent sensitive research material from being stolen.</p>
+
+<p>
+We must trust the authorized users to keep any information from the file-sharing system private.
+In other words, we will have to trust that the users' machines will not be compromised in any way.
+We must assume that any files uploaded by a professor or grad student are from the whitelisted MAC address only and were not transferred via USB,
+or any other file-sharing system.
+We must also assume the set of whitelisted MAC addresses correspond to computers that have been validated by a trusted administrator.
+</p>
+
+<p>Here is a brief discussion of the relevant security properties from the section above:</p>
+
+<ul>
+  <li> <b> Password Requirements: </b> As with any system, we want to ensure users' passwords are not compromised.</li>
+  <li> <b> Account Creation / Password Recovery: </b> We want users to be able to create accounts and reset their passwords if necessary.</li>
+  <li> <b> Password Management:</b> Due to the sensitive nature of the information that is being stored, we would like users' passwords to remain as secure as possible.</li>
+  <li> <b> Authentication: </b> This is necessary in the event that a users' machine with an authorized MAC address is compromised or stolen.</li>
+  <li> <b> Incident Recovery: </b> In the case of a significant data breach we would like to be able to reset the system to a prior time.</li>
+  <li> <b> Size Limits: </b> We do not want users to be able to upload massive files that our system lacks the proper capacity to handle.</li>
+  <li> <b> File Integrity: </b> File integrity is crucial with sensitive scientific documents to validate that the content of the file has not been compromised.</li>
+  <li> <b> File Permissions: </b> Users should only be able to access files that are absolutely necessary.</li>
+  <li> <b> User Permissions: </b> Having User permissions is important to help authenticate the person viewing/editing specific files in a group.
+    Without User permissions, if one user is compromised the entire system would become compromised. </li>
+  <li> <b> Group Owner Permissions: </b> Groups will help research collaborators organize their files so that everyone working on them has the proper form of access.</li>
+  <li> <b> Group Permissions: </b> Groups can be used to facilitate research groups / collaborations in an easy way. At the same time, group permission can prevent users working on other projects from viewing scientific data that they should not be able to see.</li>
+  <li> <b> Administrator Permissions:</b> Higher level members of the administration or IT employees will be given administrator privileges over the system.</li>
+</ul>
+
+<!-- END CHANGES HERE -->
+    </section>
+    <section id="references">
+      <h2>3. References</h2>
+<!-- BEGIN CHANGES HERE -->
+
+<p>If any of the requirements in Section 1, or any of the system models in
+Section 2, were inspired by material from books, papers, articles, or existing
+products, your sources should be cited here.</p>
+
+<!-- END CHANGES HERE -->
+    </section>
+  </body>
+</html>
