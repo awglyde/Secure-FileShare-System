@@ -304,17 +304,21 @@ public class EncryptionSuite
 
        Cipher cipher = decryptionKey.getCipher(decrypt);
 
-       // get block size
-       int blockSize = cipher.getBlockSize();
-
-       // calculate padding caused by encryption
-       int padding = blockSize - (fileSize - blockSize*(fileSize/blockSize));
-
        // getting decrypted bytes with padding from encryption
        byte[] decryptFileWithPadding =  decryptionKey.encryptBytes(fileBytes, cipher);
 
        // account for padding done by the AES encryption
-       return Arrays.copyOfRange(decryptFileWithPadding, 0, decryptFileWithPadding.length-padding);
+       return Arrays.copyOfRange(decryptFileWithPadding, 0, fileSize);
+   }
+
+   public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
+   {
+       Cipher cipher = this.getCipher(mode);
+
+       byte[] outputBytes = new byte[cipher.getOutputSize(inputBytes.length)];
+       int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
+       cipher.doFinal(outputBytes, outputLength);
+       return outputBytes;
    }
 
     public byte[] encryptBytes(byte[] inputBytes, Cipher cipher) throws Exception
