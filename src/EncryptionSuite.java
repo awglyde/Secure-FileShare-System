@@ -311,6 +311,16 @@ public class EncryptionSuite
        return Arrays.copyOfRange(decryptFileWithPadding, 0, fileSize);
    }
 
+   public byte[] encryptBytes(byte[] inputBytes) throws Exception
+   {
+       return this.encryptBytes(inputBytes, encrypt);
+   }
+
+   public byte[] decryptBytes(byte[] inputBytes) throws Exception
+   {
+       return this.encryptBytes(inputBytes, decrypt);
+   }
+
    public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
    {
        Cipher cipher = this.getCipher(mode);

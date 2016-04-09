@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import javax.crypto.*;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
+import javax.xml.bind.DatatypeConverter;
 
 public class GroupClient extends Client implements GroupClientInterface
 {
@@ -593,17 +594,26 @@ public class GroupClient extends Client implements GroupClientInterface
         System.out.println("Enter Authentication Code: ");
 	    String authCode = UserClient.inputValidation(UserClient.in.readLine());
 
-        System.out.println("Enter Password: ");
-	    String password = UserClient.inputValidation(UserClient.in.readLine());
-
         try
         {
+
+            byte[] encryptedAuthCodeBytes = DatatypeConverter.parseHexBinary(authCode);
+
+            byte[] decryptedAuthCode = userKeys.decryptBytes(encryptedAuthCodeBytes);
+
+            Integer finalAuthCode = (Integer)session.getObjectFromBytes(decryptedAuthCode);
+
+            System.out.println("Final Auth Code: "+finalAuthCode);
+
+            System.out.println("Enter Password: ");
+    	    String password = UserClient.inputValidation(UserClient.in.readLine());
+
             Envelope message = null, response = null;
             //Tell the server to return its public key
             message = new Envelope("AUTHLOGIN");
             // Add our new sequence number to the message
             message.addObject(this.session.getSequenceNum());
-			message.addObject(authCode);
+			message.addObject(finalAuthCode);
             message.addObject(password);
             // Generate an HMAC for the server to verify
             message.addObject(session.generateHmac(message));

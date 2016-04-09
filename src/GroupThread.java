@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.security.Key;
 import java.security.SecureRandom;
+import javax.xml.bind.DatatypeConverter;
 
 public class GroupThread extends Thread
 {
@@ -125,11 +126,20 @@ public class GroupThread extends Thread
                                 // Generate authcode for this session
                                 Integer authCode = prng.nextInt(89999)+10000;
 
-                                // Set auth code for this particular session
-                                session.setAuthCode(authCode.toString());
+                                System.out.println("Original authCode: "+authCode);
 
+                                // Set auth code for this particular session
+                                session.setAuthCode(authCode);
+
+                                byte[] authCodeBytes = session.getBytes(authCode);
+                                System.out.println("Auth code byte size: "+authCodeBytes.length);
+
+                                byte[] encryptedAuthCode = session.getTargetKey().encryptBytes(authCodeBytes);
+
+                                System.out.println("Encrypted Auth code byte size: "+encryptedAuthCode.length);
                                 // Email the session authentication code to the user
-                                this.my_gs.sendAuthEmail(this.my_gs.userList.getUserEmail(userName), authCode.toString());
+                                this.my_gs.sendAuthEmail(this.my_gs.userList.getUserEmail(userName),                                 DatatypeConverter.printHexBinary(encryptedAuthCode));
+
 
                                 // Set the user for the current session
                                 session.setUser(userName);
@@ -164,13 +174,14 @@ public class GroupThread extends Thread
                         // Verifying the parameters passed in aren't null
                         if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
                         {
-                            String authCode = (String) message.getObjContents().get(0); //Extract the username
-                            String password = (String) message.getObjContents().get(1); //Extract the password
-                            if(session.getAESKey().verifyUserPassword(password, my_gs.userList.getPasswordHash(this.session.getUser()), my_gs.userList.getPasswordSalt(this.session.getUser()))
+                            Integer authCode = (Integer) message.getObjContents().get(0); // Extract the authCode
+                            String password = (String) message.getObjContents().get(1); // Extract the password
+                            if( session.verifyAuthCode(authCode)
+                                && session.getAESKey().verifyUserPassword(password, my_gs.userList.getPasswordHash(this.session.getUser()), my_gs.userList.getPasswordSalt(this.session.getUser()))
                                 && !my_gs.userList.isLocked(this.session.getUser()))
                             {
 
-                                System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD!");
+                                System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD AND AUTHCODE!");
                                 response.setMessage("OK");
                             }
                             else

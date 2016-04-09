@@ -525,7 +525,7 @@ public class UserClient
         }
         catch(Exception e)
         {
-            System.out.println("Disconnected from server\n");
+            System.out.println("Disconnected from server\n"+e.getMessage());
         }
 
         in.close();

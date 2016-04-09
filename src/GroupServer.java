@@ -19,7 +19,7 @@ public class GroupServer extends Server
     public static final int SERVER_PORT = 8765;
     public UserList userList;
     public GroupList groupList;
-    private String SERVER_EMAIL = "groupserver1653";
+    private String SERVER_EMAIL = "groupserver1653@gmail.com";
     private String SERVER_PASS = "@Lexishere1";
     private String SUBJECT = "Group Server Authentication Code";
 
@@ -37,6 +37,7 @@ public class GroupServer extends Server
 
     public void sendAuthEmail(String recipient, String authCode) throws Exception
     {
+        System.out.println("Recipient: "+recipient);
         Properties props = System.getProperties();
         String host = "smtp.gmail.com";
         props.put("mail.smtp.starttls.enable", "true");

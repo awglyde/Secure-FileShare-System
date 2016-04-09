@@ -14,19 +14,19 @@ public class Session
     byte[] nonce;
 	int sequenceNum = -1;
 	String userName = "";
-	String authCode = "";
+	Integer authCode = -1;
 
 	public Session()
 	{
 
 	}
 
-	public boolean verifyAuthCode(String authCodeInput)
+	public boolean verifyAuthCode(Integer authCodeInput)
 	{
 		return this.authCode.equals(authCodeInput);
 	}
 
-	public void setAuthCode(String authCode)
+	public void setAuthCode(Integer authCode)
 	{
 		this.authCode = authCode;
 	}
