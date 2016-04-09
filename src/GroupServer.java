@@ -4,18 +4,24 @@
  */
 
 import java.io.*;
+import java.util.*;
 import java.security.Key;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.ArrayList;
+import javax.mail.*;
+import javax.mail.internet.*;
 
 public class GroupServer extends Server
 {
     public static final int SERVER_PORT = 8765;
     public UserList userList;
     public GroupList groupList;
+    private String SERVER_EMAIL = "groupserver1653";
+    private String SERVER_PASS = "@Lexishere1";
+    private String SUBJECT = "Group Server Authentication Code";
 
     public GroupServer() throws Exception
     {
@@ -27,6 +33,31 @@ public class GroupServer extends Server
     {
         super(_port, "ALPHA");
         serverRSAKeys = new EncryptionSuite("group_server_config/group_server_pub", "group_server_config/group_server_priv");
+    }
+
+    public void sendAuthEmail(String recipient, String authCode) throws Exception
+    {
+        Properties props = System.getProperties();
+        String host = "smtp.gmail.com";
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.user", this.SERVER_EMAIL);
+        props.put("mail.smtp.password", this.SERVER_PASS);
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+
+        javax.mail.Session session = javax.mail.Session.getDefaultInstance(props);
+        MimeMessage message = new MimeMessage(session);
+
+        message.setFrom(new InternetAddress(this.SERVER_EMAIL));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+
+        message.setSubject(this.SUBJECT);
+        message.setText(authCode);
+        Transport transport = session.getTransport("smtp");
+        transport.connect(host, this.SERVER_EMAIL, this.SERVER_PASS);
+        transport.sendMessage(message, message.getAllRecipients());
+        transport.close();
     }
 
     public void start() throws Exception
