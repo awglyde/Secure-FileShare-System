@@ -2,4 +2,4 @@ Once inside src/ folder,
 
 Compile with
 
-	javac -cp ../resources/bcprov-jdk15on-154.jar *.java
+	javac -cp '../resources/bcprov-jdk15on-154.jar;../resources/javax.mail-1.5.5.jar' *.java
