@@ -96,6 +96,8 @@ public class UserClient
                     case "7": // Create a user
                         System.out.println("Enter username of new user to create: ");
                         String newUserName = inputValidation(in.readLine());
+                        System.out.println("Enter email of new user to create: ");
+                        String newUserEmail = inputValidation(in.readLine());
                         System.out.println("Enter password for "+newUserName +":");
                         String password = inputValidation(in.readLine());
 
@@ -108,7 +110,7 @@ public class UserClient
 						else
 						{
 
-	                        if (groupClient.createUser(newUserName, password, userName))
+	                        if (groupClient.createUser(newUserName, newUserEmail, password, userName))
 	                        {
 	                            System.out.println("User created successfully!");
 	                        }

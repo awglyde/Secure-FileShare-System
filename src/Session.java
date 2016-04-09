@@ -13,10 +13,32 @@ public class Session
 	EncryptionSuite targetPubKey;
     byte[] nonce;
 	int sequenceNum = -1;
+	String userName = "";
+	String authCode = "";
 
 	public Session()
 	{
 
+	}
+
+	public boolean verifyAuthCode(String authCodeInput)
+	{
+		return this.authCode.equals(authCodeInput);
+	}
+
+	public void setAuthCode(String authCode)
+	{
+		this.authCode = authCode;
+	}
+
+	public void setUser(String userName)
+	{
+		this.userName = userName;
+	}
+
+	public String getUser()
+	{
+		return this.userName;
 	}
 
 	public void setSequenceNum(int sequenceNum)

@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.security.Key;
+import java.security.SecureRandom;
 
 public class GroupThread extends Thread
 {
@@ -102,20 +103,37 @@ public class GroupThread extends Thread
                 }
                 else if (message.getMessage().equals("AUTHCHALLENGE"))
                 {
-                    if(message.getObjContents().size() >= 3)
+                    if(message.getObjContents().size() >= 4)
                     {
                         // Checking first param isn't null
                         if(message.getObjContents().get(0) != null &&
                             message.getObjContents().get(1) != null &&
-                            message.getObjContents().get(2) != null)
+                            message.getObjContents().get(2) != null &&
+                            message.getObjContents().get(3) != null)
                         {
 		                    byte[] challenge = (byte[])message.getObjContents().get(0); // User's challenge R
                             Key hmacKey = (Key)message.getObjContents().get(1);
-                            byte[] messageHmac = (byte[])message.removeObject(2);
+                            String userName = (String)message.getObjContents().get(2);
+                            byte[] messageHmac = (byte[])message.removeObject(3);
 
                             // If we verify the message is from the person who sent it
                             if (this.session.getTargetKey().verifyHmac(messageHmac, this.session.getBytes(message)))
                             {
+                                // Secure Random to generate authcode
+                                SecureRandom prng = new SecureRandom();
+
+                                // Generate authcode for this session
+                                Integer authCode = prng.nextInt(89999)+10000;
+
+                                // Set auth code for this particular session
+                                session.setAuthCode(authCode.toString());
+
+                                // Email the session authentication code to the user
+                                this.my_gs.sendAuthEmail(this.my_gs.userList.getUserEmail(userName), authCode.toString());
+
+                                // Set the user for the current session
+                                session.setUser(userName);
+
                                 // Creating an E.S. for our Hmac key from the client
                                 session.setHmacKey(hmacKey);
     		                    // Generating a new AES session key
@@ -146,10 +164,10 @@ public class GroupThread extends Thread
                         // Verifying the parameters passed in aren't null
                         if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null)
                         {
-                            String username = (String) message.getObjContents().get(0); //Extract the username
+                            String authCode = (String) message.getObjContents().get(0); //Extract the username
                             String password = (String) message.getObjContents().get(1); //Extract the password
-                            if(session.getAESKey().verifyUserPassword(password, my_gs.userList.getPasswordHash(username), my_gs.userList.getPasswordSalt(username))
-                                && !my_gs.userList.isLocked(username))
+                            if(session.getAESKey().verifyUserPassword(password, my_gs.userList.getPasswordHash(this.session.getUser()), my_gs.userList.getPasswordSalt(this.session.getUser()))
+                                && !my_gs.userList.isLocked(this.session.getUser()))
                             {
 
                                 System.out.println("SUCCESSFULLY VERIFIED USER PASSWORD!");
@@ -158,7 +176,7 @@ public class GroupThread extends Thread
                             else
                             {
                                 // keep track of the number of failed login attempts
-                                my_gs.userList.failedLogin(username);
+                                my_gs.userList.failedLogin(this.session.getUser());
                             }
                         }
                     }
@@ -218,14 +236,16 @@ public class GroupThread extends Thread
                 }
                 else if(message.getMessage().equals("CUSER")) //Client wants to create a user
                 {
-                    if(message.getObjContents().size() >= 3)
+                    if(message.getObjContents().size() >= 4)
                     {
                         if(message.getObjContents().get(0) != null && message.getObjContents().get(1) != null
-                                                                   && message.getObjContents().get(2) != null)
+                                                                   && message.getObjContents().get(2) != null
+                                                                   && message.getObjContents().get(3) != null)
                         {
                             String username = (String) message.getObjContents().get(0); //Extract the username
-                            String password = (String) message.getObjContents().get(1); //Extract the password
-                            String requester = (String) message.getObjContents().get(2); //Extract the requester
+                            String email = (String) message.getObjContents().get(1); //Extract the new user's email
+                            String password = (String) message.getObjContents().get(2); //Extract the password
+                            String requester = (String) message.getObjContents().get(3); //Extract the requester
 
                             if(!EncryptionSuite.verifyPassword(username, password))
                             {
@@ -233,7 +253,7 @@ public class GroupThread extends Thread
                             }
                             else
                             {
-                                if(createUser(username, password, requester, session.getAESKey()))
+                                if(createUser(username, email, password, requester, session.getAESKey()))
                                 {
                                     response.setMessage("OK"); //Success
                                 }
@@ -401,7 +421,7 @@ public class GroupThread extends Thread
 
                     // Generate an HMAC of the auth response for the client to verify
                     response.addObject(session.generateHmac(response));
-                    
+
                     output.writeObject(session.getEncryptedMessage(response));
                 }
             } while(proceed);
@@ -451,13 +471,14 @@ public class GroupThread extends Thread
                     // unlock the user
                     my_gs.userList.unlockUser(username);
 
-                    //upadte their password
+                    // Update their password
                     // Generate salt
                     byte[] tempSalt = sessionKey.generateSalt();
                     // salt and hash the password
                     byte[] saltedPwHash = sessionKey.saltAndHashPassword(password, tempSalt);
                     // Add user with their hashed and salted password
-                    my_gs.userList.addUser(username, saltedPwHash, tempSalt);
+                    my_gs.userList.addUser(username, my_gs.userList.getUserEmail(username), saltedPwHash, tempSalt);
+
                     return true;
                 }
             }
@@ -466,7 +487,7 @@ public class GroupThread extends Thread
     }
 
     //Method to create a user
-    private boolean createUser(String username, String password, String requester, EncryptionSuite sessionKey) throws Exception
+    private boolean createUser(String username, String email, String password, String requester, EncryptionSuite sessionKey) throws Exception
     {
 
         //Check if requester exists
@@ -489,7 +510,7 @@ public class GroupThread extends Thread
                     // salt and hash the password
                     byte[] saltedPwHash = sessionKey.saltAndHashPassword(password, tempSalt);
                     // Add user with their hashed and salted password
-                    my_gs.userList.addUser(username, saltedPwHash, tempSalt);
+                    my_gs.userList.addUser(username, email, saltedPwHash, tempSalt);
                     return true;
                 }
             }

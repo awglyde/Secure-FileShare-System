@@ -12,11 +12,12 @@ public class UserList implements java.io.Serializable
     private static final long serialVersionUID = 7600343803563417992L;
     private Hashtable<String, User> list = new Hashtable<String, User>();
 
-    public synchronized void addUser(String username, byte[] saltedPwHash, byte[] salt)
+    public synchronized void addUser(String username, String email, byte[] saltedPwHash, byte[] salt)
     {
         User newUser = new User();
         newUser.setPasswordHash(saltedPwHash);
         newUser.setPasswordSalt(salt);
+        newUser.setEmail(email);
         this.list.put(username, newUser);
     }
 
@@ -78,6 +79,11 @@ public class UserList implements java.io.Serializable
             return null;
     }
 
+    public synchronized String getUserEmail(String username)
+    {
+        return this.list.get(username).getEmail();
+    }
+
     public synchronized ArrayList<String> getUserGroups(String username)
     {
         return this.list.get(username).getGroups();
@@ -135,6 +141,7 @@ public class UserList implements java.io.Serializable
         private int numLogin = 0;
 
         String username = "";
+        String email = "";
         Token userToken = null;
 
         public User()
@@ -161,6 +168,16 @@ public class UserList implements java.io.Serializable
         public void unlock()
         {
             numLogin = 0;
+        }
+
+        public void setEmail(String email)
+        {
+            this.email = email;
+        }
+
+        public String getEmail()
+        {
+            return this.email;
         }
 
         // if the user is locked return null so that they cannot login

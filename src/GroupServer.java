@@ -72,6 +72,7 @@ public class GroupServer extends Server
         ObjectInputStream userStream;
         ObjectInputStream groupStream;
         String username = "";
+        String email = "";
         String password = "";
 
         //This runs a thread that saves the lists on program exit
@@ -91,6 +92,8 @@ public class GroupServer extends Server
             System.out.println("No users currently exist. Your account will be the administrator.");
             System.out.print("Enter your username: ");
             username = in.readLine();
+            System.out.print("Enter your email: ");
+            email = in.readLine();
 
             do{
                 System.out.print("Enter your password (q to quit): ");
@@ -115,7 +118,7 @@ public class GroupServer extends Server
             // salt and hash the password
             byte[] saltedPwHash = this.serverRSAKeys.saltAndHashPassword(password, tempSalt);
             // Add user with their hashed and salted password
-            this.userList.addUser(username, saltedPwHash, tempSalt);
+            this.userList.addUser(username, email, saltedPwHash, tempSalt);
             this.userList.addGroup(username, "ADMIN");
             this.userList.addOwnership(username, "ADMIN");
         }

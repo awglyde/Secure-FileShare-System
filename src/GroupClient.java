@@ -127,7 +127,7 @@ public class GroupClient extends Client implements GroupClientInterface
         }
     }
 
-    public boolean createUser(String userName, String password, String requester)
+    public boolean createUser(String userName, String email, String password, String requester)
     {
         try
         {
@@ -136,6 +136,7 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("CUSER");
             message.addObject(this.session.getSequenceNum());
             message.addObject(userName); //Add user name string
+            message.addObject(email); //Add user email string
             message.addObject(password); //Add the new user's password
             message.addObject(requester); //Add the requester
 
@@ -527,8 +528,13 @@ public class GroupClient extends Client implements GroupClientInterface
         {
             Envelope message = null, response = null;
             message = new Envelope("AUTHCHALLENGE");
+
+            System.out.println("Enter username to receive an authentication email: ");
+            UserClient.userName = UserClient.inputValidation(UserClient.in.readLine());
+
 			message.addObject(challenge); // Add the nonce to our message
 			message.addObject(this.session.getHmacKey().getEncryptionKey()); // add the hmac key to our message
+            message.addObject(UserClient.userName);
             // Add an HMAC of our message created using the user's public RSA key
             message.addObject(userKeys.generateHmac(this.session.getBytes(message)));
 
@@ -584,8 +590,9 @@ public class GroupClient extends Client implements GroupClientInterface
         int sequenceNumber = prng.nextInt();
         this.session.setSequenceNum(Math.abs(sequenceNumber));
 
-	    System.out.println("Enter username to login: ");
-	    UserClient.userName = UserClient.inputValidation(UserClient.in.readLine());
+        System.out.println("Enter Authentication Code: ");
+	    String authCode = UserClient.inputValidation(UserClient.in.readLine());
+
         System.out.println("Enter Password: ");
 	    String password = UserClient.inputValidation(UserClient.in.readLine());
 
@@ -596,7 +603,7 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("AUTHLOGIN");
             // Add our new sequence number to the message
             message.addObject(this.session.getSequenceNum());
-			message.addObject(UserClient.userName);
+			message.addObject(authCode);
             message.addObject(password);
             // Generate an HMAC for the server to verify
             message.addObject(session.generateHmac(message));
