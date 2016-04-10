@@ -132,6 +132,7 @@ public class FileClient extends Client implements FileClientInterface
                         // With the right key version, decrypt the file retrieved from the file server
                         byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes, fileSize);
 
+                        // Verify the file hasn't been tampered with
                         if(EncryptionSuite.verifyFileHmac(keyRing.get(group), keyVersion, fileHmac, decryptedFileBytes))
                         {
                             fos.write(decryptedFileBytes);

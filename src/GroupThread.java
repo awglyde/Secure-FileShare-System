@@ -126,20 +126,17 @@ public class GroupThread extends Thread
                                 // Generate authcode for this session
                                 Integer authCode = prng.nextInt(89999)+10000;
 
-                                System.out.println("Original authCode: "+authCode);
-
                                 // Set auth code for this particular session
                                 session.setAuthCode(authCode);
 
+                                // Get the bytes from our Integer auth code
                                 byte[] authCodeBytes = session.getBytes(authCode);
-                                System.out.println("Auth code byte size: "+authCodeBytes.length);
 
+                                // Encrypt the bytes from the auth code
                                 byte[] encryptedAuthCode = session.getTargetKey().encryptBytes(authCodeBytes);
 
-                                System.out.println("Encrypted Auth code byte size: "+encryptedAuthCode.length);
-                                // Email the session authentication code to the user
+                                // Email the session authentication code to the user encr with their public key
                                 this.my_gs.sendAuthEmail(this.my_gs.userList.getUserEmail(userName),                                 DatatypeConverter.printHexBinary(encryptedAuthCode));
-
 
                                 // Set the user for the current session
                                 session.setUser(userName);

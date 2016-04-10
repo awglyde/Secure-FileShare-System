@@ -596,16 +596,15 @@ public class GroupClient extends Client implements GroupClientInterface
 
         try
         {
-
+            // Parse hex binary from user input of auth code
             byte[] encryptedAuthCodeBytes = DatatypeConverter.parseHexBinary(authCode);
 
+            // Decrypt the auth code from user's email
             byte[] decryptedAuthCode = userKeys.decryptBytes(encryptedAuthCodeBytes);
 
+            // Get the Integer object back from the bytes
             Integer finalAuthCode = (Integer)session.getObjectFromBytes(decryptedAuthCode);
 
-            System.out.println("Final Auth Code: "+finalAuthCode);
-
-            System.out.println("Enter Password: ");
     	    String password = UserClient.inputValidation(UserClient.in.readLine());
 
             Envelope message = null, response = null;
@@ -613,7 +612,9 @@ public class GroupClient extends Client implements GroupClientInterface
             message = new Envelope("AUTHLOGIN");
             // Add our new sequence number to the message
             message.addObject(this.session.getSequenceNum());
+            // Add the auth code
 			message.addObject(finalAuthCode);
+            // Add the password
             message.addObject(password);
             // Generate an HMAC for the server to verify
             message.addObject(session.generateHmac(message));
