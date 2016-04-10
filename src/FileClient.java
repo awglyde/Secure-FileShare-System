@@ -111,10 +111,6 @@ public class FileClient extends Client implements FileClientInterface
 
                 if (env.getMessage().equals("FILE"))
                 {
-                    // We got a fle, so create a new file
-                    file.createNewFile();
-
-                    FileOutputStream fos = new FileOutputStream(file);
 
                     byte[] encryptedFileBytes = (byte[])env.getObjContents().get(0);
                     // Group that owns the file we downloaded. Used to find the right key
@@ -132,9 +128,20 @@ public class FileClient extends Client implements FileClientInterface
                         // With the right key version, decrypt the file retrieved from the file server
                         byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes, fileSize);
 
+                        /* Testing hmac verification works. Uncomment to verify it works.
+                        decryptedFileBytes[0] &= decryptedFileBytes[0] << 2;
+                        decryptedFileBytes[1] |= decryptedFileBytes[0] << 2;
+                        */
+
                         // Verify the file hasn't been tampered with
                         if(EncryptionSuite.verifyFileHmac(keyRing.get(group), keyVersion, fileHmac, decryptedFileBytes))
                         {
+
+                            // We got a file and it hasn't been modified, so create a new file
+                            file.createNewFile();
+
+                            FileOutputStream fos = new FileOutputStream(file);
+
                             fos.write(decryptedFileBytes);
                             fos.close();
 

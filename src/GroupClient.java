@@ -605,6 +605,7 @@ public class GroupClient extends Client implements GroupClientInterface
             // Get the Integer object back from the bytes
             Integer finalAuthCode = (Integer)session.getObjectFromBytes(decryptedAuthCode);
 
+            System.out.println("Enter password to complete login: ");
     	    String password = UserClient.inputValidation(UserClient.in.readLine());
 
             Envelope message = null, response = null;
