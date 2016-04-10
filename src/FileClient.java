@@ -262,6 +262,8 @@ public class FileClient extends Client implements FileClientInterface
 
                 // add the size of the unencrypted file
                 message.addObject(fileBytes.length);
+
+                message.addObject(EncryptionSuite.generateFileHmac(keyRing.get(group), fileBytes));
             }
             else
             {

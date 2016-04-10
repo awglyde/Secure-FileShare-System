@@ -145,7 +145,7 @@ public class FileThread extends Thread
                 }
                 else if(message.getMessage().equals("UPLOADF"))
                 {
-                    if(message.getObjContents().size() < 5)
+                    if(message.getObjContents().size() < 7)
                     {
                         response.setMessage("FAIL-BADCONTENTS");
                     }
@@ -163,6 +163,22 @@ public class FileThread extends Thread
                         {
                             response.setMessage("FAIL-BADTOKEN");
                         }
+                        else if(message.getObjContents().get(3) == null)
+                        {
+                            response.setMessage("FAIL-BADFILE");
+                        }
+                        else if(message.getObjContents().get(4) == null)
+                        {
+                            response.setMessage("FAIL-BADKEYVERSION");
+                        }
+                        else if(message.getObjContents().get(5) == null)
+                        {
+                            response.setMessage("FAIL-BADFILESIZE");
+                        }
+                        else if(message.getObjContents().get(6) == null)
+                        {
+                            response.setMessage("FAIL-BADHMAC");
+                        }
                         else
                         {
                             String remotePath = (String) message.getObjContents().get(0);
@@ -171,6 +187,7 @@ public class FileThread extends Thread
                             byte[] fileBytes = (byte[])message.getObjContents().get(3);
                             int keyVersion = (int)message.getObjContents().get(4);
                             int actualFileSize = (int)message.getObjContents().get(5);
+                            byte[] fileHmac = (byte[])message.getObjContents().get(6);
 
                             // Verify token signature and make sure it isn't expired
                             response.setMessage("FAIL-BADTOKEN");
@@ -199,7 +216,7 @@ public class FileThread extends Thread
 
                                     System.out.println("Successfully received the file from the client.");
 
-                                    FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath, keyVersion, actualFileSize);
+                                    FileServer.fileList.addFile(yourToken.getSubject(), group, remotePath, keyVersion, actualFileSize, fileHmac);
 
                                     response.setMessage("OK"); //Success
                                 }

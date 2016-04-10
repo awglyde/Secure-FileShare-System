@@ -286,6 +286,14 @@ public class EncryptionSuite
 
     }
 
+    public static byte[] generateFileHmac(ArrayList<Key> keys, byte[] fileBytes) throws Exception
+    {
+       // create new encryption suite object with last key
+       EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
+
+       return encryptionKey.generateHmac(fileBytes);
+    }
+
     public static byte[] encryptFile(ArrayList<Key> keys, byte[] fileBytes) throws Exception
    {
        // create new encryption suite object with last key
