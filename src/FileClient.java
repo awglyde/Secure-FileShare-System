@@ -123,6 +123,8 @@ public class FileClient extends Client implements FileClientInterface
                     int keyVersion = (int)env.getObjContents().get(2);
                     // Retrieve the actual size of the file (without padding)
                     int fileSize = (int)env.getObjContents().get(3);
+                    // Retrieve the hmac of the file
+                    byte[] fileHmac = (byte[])env.getObjContents().get(4);
 
                     // Make sure our key ring is not null before we try to decrypt anything
                     if (!(keyRing == null) && !(keyRing.get(group) == null))
@@ -130,10 +132,19 @@ public class FileClient extends Client implements FileClientInterface
                         // With the right key version, decrypt the file retrieved from the file server
                         byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes, fileSize);
 
-                        fos.write(decryptedFileBytes);
-                        fos.close();
+                        if(EncryptionSuite.verifyFileHmac(keyRing.get(group), keyVersion, fileHmac, decryptedFileBytes))
+                        {
+                            fos.write(decryptedFileBytes);
+                            fos.close();
 
-                        return true;
+                            return true;
+                        }
+                        else
+                        {
+                            System.out.println("File was modified! Download failed.");
+                            return false;
+                        }
+
                     }
                     else
                     {

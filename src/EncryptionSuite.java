@@ -286,6 +286,17 @@ public class EncryptionSuite
 
     }
 
+    public static boolean verifyFileHmac(ArrayList<Key> keys, int version, byte[] fileHmacBytes, byte[] fileBytes) throws Exception
+    {
+        // create new encryption suite object with last key
+        EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
+
+        // generate Hmac of file to compare to the one passed in
+        byte[] generatedFileHmac = encryptionKey.generateHmac(fileBytes);
+
+        return Arrays.equals(generatedFileHmac, fileHmacBytes);
+    }
+
     public static byte[] generateFileHmac(ArrayList<Key> keys, byte[] fileBytes) throws Exception
     {
        // create new encryption suite object with last key
@@ -295,7 +306,7 @@ public class EncryptionSuite
     }
 
     public static byte[] encryptFile(ArrayList<Key> keys, byte[] fileBytes) throws Exception
-   {
+    {
        // create new encryption suite object with last key
        EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
 
@@ -303,7 +314,7 @@ public class EncryptionSuite
 
        // encrypt the file and return the encrypted bytes
        return encryptionKey.encryptBytes(fileBytes, cipher);
-   }
+    }
 
    public static byte[] decryptFile(ArrayList<Key> keys, int version, byte[] fileBytes, int fileSize) throws Exception
    {

@@ -272,7 +272,7 @@ public class FileThread extends Thread
                                     response.addObject(sf.getGroup());
                                     response.addObject(sf.getEncryptionVersion());
                                     response.addObject(sf.getFileSize());
-
+                                    response.addObject(sf.getFileHmac());
                                 }
                             }
                             catch(Exception e1)

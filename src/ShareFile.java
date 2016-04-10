@@ -22,6 +22,11 @@ public class ShareFile implements java.io.Serializable, Comparable<ShareFile>
         this.fileHmac = fileHmac;
     }
 
+    public byte[] getFileHmac()
+    {
+        return this.fileHmac;
+    }
+
     public int getFileSize()
     {
         return this.fileSize;
