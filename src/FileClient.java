@@ -125,17 +125,11 @@ public class FileClient extends Client implements FileClientInterface
                     // Make sure our key ring is not null before we try to decrypt anything
                     if (!(keyRing == null) && !(keyRing.get(group) == null))
                     {
-                        // With the right key version, decrypt the file retrieved from the file server
-                        byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes, fileSize);
-
-                        /* Testing hmac verification works. Uncomment to verify it works.
-                        decryptedFileBytes[0] &= decryptedFileBytes[0] << 2;
-                        decryptedFileBytes[1] |= decryptedFileBytes[0] << 2;
-                        */
-
-                        // Verify the file hasn't been tampered with
-                        if(EncryptionSuite.verifyFileHmac(keyRing.get(group), keyVersion, fileHmac, decryptedFileBytes))
+                        // Verify the file hasn't been tampered with BEFORE decrypting the file and saving it
+                        if(EncryptionSuite.verifyFileHmac(keyRing.get(group), keyVersion, fileHmac, encryptedFileBytes))
                         {
+                            // With the right key version, decrypt the file retrieved from the file server
+                            byte[] decryptedFileBytes = EncryptionSuite.decryptFile(keyRing.get(group), keyVersion, encryptedFileBytes, fileSize);
 
                             // We got a file and it hasn't been modified, so create a new file
                             file.createNewFile();
@@ -274,7 +268,8 @@ public class FileClient extends Client implements FileClientInterface
             // Need to retrieve one from group server if so
             if (!(keyRing == null) && !(fileBytes == null) && !(keyRing.get(group) == null))
             {
-                message.addObject(EncryptionSuite.encryptFile(keyRing.get(group), fileBytes)); // add file bytes to message
+                byte[] encryptedFileBytes = EncryptionSuite.encryptFile(keyRing.get(group), fileBytes);
+                message.addObject(encryptedFileBytes); // add file bytes to message
 
                 // add the version number of the encrypted file
                 message.addObject(keyRing.get(group).size()-1);
@@ -282,7 +277,7 @@ public class FileClient extends Client implements FileClientInterface
                 // add the size of the unencrypted file
                 message.addObject(fileBytes.length);
 
-                message.addObject(EncryptionSuite.generateFileHmac(keyRing.get(group), fileBytes));
+                message.addObject(EncryptionSuite.generateFileHmac(keyRing.get(group), encryptedFileBytes));
             }
             else
             {
