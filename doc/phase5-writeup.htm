@@ -186,11 +186,14 @@
 				Similarly, the way we mitigated file modification largely built on our file encryption techniques, since we use the same key to encrypt the files as we do to HMAC them. We send the HMAC along with the file when we upload it. Since HMACs are cryptographically secure, and the file server does not have access to our Keyring, we don't have to worry about the possibility of them recomputing an HMAC for a modified or replaced file.
 			</p>
             <p>
-                For DDoS, our system required completely seperate protocols that were unrelated to our previous protocols (thus building on them rather than replacing them). The only affect on our previous phases would be with the users ability to upload files as users can no longer upload an infinite number of files.
+                For DDoS, our system required completely seperate protocols that were unrelated to our previous protocols (thus building along side our old protocols rather than replacing or building upon them). The only affect on our previous phases would be with the users ability to upload files as users can no longer upload an infinite number of files.
             </p>
 			<p>
 				Overall, we did not have to design our countermeasures in any special way to prevent re-introducing older threats. We simply had to build upon our existing framework to help further secure our system from the new threats we introduced.
 			</p>
+            <p>
+                <b>A note on DDoS: </b> It is important to recognize that DDoS is a significant attack, it is also difficult to prevent. With this in mind we left the DDoS mitigation as a theoretical exercise that we would implement in the future if we contiue to support this applications source code. T8-T10 have full solutions or proofs of concepts implemented to demonstrate that our fixes solve those problems.
+            </p>
 			<!-- END CHANGES HERE -->
 		</section>
 	</body>
