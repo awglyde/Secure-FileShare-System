@@ -7,25 +7,21 @@
 	<style>
 		/* BEGIN CHANGES HERE */
 		/* In this section, you may add CSS styling if desired */
-
 		header {
 			text-align: center;
 		}
 		/* END CHANGES HERE */
 	</style>
-
 	<body>
 		<header>
 			<h1>CS 1653 Project P5 Writeup</h1>
 			<h2>
-<!-- BEGIN CHANGES HERE -->
-
-George Hoesch - gah33@pitt.edu
-<br />
-Alex Glyde - awg13@pitt.edu
-
-<!-- END CHANGES HERE -->
-      </h2>
+                <!-- BEGIN CHANGES HERE -->
+                George Hoesch - gah33@pitt.edu
+                <br />
+                Alex Glyde - awg13@pitt.edu
+                <!-- END CHANGES HERE -->
+            </h2>
 		</header>
 		<section id="overview">
 			<h2>Overview</h2>
@@ -42,15 +38,17 @@ Alex Glyde - awg13@pitt.edu
 			<p>
 				<b>T10: </b>In Threat 10 we worry about the possibility of a file server modifying files it has access to or potentially replacing them with malicious software (malware, ransomware, etc.). To mitigate this threat we HMAC every file we upload with an HMAC keyring similar to the way the file encryption keyring works, relying on the Group Server. This key is never visible to the File Server. Then, when a client attempts to download a file, we verify the HMAC in the ShareFile is correct. If verification fails, we do not unencrypt the file and notify the client that their file has been tampered with.
 			</p>
-
+            <p>
+				<b>T11: </b>In Threat 11 we worry about the possibility of an adversary taking advantage of a resource disparity inorder to perform a denial of service attack on our application. This would involve creating a large number of threads on our servers to take up the bandwidth of the server. A small amount of resources on the adversaries part would be needed but would soak up a lot of our applications resources causing the usability of the file sharing system to be minimal if not nill.
+			</p>
+            <p>
+				<b>T12: </b>In Threat 12 we worry about the possibility of an adversary attacking with a different kind of denial of service attack where they attempt to overload the file servers with random files. A way to mitigate this would be to create a maximum storage size allocated per group, and also a limited number of owned groups allowed per user. Similarly this could be solved by a storage size per user.
+			</p>
 			<!-- END CHANGES HERE -->
 		</section>
-
 		<section id="threatmodel">
 			<h2>Threat Model</h2>
-
 <!--
-
 			<p>Define a threat model within which your implementation is subject to attack. You may re-use a threat model from another phase of the project, or you may define a new threat model (e.g., What if we were worried about more than just the file leakage
 				from a file server? What if the group server was mostly trusted, but the password file or other state was somehow leaked? What about the possibility of DoS or DDoS attacks?). This threat model should be written up in the same format as the threat
 				models that you were given for Phases P3 and P4 of the project.</p>
@@ -59,10 +57,8 @@ Alex Glyde - awg13@pitt.edu
 				represent a threat against your system.</p>
 
 			<p>If your group implemented programs to demonstrate your attacks, discuss these programs here.</p>
-
 -->
 			<!-- BEGIN CHANGES HERE -->
-
 			<ul>
 				<li>
 					<b>Group Server: </b> In this trust model the Group Server is mostly trustworthy. The one exception is that the Group Server may potentially leak the password file containing all user's passwords.
@@ -71,23 +67,18 @@ Alex Glyde - awg13@pitt.edu
 				<li>
 					<b>File Server: </b> In this trust model, File Servers are entirely untrustworthy. In particular, the file server may modify files, leak tokens, and leak files.
 				</li>
-
 				<li>
-					<b>Clients: </b> We will assume that clients are not trustworthy. Specifically, clients may attempt to obtain tokens that belong to other users and/or modify the tokens issued to them by the group server to acquire additional permissions.
+					<b>Clients: </b> We will assume that clients are not trustworthy. Specifically, clients may attempt to obtain tokens that belong to other users and/or modify the tokens issued to them by the group server to acquire additional permissions. We also assume that clients are not mindful of server storage space and may attempt to overload the file server.
 				</li>
-
 				<li>
 					<b>Other Principals: </b> We will assume that all communications in the system might be intercepted by an active attacker that can insert, reorder, replay, or modify messages.
-
 				</li>
 			</ul>
-
 			<!-- END CHANGES HERE -->
 		</section>
 		<section id="attacks">
 			<h2>Attacks</h2>
 			<!-- BEGIN CHANGES HERE -->
-
 			<p>
 				<b>T8 Leaked Password Files (Offline Brute Force Attack)</b> In this attack we assume that an attacker has acquired access to our list of passwords. Using the list of hashed, salted passwords the attacker can carry out an offline brute force attack and potentially acquire every user's password. Being able to brute force the passwords would allow an adversary to log in as any user in our system.
 			</p>
@@ -97,13 +88,17 @@ Alex Glyde - awg13@pitt.edu
 			<p>
 				<b>T10 File Modification</b> In this attack, a File Server may arbitrarily modify files that it is storing. For example: A user uploads a file. The file server then flips some bits in the file or replaces it with malware or attempts some other malicious modificaiton or replacement of the file.
 			</p>
-
+            <p>
+                <b>T11 DDoS (Threads): </b> In this attack an adversary may attempt to disrupt the usability of both the Group Server and the File server. An adversary would open a valid connection to either server (with a valid initial message; see P4 diagrams) and then leave the connection open never following through with the rest of the protocol and never terminating the connection. If this is done many times, many threads will be created (and never closed) and eventually the bandwith of each server will be taken up. Thus preventing our users from accessing their files. In fact, an adversary would only have to DDoS the Group Server to prevent users from accessing their files on the File Server as they need a token and a key ring from the Group Server to gain access to the files and to decrypt the files correctly. This attack is very dangerous in regards to the reliability of our application.
+            </p>
+            <p>
+                <b>T12 DDoS (File Storage): </b> In this attack an adversary (or an unknowning client) may attempt to store large files or many small files on our file server eventually taking up all of the memory dedicated to our file servers. This would prevent other users from storing their own files on our file server(s). This attack is considered DDoS because an adversary can reupload the same file with a different name to perform the attack. Meaning an adversary can use a small number of resources (the repeatedly uploaded file's memory) to take up a large number of resources on our end (file server storage). The main dangers of this attack is the reliability of our application.
+            </p>
 			<!-- END CHANGES HERE -->
 		</section>
 		<section id="countermeasure">
 			<h2>Countermeasures</h2>
 			<!-- BEGIN CHANGES HERE -->
-
 			<!-- <p>Write a clear and concise description of the mechanism that your group proposes to address each attack from the previous section. Follow the format described in Phases P3 and P4 of the project: describe the mechanism in detail (including protocol diagrams
 				as needed) and provide justification for why your proposed mechanism is sufficient for addressing the threat that you have discovered.
 			</p> -->
@@ -111,7 +106,7 @@ Alex Glyde - awg13@pitt.edu
 				<b>T8: (Proof of Concept)</b> To protect against an adversary who has access to the list of our user's passwords, we implement a few separate mechanisms. The first mechanism we implement to protect against this threat is a <b>two-factor authentication</b> system. To login to the Group Server, a user would have to first enter their username. Stored in the UserList per user is an email associated with that user's account. When a user enters their username, an authentication code (encrypted with the user's public key) will be emailed to them. The user is required to open the authentication email and enter the authenticaiton code sent to them. After entering the authentication code they can proceed to enter their password. Thus, even if an adversary manages to brute force the user's password, they will still be unable to log in as that user unless they can also discover the user's private RSA key and the password to the user's email.
 			</p>
             <p>
-            <b>Read the discussion below for an overview of the shortcomings of this proof of concept and our fixes in a full implementation.</b>
+                <b>Read the discussion below for an overview of the shortcomings of this proof of concept and our fixes in a full implementation.</b>
             </p>
 			<p>
 				Another countermeasure we implemented to make offline brute force attacks more difficult was our password requirements. We require each password have at least one special character, one upper case character, one lower case character, one digit, and for the total length to be at least 8 characters. This makes dictionary attacks much more difficult. Furthermore, we salt each password individually before we hash it. This forces an attacker to recompute a so called rainbow table before brute-forcing each password.
@@ -120,36 +115,52 @@ Alex Glyde - awg13@pitt.edu
 				<b>T9: </b>To prevent against an adversary brute forcing a user's password online, we will limit the number of login attempts they have. A user will only have 3 attempts to correctly enter their pin code and password. If they fail all three times we will lock their account until their password is reset. Furthermore, our implementation of 2-factor authentication will also help to prevent this threat. Not only will an adversary need access to the user's password, they'll also need access to the user's email, and to their private key.
 			</p>
 			<p>
-            <b>T10: </b>While we can't do anything to actively <b>prevent</b> a file server from modifying files that it has access to, we can ensure that the user is notified when a file has been modified. To make sure we can verify file integrity, we will use an HMAC that is created when the file is uploaded. So, for example, when a user goes to upload a file, they will create an HMAC of the <b>encrypted</b> file with an HMAC key from the keyring (similar to our keyring for file leakage) rather than the one which will be used for the file encryption; this key is never visible to the file server. We decided to HMAC the <b>encrypted</b> file rather than the unencrypted one, so that the user never sees the actual file assuming it's been modified. This prevents the user from ever decrypting a malicious file. Thus, when the user downloads a file, there is no risk. If the HMAC verification fails, the user will NOT decrypt the file. This will prevent the file server from delivering malware or any other sort of malicious file. The HMAC of the file will be stored in the ShareFile object on the file server.
+                <b>T10: </b>While we can't do anything to actively <b>prevent</b> a file server from modifying files that it has access to, we can ensure that the user is notified when a file has been modified. To make sure we can verify file integrity, we will use an HMAC that is created when the file is uploaded. So, for example, when a user goes to upload a file, they will create an HMAC of the <b>encrypted</b> file with an HMAC key from the keyring (similar to our keyring for file leakage) rather than the one which will be used for the file encryption; this key is never visible to the file server. We decided to HMAC the <b>encrypted</b> file rather than the unencrypted one, so that the user never sees the actual file assuming it's been modified. This prevents the user from ever decrypting a malicious file. Thus, when the user downloads a file, there is no risk. If the HMAC verification fails, the user will NOT decrypt the file. This will prevent the file server from delivering malware or any other sort of malicious file. The HMAC of the file will be stored in the ShareFile object on the file server.
 			</p>
 			<p>
 				<b>A note on our reasoning behind allowing the HMAC to be stored in plaintext in the ShareFile object on the file server: </b> This is okay because the HMAC is generated using an HMAC key from the Keyring associated with that group specifically for HMACs (similar to our file leakage keyring mechanism, see P4 diagrams). This key is never visible to the file server, thus they cannot generate a legitimate HMAC because they don't have the relevant key (E.g., there is no way for them to recompute an accurate HMAC).
 			</p>
-
+            <p>
+                <b>T11: </b>
+            </p>
+            <p>
+                <b>T12: </b>For DDoS attacks attempting to soak up the storage space of our file servers we have two main options to consider in order to mitigate these issues.
+            </p>
+            <p>
+                The simpilest option would be to limit the amount of space provided to a specific user. The complications of this would be determining by how we consider files added to a group that were not added by all users in that group. Does a file uploaded to a group count towards everyones file storage quota, or just the user who uploaded it? I would suspect that it would count for user in the group where the file was uploaded, however it would depend on what the application is for. This would prevent an adversary from taking up the storage of all of our users file space, and would instead limit it to the groups that the adversary is in and the memebers in those groups. However this could hurt the usability of our application as a user that is included in a large number of groups may have their quota taken up rather quickly (especially if large files are typical).
+            </p>
+            <p>
+                Another potential solution would be to limit the number of groups a user could make, and then to provide each of those groups with a specific quota. Limiting the number of groups that a user can make prevents the adversary from constantly creating new groups to gain the ability of generating more server space to store the random files on. In this instance the file quota would count towards whoever created the group. The draw back to this is that a user may want to have the ability to create a large number of groups.
+            </p>
+            <p>
+                Our threat model as described in P3, is that of a University Research Department. This means that groups may represent the research being done currently at the time and the many different projects that PhD professors are working on. Limiting the number of groups a professor could have would severly hurt the usability of the application as they may split their projects into many groups and they may possible want to keep old past groups. Considering that the vast majority of files uploaded to our file system will be of the following formats: txt, pdf, ppt, docs, etc. Each one of these formats are typically rather small in size. Thus it would be in our best interest to provide each user with a quota of roughly 10-15 GB, that way counting each file uploaded to a group toward each users quota has minimal effect.
+            </p>
+            <p>
+                <b>A note on the adversaries access to file servers: </b> An adversary may gain access to the file server with a valid username and password. This means that they did one of two things 1) got a user account from an admin or 2) managed to compromise the username and password of another client of our system. If the adversary got access to the file server because of an admin, then they are a valid user who may have gone rogue, and it is up to the admin to make sure they do not provide more than one set of usernames and passwords to each user (or at the very least to have a policy on the number of users per person). In the above sections of the protocol, we make it clear that compromising the username and password of a user is not easy and that gaining access to a users account would require more than just their username and password (see T8 and T9).
+            </p>
 			<!-- END CHANGES HERE -->
 		</section>
 		<section id="discussion">
 			<h2>Discussion</h2>
             <p>
-            <b>Modifications to our T8 countermeasure in a full implementation:</b>
-            In discussing our T8 countermeasure, we determined a flaw that would allow an attacker to bypass our proof of concept. The flaw occurs in a sophisticated attack where an adversary has retrieved a user's username, password, email, and is actively intercepting messages over the network (e.g., wireshark). 
+                <b>Modifications to our T8 countermeasure in a full implementation:</b>
+                In discussing our T8 countermeasure, we determined a flaw that would allow an attacker to bypass our proof of concept. The flaw occurs in a sophisticated attack where an adversary has retrieved a user's username, password, email, and is actively intercepting messages over the network (e.g., wireshark).
             </p>
             <p>
-            As mentioned above (in the Threat Model section), our T8 countermeasure assumes that the adversary has obtained a user's password.
+                As mentioned above (in the Threat Model section), our T8 countermeasure assumes that the adversary has obtained a user's password.
             </p>
             <p>
-            The reason the proof of concept is flawed is that it's possible in our implementation for an adversary to make it to the login stage (See P4 diagrams in folder P4). Once they've gotten to the login stage, if they're actively monitoring packets on the client or server's network, it's possible for the adversary to intercept the encrypted security code which is emailed to the client. This code is encrypted by the Group Server with the public key of whoever starts the session (authentic client or malicious adversary). If the adversary starts a session posing as the client, the authentication email will be sent to the correct client, but encrypted with a fake public key. The problem here is that we don't verify the public key of the client. This isn't as extreme as it sounds, because the client will get an email from the server that they can't decrypt. Assuming one is proactive in checking their email notifications and changes their password or locks their account, the threat could be minimal.
+                The reason the proof of concept is flawed is that it's possible in our implementation for an adversary to make it to the login stage (See P4 diagrams in folder P4). Once they've gotten to the login stage, if they're actively monitoring packets on the client or server's network, it's possible for the adversary to intercept the encrypted security code which is emailed to the client. This code is encrypted by the Group Server with the public key of whoever starts the session (authentic client or malicious adversary). If the adversary starts a session posing as the client, the authentication email will be sent to the correct client, but encrypted with a fake public key. The problem here is that we don't verify the public key of the client. This isn't as extreme as it sounds, because the client will get an email from the server that they can't decrypt. Assuming one is proactive in checking their email notifications and changes their password or locks their account, the threat could be minimal.
             </p>
             <p>
-            <b>How to improve our T8 2-factor in a full implementation: </b>
-            In a full implementation of our T8 countermeasure, when the user is created, the server and client (in a smartphone app) would share a secret value and a counter, which allow them to generate random one-time passwords independently of each-other. This would follow similarly to how Google Authenticator works. This prevents an adversary from being able to intercept and decrypt a client's authentication code, as in our proof of concept. The secret value is a random seed. The counter could start as any number of things, including the time of day. As time progressed, the counter would measure the difference between creation and current time. 
+                <b>How to improve our T8 2-factor in a full implementation: </b>
+                In a full implementation of our T8 countermeasure, when the user is created, the server and client (in a smartphone app) would share a secret value and a counter, which allow them to generate random one-time passwords independently of each-other. This would follow similarly to how Google Authenticator works. This prevents an adversary from being able to intercept and decrypt a client's authentication code, as in our proof of concept. The secret value is a random seed. The counter could start as any number of things, including the time of day. As time progressed, the counter would measure the difference between creation and current time.
             </p>
             <p>
-            <b>Why this solves the issue with our T8 Proof of Concept: </b>
-            This solves our problem because it ensures that the authentication code cannot be revealed by a motivated adversary. Thus, even if the user's password is breached, the adversary is unable to correctly compute the authentication code because they don't have the secret value. Thus, we've reached a solution to T8. 
-            </P>
+                <b>Why this solves the issue with our T8 Proof of Concept: </b>
+                This solves our problem because it ensures that the authentication code cannot be revealed by a motivated adversary. Thus, even if the user's password is breached, the adversary is unable to correctly compute the authentication code because they don't have the secret value. Thus, we've reached a solution to T8.
+            </p>
 			<!-- BEGIN CHANGES HERE -->
-
 			<!-- <p>Conclude with a paragraph or two discussing your threat model and countermeasure mechanisms. How realistic is your threat model for a real-life file sharing system? Comment on the design process that your group followed. Did you discuss other ideas
 				that didn’t pan out before settling on the above-documented approach? Did you design attacks that you were unable to mitigate, or that you think are impossible to mitigate? Use this space to show off your hard work!</p>
 
@@ -159,26 +170,27 @@ Alex Glyde - awg13@pitt.edu
 
 			<p>If your group implemented the countermeasures or did any extra credit, please discuss these additional contributions in this section, as well.</p>
 			-->
-
 			<p>
 				We think that the risk of adversaries attempting to brute-force, socially engineer, or otherwise obtain passwords maliciously is <b>very</b> prevalent to real filesharing systems (since most authenticate via password; i.e., Google Drive, Dropbox, Box, etc.). This is why we chose to focus on these sorts of threats so heavily in Phase 5.
 			</p>
 			<p>
-				Furthermore, file modification can be a very significant risk considering how dangerous downloading files onto your computer can be. This is why we decided to focus on file modification for our final threat.
+				File modification can be a very significant risk considering how dangerous downloading files onto your computer can be. This is why we decided to focus on file modification for our final threat.
 			</p>
+            <p>
+                Further, both DDoS attacks presented (threads, and file storage) can greatly reduce the reliability of our application. If users are going to be storing important information that they need to be able to access anywhere, then they also need to be able to access that information at any time. If our servers go down, or our servers have fully saturated memory our application is no longer useful and thus a user will simply stop using our application (which you can imagine is bad for business).
+            </p>
 			<p>
 				We largely didn't have to modify our threat mitigation for threats T1-T7. They stayed almost entirely the same. Instead of modifying our mechanisms for T1-T7, we left them largely the same and simply built on top of them. For example, our 2-factor authentication builds on our solely password-based authentication by requiring the user to prove their identity through email and their private RSA key (by decrypting the authentication code) as well as their password.
 			</p>
 			<p>
 				Similarly, the way we mitigated file modification largely built on our file encryption techniques, since we use the same key to encrypt the files as we do to HMAC them. We send the HMAC along with the file when we upload it. Since HMACs are cryptographically secure, and the file server does not have access to our Keyring, we don't have to worry about the possibility of them recomputing an HMAC for a modified or replaced file.
 			</p>
+            <p>
+                For DDoS, our system required completely seperate protocols that were unrelated to our previous protocols (thus building on them rather than replacing them). The only affect on our previous phases would be with the users ability to upload files as users can no longer upload an infinite number of files.
+            </p>
 			<p>
 				Overall, we did not have to design our countermeasures in any special way to prevent re-introducing older threats. We simply had to build upon our existing framework to help further secure our system from the new threats we introduced.
 			</p>
-			<p>
-				We were originally planning on doing DDoS prevention. However, when we implemented malicious clients that spammed requests to our group server, we found that it didn't actually affect the performance of our group server at all (Maybe our computer's hardware is too good and we needed to try more clients at one time?). Either way, the more we argued about it the more we found that the three threats we focused on were more of an issue than DDoS attacks.
-			</p>
-
 			<!-- END CHANGES HERE -->
 		</section>
 	</body>
