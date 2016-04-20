@@ -138,7 +138,7 @@
 				In the end, a combination of the three above approaches would likely provide the best mitigation to these sorts of DDoS attacks.
 			</p>
             <p>
-                <b>T12: </b>For DDoS attacks attempting to soak up the storage space of our file servers we have two main options to consider in order to mitigate these issues.
+                <b>T12: </b>For DDoS attacks where malicious users attempt to repeatedly upload large files to use up the available storage space on our file servers, we have two main options to consider to mitigate this attack.
             </p>
             <p>
                 The simplest option would be to limit the amount of space provided to a specific user or to a specific group. There are a number of questions that complicate this solution. Does a file uploaded to a group count towards each group member's file storage quota, or just the user who uploaded it? I would suspect that it would count for user in the group where the file was uploaded, however it would depend on what the application is for. This would prevent an adversary from taking up the storage of all of our users file space, and would instead limit it to the groups that the adversary is in and the memebers in those groups. However this could hurt the usability of our application as a user that is included in a large number of groups may have their quota taken up rather quickly (especially if large files are typical).
