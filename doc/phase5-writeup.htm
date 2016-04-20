@@ -38,7 +38,7 @@
 				<b>T10: </b>In Threat 10 we worry about the possibility of a file server modifying files it has access to or potentially replacing them with malicious software (malware, ransomware, etc.). To mitigate this threat we HMAC every file we upload with an HMAC keyring similar to the way the file encryption keyring works, relying on the Group Server. This key is never visible to the File Server. Then, when a client attempts to download a file, we verify the HMAC in the ShareFile is correct. If verification fails, we do not unencrypt the file and notify the client that their file has been tampered with.
 			</p>
             <p>
-				<b>T11: </b>In Threat 11 we worry about the possibility of an adversary taking advantage of a resource disparity inorder to perform a denial of service attack on our application. This would involve creating a large number of threads on our servers to take up the bandwidth of the server. A small amount of resources on the adversaries part would be needed but would soak up a lot of our applications resources causing the usability of the file sharing system to be minimal if not nill.
+				<b>T11: </b>In Threat 11 we worry about the possibility of an adversary taking advantage of a resource disparity inorder to perform a denial of service attack on our application. This would involve creating a large number of threads on our servers to use up all of the available CPU time or RAM on the server. A small amount of resources on the adversaries part would be needed but would soak up a lot of our applications resources causing the usability of the file sharing system to potentially be degraded.
 			</p>
             <p>
 				<b>T12: </b>In Threat 12 we worry about the possibility of an adversary attacking with a different kind of denial of service attack where they attempt to overload the file servers with random files. A way to mitigate this would be to create a maximum storage size allocated per group, and also a limited number of owned groups allowed per user. Similarly this could be solved by a storage size per user.
@@ -120,13 +120,13 @@
 				<b>A note on our reasoning behind allowing the HMAC to be stored in plaintext in the ShareFile object on the file server: </b> This is okay because the HMAC is generated using an HMAC key from the Keyring associated with that group specifically for HMACs (similar to our file leakage keyring mechanism, see P4 diagrams). This key is never visible to the file server, thus they cannot generate a legitimate HMAC because they don't have the relevant key (E.g., there is no way for them to recompute an accurate HMAC).
 			</p>
             <p>
-                <b>T11: </b>
+                <b>T11: </b>To prevent malicious user's from starting a large number of connections and threats, we can limit the number of active sessions one particular IP can start (internal or external). We can also implement a timeout mechanism that tracks the last time since an action was taken on a particular thread. If the time since the last action was taken on a particular thread exceeds a certain threshold, we'll have the group server or file server terminate the thread, preventing the buildup of a high number of threads. A third option for preventing this type of DDoS attack would be requiring the client starting a thread to complete a computational puzzle before connecting, preventing them from opening simultaneous sessions in quick succession. 
             </p>
             <p>
                 <b>T12: </b>For DDoS attacks attempting to soak up the storage space of our file servers we have two main options to consider in order to mitigate these issues.
             </p>
             <p>
-                The simpilest option would be to limit the amount of space provided to a specific user. The complications of this would be determining by how we consider files added to a group that were not added by all users in that group. Does a file uploaded to a group count towards everyones file storage quota, or just the user who uploaded it? I would suspect that it would count for user in the group where the file was uploaded, however it would depend on what the application is for. This would prevent an adversary from taking up the storage of all of our users file space, and would instead limit it to the groups that the adversary is in and the memebers in those groups. However this could hurt the usability of our application as a user that is included in a large number of groups may have their quota taken up rather quickly (especially if large files are typical).
+                The simplest option would be to limit the amount of space provided to a specific user. The complications of this would be determining by how we consider files added to a group that were not added by all users in that group. Does a file uploaded to a group count towards everyones file storage quota, or just the user who uploaded it? I would suspect that it would count for user in the group where the file was uploaded, however it would depend on what the application is for. This would prevent an adversary from taking up the storage of all of our users file space, and would instead limit it to the groups that the adversary is in and the memebers in those groups. However this could hurt the usability of our application as a user that is included in a large number of groups may have their quota taken up rather quickly (especially if large files are typical).
             </p>
             <p>
                 Another potential solution would be to limit the number of groups a user could make, and then to provide each of those groups with a specific quota. Limiting the number of groups that a user can make prevents the adversary from constantly creating new groups to gain the ability of generating more server space to store the random files on. In this instance the file quota would count towards whoever created the group. The draw back to this is that a user may want to have the ability to create a large number of groups.
@@ -170,19 +170,26 @@
 			<p>If your group implemented the countermeasures or did any extra credit, please discuss these additional contributions in this section, as well.</p>
 			-->
 			<p>
+				<b>How realistic were our threat models?</b>
+			</p>
+			<p>
 				We think that the risk of adversaries attempting to brute-force, socially engineer, or otherwise obtain passwords maliciously is <b>very</b> prevalent to real filesharing systems (since most authenticate via password; i.e., Google Drive, Dropbox, Box, etc.). This is why we chose to focus on these sorts of threats so heavily in Phase 5.
 			</p>
 			<p>
-				File modification can be a very significant risk considering how dangerous downloading files onto your computer can be. This is why we decided to focus on file modification for our final threat.
+				File modification can be a very significant risk considering how dangerous downloading files onto your computer can be. This is why we decided to focus on file modification for T10.
 			</p>
-            <p>
-                Further, both DDoS attacks presented (threads, and file storage) can greatly reduce the reliability of our application. If users are going to be storing important information that they need to be able to access anywhere, then they also need to be able to access that information at any time. If our servers go down, or our servers have fully saturated memory our application is no longer useful and thus a user will simply stop using our application (which you can imagine is bad for business).
-            </p>
+			<p>
+				DDoS attacks are one of the most prevalent threats to modern systems. We see DDoS attacks on popular websites and applications very frequently. This is one reason we decided to address these threats in T11 and T12.
+			</p>
+			<p>
+				<b>Did we have to design our countermeasures in a particular
+				way so as not to re-introduce these older threats?</b>
+			</p>
 			<p>
 				We largely didn't have to modify our threat mitigation for threats T1-T7. They stayed almost entirely the same. Instead of modifying our mechanisms for T1-T7, we left them largely the same and simply built on top of them. For example, our 2-factor authentication builds on our solely password-based authentication by requiring the user to prove their identity through email and their private RSA key (by decrypting the authentication code) as well as their password.
 			</p>
 			<p>
-				Similarly, the way we mitigated file modification largely built on our file encryption techniques, since we use the same key to encrypt the files as we do to HMAC them. We send the HMAC along with the file when we upload it. Since HMACs are cryptographically secure, and the file server does not have access to our Keyring, we don't have to worry about the possibility of them recomputing an HMAC for a modified or replaced file.
+				Similarly, the way we mitigated file modification largely built on our file encryption techniques, since we use the same keyring mechanism (but different keys/keyrings) to encrypt the files as we do to HMAC them. We send the HMAC along with the file when we upload it. Since HMACs are cryptographically secure, and the file server does not have access to our Keyring, we don't have to worry about the possibility of them recomputing an HMAC for a modified or replaced file.
 			</p>
             <p>
                 For DDoS, our system required completely seperate protocols that were unrelated to our previous protocols (thus building along side our old protocols rather than replacing or building upon them). The only affect on our previous phases would be with the users ability to upload files as users can no longer upload an infinite number of files.
@@ -190,6 +197,12 @@
 			<p>
 				Overall, we did not have to design our countermeasures in any special way to prevent re-introducing older threats. We simply had to build upon our existing framework to help further secure our system from the new threats we introduced.
 			</p>
+			<p>
+				<b>Threat 11 and Threat 12</b>
+			</p>
+            <p>
+                Both DDoS attacks presented (threads, and file storage) can greatly reduce the reliability of our application. If users are going to be storing important information that they need to be able to access anywhere, then they also need to be able to access that information at any time. If our servers go down, or our servers have fully saturated memory, or we run out of CPU time, our application is no longer useful and thus a user will simply stop using our application (which you can imagine is bad for business).
+            </p>
             <p>
                 <b>A note on DDoS: </b> It is important to recognize that DDoS is a significant attack, it is also difficult to prevent. With this in mind we left the DDoS mitigation as a theoretical exercise that we would implement in the future if we contiue to support this applications source code. T8-T10 have full solutions or proofs of concepts implemented to demonstrate that our fixes solve those problems.
             </p>
