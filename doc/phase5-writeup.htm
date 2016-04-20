@@ -123,19 +123,19 @@
 				<b>A note on our reasoning behind allowing the HMAC to be stored in plaintext in the ShareFile object on the file server: </b> This is okay because the HMAC is generated using an HMAC key from the Keyring associated with that group specifically for HMACs (similar to our file leakage keyring mechanism, see P4 diagrams). This key is never visible to the file server, thus they cannot generate a legitimate HMAC because they don't have the relevant key (E.g., there is no way for them to recompute an accurate HMAC).
 			</p>
             <p>
-                <b>T11:</b> To mitigate the threat of malicious clients simultaneously opening a large number of connections with one of our servers, we can implement a number of countermechanisms.
+                <b>T11:</b> To mitigate the threat of malicious clients simultaneously opening a large number of connections with one of our servers, we can implement a number of countermechanisms to varying effectiveness. Each approach has pitfalls, but an intelligent combination of them may be the best countermeasure overall.
 			</p>
 			<p>
 				One option is to limit the number of simultaneous connections a particular IP (external or internal) that a particular client can open. After a client opened a particular number of connections, their IP would be denied the connection request until some of their other simultaneous connections were closed.
             </p>
 			<p>
-				Another option is to record the time of the last action a client took. If a client has not sent any valid requests (such as an attempt to further progress the handshake protocol) or requested any valid Group Server actions (adding a group, listing group members, etc), then the connection should be terminated. The Group Server would monitor active connections and terminate them after a certain amount of time has passed where no "valid actions" have been taken. One potential pitfall of this is a malicious client application that spams valid requests (like repeatedly requesting a token) would not eventually be terminated. But perhaps more complex mechanisms could be devised to allow connections carrying out that sort of attack to be terminated.
+				Another option is to record the time of the last action a client took. If a client has not sent any valid requests (such as an attempt to further progress the handshake protocol) or requested any valid Group / File Server actions (adding a group, listing group members, listing files, etc.), then the connection should be terminated. The Group Server would monitor active connections and terminate them after a certain amount of time has passed where no "valid actions" have been taken. One potential pitfall of this is a malicious client application that spams valid requests (like repeatedly requesting a token) would not eventually be terminated. But perhaps more complex mechanisms could be devised to allow connections carrying out that sort of attack to be terminated.
 			</p>
 			<p>
 				A final countermeasure (and the most convincing to me) that could be taken to prevent these sorts of DDoS attacks is to require that the client complete some sort of computational puzzle before their connection is accepted. Clients who do not complete the computational will not be granted a connection. This puzzle could take the form of a difficult hash, or any other sort of computational problem that might force the client to wait a few seconds before connecting. This prevents a client from opening numerous connections simultaneous in an efficient manner.
 			</p>
 			<p>
-				In the end, a combination of the three above approaches would provide the best mitigation to these sorts of DDoS attacks.
+				In the end, a combination of the three above approaches would likely provide the best mitigation to these sorts of DDoS attacks.
 			</p>
             <p>
                 <b>T12: </b>For DDoS attacks attempting to soak up the storage space of our file servers we have two main options to consider in order to mitigate these issues.
@@ -188,26 +188,26 @@
 				<b>How realistic were our threat models?</b>
 			</p>
 			<p>
-				We think that the risk of adversaries attempting to brute-force, socially engineer, or otherwise obtain passwords maliciously is <b>very</b> prevalent to real filesharing systems (since most authenticate via password; i.e., Google Drive, Dropbox, Box, etc.). This is why we chose to focus on these sorts of threats so heavily in Phase 5.
+				We think that the risk of adversaries attempting to brute-force, socially engineer, or otherwise obtain passwords maliciously is <b>very</b> prevalent to real filesharing systems (since most authenticate via password; i.e., Google Drive, Dropbox, Box, etc.). This is why we chose to focus on these sorts of threats so heavily in Phase 5. Two-factor authentication is a very prevalent solution to the problem of passwords being compromised and is seen in a number of very prevalent services (Google Authenticator, Steam Two-Factor authentication, etc.).
 			</p>
 			<p>
-				File modification can be a very significant risk considering how dangerous downloading files onto your computer can be. This is why we decided to focus on file modification for T10.
+				File modification can be a very significant risk considering how dangerous downloading files onto your computer can be. It's very realistic to assume a malicious file server may attempt to serve you malware or other kinds of harmful files. This is why we decided to focus on file modification for T10.
 			</p>
 			<p>
-				DDoS attacks are one of the most prevalent threats to modern systems. We see DDoS attacks on popular websites and applications very frequently. This is one reason we decided to address these threats in T11 and T12.
+				DDoS attacks are one of the most prevalent threats to modern systems. We see DDoS attacks on popular websites and applications very frequently. It didn't take me long to find a number of recent articles describing DDoS attacks on popular websites, applications, and platforms. This is one reason we decided to address these threats in T11 and T12.
 			</p>
 			<p>
 				<b>Did we have to design our countermeasures in a particular
 				way so as not to re-introduce these older threats?</b>
 			</p>
 			<p>
-				We largely didn't have to modify our threat mitigation for threats T1-T7. They stayed almost entirely the same. Instead of modifying our mechanisms for T1-T7, we left them largely the same and simply built on top of them. For example, our 2-factor authentication builds on our solely password-based authentication by requiring the user to prove their identity through email and their private RSA key (by decrypting the authentication code) as well as their password.
+				We largely didn't have to modify our threat mitigation for threats T1-T7. They stayed almost entirely the same. Instead of modifying our mechanisms for T1-T7, we simply built on top of them. For example, our 2-factor authentication builds on top of our solely password-based authentication by requiring the user to prove their identity through email (or a separate app in our revised version) and their private RSA key (by decrypting the authentication code) as well as their password.
 			</p>
 			<p>
-				Similarly, the way we mitigated file modification largely built on our file encryption techniques, since we use the same keyring mechanism (but different keys/keyrings) to encrypt the files as we do to HMAC them. We send the HMAC along with the file when we upload it. Since HMACs are cryptographically secure, and the file server does not have access to our Keyring, we don't have to worry about the possibility of them recomputing an HMAC for a modified or replaced file.
+				Similarly, the way we mitigated file modification largely built on top of (and made use of) our existing file encryption techniques. In fact, we use the same keyring mechanism (but different keys/keyrings) to encrypt the files as we do to HMAC them. We send the HMAC along with the encrypted file when we upload it. Since HMACs are cryptographically secure, and the file server does not have access to our Keyring, we don't have to worry about the possibility of them recomputing an HMAC for a modified or replaced file. Furthermore, the fact that the files are HMAC'd after they're encrypted prevent the possibility of a client unencrypting a malicious file. If the HMAC has been tampered with the client will never decrypt the file in the first place.
 			</p>
             <p>
-                For DDoS, our system required completely seperate protocols that were unrelated to our previous protocols (thus building along side our old protocols rather than replacing or building upon them). The only affect on our previous phases would be with the users ability to upload files as users can no longer upload an infinite number of files.
+                For DDoS, our system required completely seperate protocols that were unrelated to our previous protocols (thus building along side our old protocols rather than replacing or building upon them). The only affect on our previous phases would be with the users ability to upload files as users can no longer upload an infinite number of files (or upload files of arbitrarily large size).
             </p>
 			<p>
 				Overall, we did not have to design our countermeasures in any special way to prevent re-introducing older threats. We simply had to build upon our existing framework to help further secure our system from the new threats we introduced.
@@ -219,7 +219,7 @@
                 Both DDoS attacks presented (threads, and file storage) can greatly reduce the reliability of our application. If users are going to be storing important information that they need to be able to access anywhere, then they also need to be able to access that information at any time. If our servers go down, or our servers have fully saturated memory our application is no longer useful and thus a user will simply stop using our application (which you can imagine is bad for business).
             </p>
             <p>
-                <b>A note on DDoS: </b> It is important to recognize that DDoS is a significant attack, it is also difficult to prevent. With this in mind we left the DDoS mitigation as a theoretical exercise that we would implement in the future if we contiue to support this applications source code. T8-T10 have full solutions or proofs of concepts implemented to demonstrate that our fixes solve those problems.
+                <b>A note on DDoS: </b> It is important to recognize that DDoS is a significant attack, it is also difficult to prevent. With this in mind we left the DDoS mitigation as a theoretical exercise that we would implement in the future if we contiue to support this application's source code. T8-T10 have full solutions or proofs of concepts implemented to demonstrate that our fixes solve those problems.
             </p>
 			<!-- END CHANGES HERE -->
 		</section>
