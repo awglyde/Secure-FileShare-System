@@ -138,20 +138,29 @@
 				In the end, a combination of the three above approaches would likely provide the best mitigation to these sorts of DDoS attacks.
 			</p>
             <p>
-                <b>T12: </b>For DDoS attacks where malicious users attempt to repeatedly upload large files to use up the available storage space on our file servers, we have two main options to consider to mitigate this attack.
+                <b>T12: </b>For DDoS attacks where malicious users attempt to repeatedly upload large files to use up the available storage space on our file servers, we have a few options that typically involve putting a limit on the storage space available to individual users and/or groups. At this point a few design decisions must be made. It may be possible to limit the storage available to individual users, but in a group-based file-sharing application this results in a number of complications: Another user in a group could ruin another user's quota by adding a bunch of garbage to a particular file. Should uploaded files count towards the quota of each user or just the one who uploaded it? etc. There are tradeoffs in both limiting group storage or individual user storage which we will discuss further.
             </p>
-            <p>
+			<p>
+				Due to the complications mentioned above, we decided that the best way to mitigate this sort of DDoS attack is to implement a storage quota for each group. To prevent adversaries from simply creating numerous groups and adding large files to the new groups, we will also implement a limit on the number of groups any particular user can create. We came to the number five as a reasonable amount of groups a user could create. Users may request additional groups by sending an email to administrators. In our threat model from P3, this allows, say, a Professor to request the ability to create additional groups if their research requires more groups.
+			</p>
+			<p>
+				<b>Note about our countermeasure to T12: </b>Many of the complications we mentioned in the first paragraph can still exist in our solution. In our current implementation we do not keep track of who uploaded and modified files. This would allow a malicious user to max out the storage in a particular group. This isn't the worst thing in the world compared to using up all of the available storage for the entire server. A further countermeasure that mitigates these complications would be to implement a source control type of system that monitors file modification, file upload, file deletion, etc.
+			</p>
+			<p>
+				It's easy to see how effective this countermeasure can be. An adversary may attempt to upload numerous large files but would immediately hit their quota, preventing them from uploading anything else until they make space, thus mitigating the threat.
+			</p>
+            <!-- <p>
                 The simplest option would be to limit the amount of space provided to a specific user or to a specific group. There are a number of questions that complicate this solution. Does a file uploaded to a group count towards each group member's file storage quota, or just the user who uploaded it? I would suspect that it would count for user in the group where the file was uploaded, however it would depend on what the application is for. This would prevent an adversary from taking up the storage of all of our users file space, and would instead limit it to the groups that the adversary is in and the memebers in those groups. However this could hurt the usability of our application as a user that is included in a large number of groups may have their quota taken up rather quickly (especially if large files are typical).
             </p>
             <p>
                 Another potential solution would be to limit the number of groups a user could make, and then to provide each of those groups with a specific quota. Limiting the number of groups that a user can make prevents the adversary from constantly creating new groups to gain the ability of generating more server space to store the random files on. In this instance the file quota would count towards whoever created the group. The draw back to this is that a user may want to have the ability to create a large number of groups.
-            </p>
-            <p>
+            </p> -->
+            <!-- <p>
                 Our threat model as described in P3, is that of a University Research Department. This means that groups may represent the research being done currently at the time and the many different projects that PhD professors are working on. Limiting the number of groups a professor could have would severly hurt the usability of the application as they may split their projects into many groups and they may possible want to keep old past groups. Considering that the vast majority of files uploaded to our file system will be of the following formats: txt, pdf, ppt, docs, etc. Each one of these formats are typically rather small in size. Thus it would be in our best interest to provide each user with a quota of roughly 10-15 GB, that way counting each file uploaded to a group toward each users quota has minimal effect.
-            </p>
-            <p>
+            </p> -->
+            <!-- <p>
                 <b>A note on the adversaries access to file servers: </b> An adversary may gain access to the file server with a valid username and password. This means that they did one of two things 1) got a user account from an admin or 2) managed to compromise the username and password of another client of our system. If the adversary got access to the file server because of an admin, then they are a valid user who may have gone rogue, and it is up to the admin to make sure they do not provide more than one set of usernames and passwords to each user (or at the very least to have a policy on the number of users per person). In the above sections of the protocol, we make it clear that compromising the username and password of a user is not easy and that gaining access to a users account would require more than just their username and password (see T8 and T9).
-            </p>
+            </p> -->
 			<!-- END CHANGES HERE -->
 		</section>
 		<section id="discussion">
