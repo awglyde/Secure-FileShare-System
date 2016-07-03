@@ -6,14 +6,13 @@ import java.net.Socket;
 
 public abstract class Client
 {
-
     /* protected keyword is like private but subclasses have access
      * Socket and input/output streams
      */
     protected Socket sock;
     protected ObjectOutputStream output;
     protected ObjectInputStream input;
-	protected Session session;
+    protected Session session;
 
     public boolean connect(final String serverName, final int port)
     {
@@ -26,9 +25,10 @@ public abstract class Client
             this.input = new ObjectInputStream(sock.getInputStream());
 
             System.out.println("Connected to " + serverName + " on port " + port);
+
             return true;
         }
-        catch(IOException err)
+        catch (IOException err)
         {
             System.out.println("Couldn't connect to Server.\n" + err);
         }
@@ -38,7 +38,7 @@ public abstract class Client
 
     public boolean isConnected()
     {
-        if(this.sock == null || !this.sock.isConnected())
+        if (this.sock == null || !this.sock.isConnected())
         {
             return false;
         }
@@ -65,7 +65,7 @@ public abstract class Client
 
     public void disconnect()
     {
-        if(isConnected())
+        if (isConnected())
         {
             try
             {
@@ -76,7 +76,7 @@ public abstract class Client
                 this.input.close();
                 this.sock.close();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 System.err.println("Error: " + e.getMessage());
                 e.printStackTrace(System.err);

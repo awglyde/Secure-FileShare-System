@@ -13,7 +13,7 @@ public class Token implements UserToken, java.io.Serializable
     private ArrayList<String> groups;
     private Key fileServerPublicKey;
     private Date expirationDate;
-	private byte[] signedHash;
+    private byte[] signedHash;
 
     public Token(String issuer, String subject, ArrayList<String> groups, Key fileServerPublicKey)
     {
@@ -27,7 +27,7 @@ public class Token implements UserToken, java.io.Serializable
         cal.add(Calendar.HOUR, 6);
         this.expirationDate = cal.getTime();
 
-		this.signedHash = null;
+        this.signedHash = null;
     }
 
     /**
@@ -44,7 +44,6 @@ public class Token implements UserToken, java.io.Serializable
         return this.issuer;
     }
 
-
     /**
      * This method should return a string indicating the name of the
      * subject of the token.  For instance, if "Alice" requests a
@@ -57,7 +56,6 @@ public class Token implements UserToken, java.io.Serializable
     {
         return this.subject;
     }
-
 
     /**
      * This method extracts the list of groups that the owner of this
@@ -80,49 +78,55 @@ public class Token implements UserToken, java.io.Serializable
     public boolean isAdmin()
     {
         if (this.getGroups().contains("ADMIN"))
+        {
             return true;
+        }
         else
+        {
             return false;
+        }
     }
 
     public boolean isExpired()
     {
-        if ( ( this.expirationDate.getTime() - new Date().getTime() ) <= 0 )
+        if ((this.expirationDate.getTime() - new Date().getTime()) <= 0)
+        {
             return true;
+        }
         else
+        {
             return false;
+        }
     }
 
-	// Sets signed hash. The group server will call this method to sign the hash
-	public void setSignedHash(byte[] signedHash)
-	{
-		this.signedHash = signedHash;
-	}
-	// Returns a signed hash of the token created using the toString method
-	// when the token was issued
-	public byte[] getSignedHash()
-	{
-		return signedHash;
-	}
-
+    // Sets signed hash. The group server will call this method to sign the hash
+    public void setSignedHash(byte[] signedHash)
+    {
+        this.signedHash = signedHash;
+    }
+    // Returns a signed hash of the token created using the toString method
+    // when the token was issued
+    public byte[] getSignedHash()
+    {
+        return signedHash;
+    }
 
     public String toString()
     {
+        String groupList = null;
 
-		String groupList = null;
-		for (String group : this.groups)
-		{
-			if (groupList != null)
-				groupList = groupList+","+group;
-			else
-				groupList = group;
-		}
-        return this.issuer+System.lineSeparator()+
-                this.subject+System.lineSeparator()+
-                groups+System.lineSeparator()+
-                DatatypeConverter.printHexBinary(this.fileServerPublicKey.getEncoded())+System.lineSeparator()+
-                this.expirationDate.toString()+System.lineSeparator();
+        for (String group : this.groups)
+        {
+            if (groupList != null)
+            {
+                groupList = groupList + "," + group;
+            }
+            else
+            {
+                groupList = group;
+            }
+        }
 
+        return this.issuer + System.lineSeparator() + this.subject + System.lineSeparator() + groups + System.lineSeparator() + DatatypeConverter.printHexBinary(this.fileServerPublicKey.getEncoded()) + System.lineSeparator() + this.expirationDate.toString() + System.lineSeparator();
     }
-
 }

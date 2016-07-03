@@ -3,7 +3,6 @@ import java.security.Key;
 
 public abstract class Server
 {
-
     public String name;
     protected int port;
     protected EncryptionSuite serverRSAKeys;
@@ -30,5 +29,4 @@ public abstract class Server
     {
         return this.name;
     }
-
 }

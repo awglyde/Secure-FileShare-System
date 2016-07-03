@@ -17,6 +17,7 @@ public class GroupList implements java.io.Serializable
     public synchronized void addGroup(String owner, String groupName) throws Exception
     {
         Group newGroup = new Group(owner);
+
         this.list.put(groupName, newGroup);
     }
 
@@ -32,7 +33,7 @@ public class GroupList implements java.io.Serializable
 
     public synchronized boolean isGroup(String groupName)
     {
-        if(this.list.containsKey(groupName))
+        if (this.list.containsKey(groupName))
         {
             return true;
         }
@@ -46,8 +47,10 @@ public class GroupList implements java.io.Serializable
     {
         String owner = this.getGroupOwnership(groupName);
 
-        if(owner == null)
+        if (owner == null)
+        {
             return false;
+        }
 
         return owner.equals(userName);
     }
@@ -56,8 +59,10 @@ public class GroupList implements java.io.Serializable
     {
         Group group = this.getGroup(groupName);
 
-        if(group == null)
+        if (group == null)
+        {
             return null;
+        }
 
         return this.getGroup(groupName).getOwnerName();
     }
@@ -65,44 +70,53 @@ public class GroupList implements java.io.Serializable
     public synchronized boolean removeMember(String userName, String groupName) throws Exception
     {
         boolean ret = this.getGroup(groupName).removeMember(userName);
+
         if (this.getGroup(groupName).getOwnerName().equals(userName))
+        {
             ret &= this.deleteGroup(groupName);
+        }
 
         return ret;
     }
 
     public synchronized ArrayList<String> getMembers(String groupName)
     {
-        if(this.getGroup(groupName) == null)
+        if (this.getGroup(groupName) == null)
+        {
             return null;
+        }
 
         return this.getGroup(groupName).getMemberNames();
     }
 
     public synchronized ArrayList<Key> getGroupKeys(String groupName)
     {
-        if(this.getGroup(groupName) == null)
+        if (this.getGroup(groupName) == null)
+        {
             return null;
+        }
 
         return this.getGroup(groupName).getGroupKeys();
     }
 
-    public synchronized Hashtable<String, ArrayList<Key>> getGroupsAndKeys(String userName)
+    public synchronized Hashtable<String, ArrayList<Key> > getGroupsAndKeys(String userName)
     {
-        Hashtable<String, ArrayList<Key>> hashmap = new Hashtable<String, ArrayList<Key>>();
+        Hashtable<String, ArrayList<Key> > hashmap = new Hashtable<String, ArrayList<Key> >();
 
         // generate hash map of group name to key list
-        for (Map.Entry<String, Group> entry : this.list.entrySet()) {
+        for (Map.Entry<String, Group> entry : this.list.entrySet())
+        {
             String groupName = entry.getKey();
             Group group = entry.getValue();
 
             // verify user is a memeber of the group
-            if(group.isMember(userName))
+            if (group.isMember(userName))
             {
                 // add groupname and keys to hashmap
                 hashmap.put(groupName, group.getGroupKeys());
             }
         }
+
         return hashmap;
     }
 
@@ -136,6 +150,7 @@ public class GroupList implements java.io.Serializable
         private void addNewKey() throws Exception
         {
             EncryptionSuite newES = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES);
+
             this.keys.add(newES.getEncryptionKey());
         }
 
@@ -156,9 +171,9 @@ public class GroupList implements java.io.Serializable
 
         public boolean removeMember(String member) throws Exception
         {
-            if(!this.groupMembers.isEmpty())
+            if (!this.groupMembers.isEmpty())
             {
-                if(this.groupMembers.contains(member))
+                if (this.groupMembers.contains(member))
                 {
                     // if a member was removed add a new key to the groups keys
                     this.addNewKey();
@@ -167,6 +182,7 @@ public class GroupList implements java.io.Serializable
                     return this.groupMembers.remove(member);
                 }
             }
+
             return false;
         }
 
@@ -184,9 +200,9 @@ public class GroupList implements java.io.Serializable
         {
             // Check to make sure the new owner is a member of the Group
             if (this.groupMembers.contains(owner))
+            {
                 this.owner = owner;
+            }
         }
-
     }
-
 }

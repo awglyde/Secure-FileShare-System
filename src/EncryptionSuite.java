@@ -1,7 +1,7 @@
 /*
-    This class is to be able to decrypt and encrypt messages from the command line
-    using AES, Blowfish, and RSA encryption.
-*/
+ *  This class is to be able to decrypt and encrypt messages from the command line
+ *  using AES, Blowfish, and RSA encryption.
+ */
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,14 +39,7 @@ import javax.crypto.CipherOutputStream;
 
 public class EncryptionSuite
 {
-
-    public static final String PASSWORD_INFO = "A user password must have the following: \n" +
-                                                "\t1. At least one digit. \n" +
-                                                "\t2. At least one lowercase letter. \n" +
-                                                "\t3. At least one uppercase letter. \n" +
-                                                "\t4. At least a special character: @, #, $, %, ^, &, +, = \n" +
-                                                "\t5. No whitespace \n" +
-                                                "\t6. At least 8 characters in length.\n";
+    public static final String PASSWORD_INFO = "A user password must have the following: \n" + "\t1. At least one digit. \n" + "\t2. At least one lowercase letter. \n" + "\t3. At least one uppercase letter. \n" + "\t4. At least a special character: @, #, $, %, ^, &, +, = \n" + "\t5. No whitespace \n" + "\t6. At least 8 characters in length.\n";
 
     public static final String ENCRYPTION_AES = "AES";
     public static final String ENCRYPTION_BLOWFISH = "Blowfish";
@@ -55,10 +48,10 @@ public class EncryptionSuite
     public static final String SIGNATURE_SHA1_RSA = "SHA1withRSA";
     public static final String HASH_ALGORITHM = "SHA-256";
     public static final String PROVIDER = "BC";
-	public static final String HMAC_ALGORITHM = "HmacSHA1";
+    public static final String HMAC_ALGORITHM = "HmacSHA1";
 
-	public static final int encrypt = Cipher.ENCRYPT_MODE;
-	public static final int decrypt = Cipher.DECRYPT_MODE;
+    public static final int encrypt = Cipher.ENCRYPT_MODE;
+    public static final int decrypt = Cipher.DECRYPT_MODE;
 
     private String algorithmName = "";
     private int rsaKeyLength = 4096;
@@ -71,16 +64,18 @@ public class EncryptionSuite
         Security.addProvider(new BouncyCastleProvider());
         this.algorithmName = EncryptionSuite.ENCRYPTION_RSA;
 
-        if(publicConfig != null || !publicConfig.equals(""))
+        if (publicConfig != null || !publicConfig.equals(""))
+        {
             this.encryptionKey = (Key)loadPublicKey(publicConfig);
+        }
 
-        if(privateConfig != null || !privateConfig.equals(""))
+        if (privateConfig != null || !privateConfig.equals(""))
+        {
             this.decryptionKey = (Key)loadPrivateKey(privateConfig);
-
+        }
 
         // if both keys are null, generate new keys and save them to the correct files
-        if((this.encryptionKey == null && this.decryptionKey == null)
-            && !(privateConfig.equals("")))
+        if ((this.encryptionKey == null && this.decryptionKey == null) && !(privateConfig.equals("")))
         {
             generateKeyPair();
             saveKey(publicConfig, this.encryptionKey);
@@ -109,15 +104,19 @@ public class EncryptionSuite
         Security.addProvider(new BouncyCastleProvider());
         this.algorithmName = algorithmName;
         if (this.algorithmName.equals(ENCRYPTION_AES))
+        {
             generateKey();
+        }
         else
+        {
             generateKeyPair();
+        }
     }
 
-	public EncryptionSuite () throws Exception
-	{
+    public EncryptionSuite () throws Exception
+    {
         Security.addProvider(new BouncyCastleProvider());
-	}
+    }
 
     public Key getEncryptionKey()
     {
@@ -139,37 +138,38 @@ public class EncryptionSuite
         this.decryptionKey = key;
     }
 
-	public String getAlgorithmName()
-	{
-		return this.algorithmName;
-	}
+    public String getAlgorithmName()
+    {
+        return this.algorithmName;
+    }
 
-	public void setAlgorithmName(String algorithmName)
-	{
-		this.algorithmName = algorithmName;
-	}
-
+    public void setAlgorithmName(String algorithmName)
+    {
+        this.algorithmName = algorithmName;
+    }
 
     /*
-        Generates and returns a secret key based off the algorithm passed in and
-        the size of the key requested.
-    */
+     *  Generates and returns a secret key based off the algorithm passed in and
+     *  the size of the key requested.
+     */
     private void generateKey() throws Exception
     {
-		SecureRandom prng = new SecureRandom();
+        SecureRandom prng = new SecureRandom();
         KeyGenerator keyGenerator = KeyGenerator.getInstance(this.algorithmName, PROVIDER);
+
         keyGenerator.init(this.aesKeyLength, prng);
         this.encryptionKey = keyGenerator.generateKey();
         this.decryptionKey = this.encryptionKey;
     }
 
     /*
-        Generates a key pair of a private and public key based off the algorithm passed in.
-    */
+     *  Generates a key pair of a private and public key based off the algorithm passed in.
+     */
     public void generateKeyPair() throws Exception
     {
-		SecureRandom prng = new SecureRandom();
+        SecureRandom prng = new SecureRandom();
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(this.algorithmName, PROVIDER);
+
         keyPairGenerator.initialize(rsaKeyLength, prng);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         this.encryptionKey = (Key)keyPair.getPublic();
@@ -179,30 +179,36 @@ public class EncryptionSuite
     public byte[] generateSignature(byte[] messageBytes) throws Exception
     {
         Signature signature = Signature.getInstance(SIGNATURE_SHA512_RSA, PROVIDER);
+
         signature.initSign((PrivateKey)this.decryptionKey);
         signature.update(messageBytes);
+
         return signature.sign();
     }
 
     public boolean verifySignature(byte[] signatureBytes, byte[] messageBytes) throws Exception
     {
         Signature signature = Signature.getInstance(SIGNATURE_SHA512_RSA, PROVIDER);
+
         signature.initVerify((PublicKey)this.encryptionKey);
         signature.update(messageBytes);
+
         return signature.verify(signatureBytes);
     }
 
-	public byte[] generateHmac(byte[] messageBytes) throws Exception
-	{
-	    Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-	    mac.init(this.encryptionKey);
+    public byte[] generateHmac(byte[] messageBytes) throws Exception
+    {
+        Mac mac = Mac.getInstance(HMAC_ALGORITHM);
 
-	    return mac.doFinal(messageBytes);
-	}
+        mac.init(this.encryptionKey);
+
+        return mac.doFinal(messageBytes);
+    }
 
     public boolean verifyHmac(byte[] hmacMessage, byte[] messageBytes) throws Exception
     {
         byte[] hmac = this.generateHmac(messageBytes);
+
         return Arrays.equals(hmac, hmacMessage);
     }
 
@@ -212,6 +218,7 @@ public class EncryptionSuite
 
         md.update(string.getBytes("UTF-8"));
         byte[] digest = md.digest();
+
         return digest;
     }
 
@@ -221,57 +228,74 @@ public class EncryptionSuite
 
         md.update(bytes); // Change this to "UTF-16" if needed
         byte[] digest = md.digest();
+
         return digest;
     }
 
     public byte[] generateSalt() throws Exception
     {
         SecureRandom prng = new SecureRandom();
-        byte[] salt = new byte[11];
+
+        byte[] salt = new byte [11];
         prng.nextBytes(salt);
+
         return salt;
     }
 
     public byte[] saltAndHashPassword(String password, byte[] tempSalt) throws Exception
     {
         // Concatenate salt and password
-        String pwAndSalt = password+new String(tempSalt, "UTF-8");
+        String pwAndSalt = password + new String(tempSalt, "UTF-8");
+
         return this.hashBytes(pwAndSalt.getBytes());
     }
 
     public boolean verifyUserPassword(String password, byte[] saltedPwHash, byte[] salt) throws Exception
     {
         if (password == null || saltedPwHash == null || salt == null)
+        {
             return false;
+        }
         else
+        {
             return Arrays.equals(this.saltAndHashPassword(password, salt), saltedPwHash);
+        }
     }
 
     public boolean verifyChallenge(byte[] challenge, byte[] completedChallenge) throws Exception
     {
         if (Arrays.equals(this.hashBytes(challenge), completedChallenge))
+        {
             return true;
+        }
         else
+        {
             return false;
+        }
     }
 
     public Cipher getCipher(int mode) throws Exception
     {
         // Make a new secure pseudo random number generator
-		SecureRandom prng = new SecureRandom();
+        SecureRandom prng = new SecureRandom();
 
         Key key = null;
+
         if (mode == Cipher.ENCRYPT_MODE)
+        {
             key = this.encryptionKey;
+        }
         else
+        {
             key = this.decryptionKey;
+        }
 
         // Create a new cipher
         Cipher cipher = Cipher.getInstance(this.algorithmName, PROVIDER);
         // Init with a prng to ensure the encryptions are random every time
-		cipher.init(mode, key, prng);
+        cipher.init(mode, key, prng);
 
-		return cipher;
+        return cipher;
     }
 
     // Prints encryption key formatted in Hex as a string
@@ -280,10 +304,11 @@ public class EncryptionSuite
         String encoded = "";
 
         if (this.encryptionKey != null)
+        {
             encoded = DatatypeConverter.printHexBinary(this.encryptionKey.getEncoded());
+        }
 
         return encoded;
-
     }
 
     public static boolean verifyFileHmac(ArrayList<Key> keys, int version, byte[] fileHmacBytes, byte[] fileBytes) throws Exception
@@ -299,91 +324,95 @@ public class EncryptionSuite
 
     public static byte[] generateFileHmac(ArrayList<Key> keys, byte[] fileBytes) throws Exception
     {
-       // create new encryption suite object with last key
-       EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
+        // create new encryption suite object with last key
+        EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size() - 1));
 
-       return encryptionKey.generateHmac(fileBytes);
+        return encryptionKey.generateHmac(fileBytes);
     }
 
     public static byte[] encryptFile(ArrayList<Key> keys, byte[] fileBytes) throws Exception
     {
-       // create new encryption suite object with last key
-       EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size()-1));
+        // create new encryption suite object with last key
+        EncryptionSuite encryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(keys.size() - 1));
 
-       Cipher cipher = encryptionKey.getCipher(encrypt);
+        Cipher cipher = encryptionKey.getCipher(encrypt);
 
-       // encrypt the file and return the encrypted bytes
-       return encryptionKey.encryptBytes(fileBytes, cipher);
+        // encrypt the file and return the encrypted bytes
+        return encryptionKey.encryptBytes(fileBytes, cipher);
     }
 
-   public static byte[] decryptFile(ArrayList<Key> keys, int version, byte[] fileBytes, int fileSize) throws Exception
-   {
-       // create new encryption suite object with key at index - version
-       EncryptionSuite decryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
-
-       Cipher cipher = decryptionKey.getCipher(decrypt);
-
-       // getting decrypted bytes with padding from encryption
-       byte[] decryptFileWithPadding =  decryptionKey.encryptBytes(fileBytes, cipher);
-
-       // account for padding done by the AES encryption
-       return Arrays.copyOfRange(decryptFileWithPadding, 0, fileSize);
-   }
-
-   public byte[] encryptBytes(byte[] inputBytes) throws Exception
-   {
-       return this.encryptBytes(inputBytes, encrypt);
-   }
-
-   public byte[] decryptBytes(byte[] inputBytes) throws Exception
-   {
-       return this.encryptBytes(inputBytes, decrypt);
-   }
-
-   public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
-   {
-       Cipher cipher = this.getCipher(mode);
-
-       byte[] outputBytes = new byte[cipher.getOutputSize(inputBytes.length)];
-       int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
-       cipher.doFinal(outputBytes, outputLength);
-       return outputBytes;
-   }
-
-    public byte[] encryptBytes(byte[] inputBytes, Cipher cipher) throws Exception
+    public static byte[] decryptFile(ArrayList<Key> keys, int version, byte[] fileBytes, int fileSize) throws Exception
     {
-        byte[] outputBytes = new byte[cipher.getOutputSize(inputBytes.length)];
+        // create new encryption suite object with key at index - version
+        EncryptionSuite decryptionKey = new EncryptionSuite(EncryptionSuite.ENCRYPTION_AES, keys.get(version));
+
+        Cipher cipher = decryptionKey.getCipher(decrypt);
+
+        // getting decrypted bytes with padding from encryption
+        byte[] decryptFileWithPadding = decryptionKey.encryptBytes(fileBytes, cipher);
+
+        // account for padding done by the AES encryption
+        return Arrays.copyOfRange(decryptFileWithPadding, 0, fileSize);
+    }
+
+    public byte[] encryptBytes(byte[] inputBytes) throws Exception
+    {
+        return this.encryptBytes(inputBytes, encrypt);
+    }
+
+    public byte[] decryptBytes(byte[] inputBytes) throws Exception
+    {
+        return this.encryptBytes(inputBytes, decrypt);
+    }
+
+    public byte[] encryptBytes(byte[] inputBytes, int mode) throws Exception
+    {
+        Cipher cipher = this.getCipher(mode);
+
+        byte[] outputBytes = new byte [cipher.getOutputSize(inputBytes.length)];
         int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
         cipher.doFinal(outputBytes, outputLength);
+
         return outputBytes;
     }
 
-	public Envelope getEncryptedMessage(Envelope message) throws Exception
-	{
+    public byte[] encryptBytes(byte[] inputBytes, Cipher cipher) throws Exception
+    {
+        byte[] outputBytes = new byte [cipher.getOutputSize(inputBytes.length)];
+        int outputLength = cipher.update(inputBytes, 0, inputBytes.length, outputBytes, 0);
+        cipher.doFinal(outputBytes, outputLength);
 
-		SealedObject encMessage = new SealedObject(message, this.getCipher(encrypt));
-		Envelope wrappedEncMessage = new Envelope("ENCRYPTEDENV"+this.algorithmName);
-		wrappedEncMessage.addObject(encMessage);
+        return outputBytes;
+    }
 
-		return wrappedEncMessage;
-	}
+    public Envelope getEncryptedMessage(Envelope message) throws Exception
+    {
+        SealedObject encMessage = new SealedObject(message, this.getCipher(encrypt));
+        Envelope wrappedEncMessage = new Envelope("ENCRYPTEDENV" + this.algorithmName);
 
-	public Envelope getDecryptedMessage(Envelope encMessage) throws Exception
-	{
-		if (encMessage.getMessage().equals("ENCRYPTEDENV"+this.algorithmName))
-		{
-			SealedObject encResponse = (SealedObject)encMessage.getObjContents().get(0);
-			return (Envelope)encResponse.getObject(this.getCipher(decrypt));
-		}
-		else
-		{
-			return null;
-		}
-	}
+        wrappedEncMessage.addObject(encMessage);
+
+        return wrappedEncMessage;
+    }
+
+    public Envelope getDecryptedMessage(Envelope encMessage) throws Exception
+    {
+        if (encMessage.getMessage().equals("ENCRYPTEDENV" + this.algorithmName))
+        {
+            SealedObject encResponse = (SealedObject)encMessage.getObjContents().get(0);
+
+            return (Envelope)encResponse.getObject(this.getCipher(decrypt));
+        }
+        else
+        {
+            return null;
+        }
+    }
 
     private void saveKey(String file, Key key) throws Exception
     {
         FileOutputStream fout = new FileOutputStream(file);
+
         fout.write(key.getEncoded());
         fout.close();
     }
@@ -392,14 +421,16 @@ public class EncryptionSuite
     {
         PrivateKey privateKey = null;
         File f = new File(file);
-        if(f.exists())
+
+        if (f.exists())
         {
-            byte[] keyBytes = new byte[(int)f.length()];
+            byte[] keyBytes = new byte [(int)f.length()];
             FileInputStream finp = new FileInputStream(f);
             finp.read(keyBytes);
             finp.close();
             privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
         }
+
         return privateKey;
     }
 
@@ -407,14 +438,16 @@ public class EncryptionSuite
     {
         PublicKey publicKey = null;
         File f = new File(file);
-        if(f.exists())
+
+        if (f.exists())
         {
-            byte[] keyBytes = new byte[(int)f.length()];
+            byte[] keyBytes = new byte [(int)f.length()];
             FileInputStream finp = new FileInputStream(f);
             finp.read(keyBytes);
             finp.close();
             publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyBytes));
         }
+
         return publicKey;
     }
 
@@ -423,23 +456,25 @@ public class EncryptionSuite
         boolean valid = true;
 
         /*
-            A user password must have the following:
-                1. At least one digit.
-                2. At least one lowercase letter.
-                3. At least one uppercase letter.
-                4. At least a special character: @, #, $, %, ^, &, +, =
-                5. No whitespace
-                6. At least 8 characters in length.
-
-            A user password cannot be equal to your username and cannot equal
-            "password" as well.
-        */
+         *  A user password must have the following:
+         *      1. At least one digit.
+         *      2. At least one lowercase letter.
+         *      3. At least one uppercase letter.
+         *      4. At least a special character: @, #, $, %, ^, &, +, =
+         *      5. No whitespace
+         *      6. At least 8 characters in length.
+         *
+         *  A user password cannot be equal to your username and cannot equal
+         *  "password" as well.
+         */
         Pattern validPassword = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$");
         Matcher match = validPassword.matcher(password);
 
         // if no match is found, then the password isn't created
-        if(!match.find() || password.equals(username) || password.equals("password"))
+        if (!match.find() || password.equals(username) || password.equals("password"))
+        {
             valid = false;
+        }
 
         return valid;
     }

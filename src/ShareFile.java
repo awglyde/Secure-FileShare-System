@@ -1,6 +1,5 @@
 public class ShareFile implements java.io.Serializable, Comparable<ShareFile>
 {
-
     /**
      *
      */
@@ -54,10 +53,17 @@ public class ShareFile implements java.io.Serializable, Comparable<ShareFile>
 
     public int compareTo(ShareFile rhs)
     {
-        if(this.path.compareTo(rhs.getPath()) == 0) return 0;
-        else if(this.path.compareTo(rhs.getPath()) < 0) return -1;
-        else return 1;
+        if (this.path.compareTo(rhs.getPath()) == 0)
+        {
+            return 0;
+        }
+        else if (this.path.compareTo(rhs.getPath()) < 0)
+        {
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
     }
-
-
 }

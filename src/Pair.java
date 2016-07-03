@@ -1,8 +1,10 @@
-public class Pair<T,E> {
+public class Pair<T, E>
+{
     private final T firstObj;
     private final E secondObj;
 
-    public Pair(T firstObj, E secondObj) {
+    public Pair(T firstObj, E secondObj)
+    {
         this.firstObj = firstObj;
         this.secondObj = secondObj;
     }

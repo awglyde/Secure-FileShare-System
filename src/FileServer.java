@@ -1,5 +1,4 @@
 /* FileServer loads files from FileList.bin.  Stores files in shared_files directory. */
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,7 +6,6 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.security.Key;
 import javax.xml.bind.DatatypeConverter;
-
 
 public class FileServer extends Server
 {
@@ -33,50 +31,46 @@ public class FileServer extends Server
     {
         Key tokensKey = token.getFileServerPublicKey();
 
-        return  this.groupServerPubKey.verifySignature(token.getSignedHash(), this.groupServerPubKey.hashBytes(token.toString().getBytes())) &&
-        DatatypeConverter.printHexBinary(tokensKey.getEncoded()).equals(
-        DatatypeConverter.printHexBinary(this.serverRSAKeys.getEncryptionKey().getEncoded()));
+        return this.groupServerPubKey.verifySignature(token.getSignedHash(), this.groupServerPubKey.hashBytes(token.toString().getBytes())) && DatatypeConverter.printHexBinary(tokensKey.getEncoded()).equals(DatatypeConverter.printHexBinary(this.serverRSAKeys.getEncryptionKey().getEncoded()));
     }
 
     public void start() throws Exception
     {
-
         System.out.println("File Server Online");
         String fileFile = "FileList.bin";
         ObjectInputStream fileStream;
 
-        //This runs a thread that saves the lists on program exit
+        // This runs a thread that saves the lists on program exit
         Runtime runtime = Runtime.getRuntime();
         Thread catchExit = new Thread(new ShutDownListenerFS());
         runtime.addShutdownHook(catchExit);
 
-        //Open user file to get user list
+        // Open user file to get user list
         try
         {
             FileInputStream fis = new FileInputStream(fileFile);
             fileStream = new ObjectInputStream(fis);
             // this.fileList?
-            fileList = (FileList) fileStream.readObject();
+            fileList = (FileList)fileStream.readObject();
         }
-        catch(FileNotFoundException e)
+        catch (FileNotFoundException e)
         {
             System.out.println("FileList Does Not Exist. Creating FileList...");
             // this.fileList?
             fileList = new FileList();
-
         }
-        catch(IOException | ClassNotFoundException e)
+        catch (IOException | ClassNotFoundException e)
         {
             System.out.println("Error reading from FileList file");
             System.exit(-1);
         }
 
         File file = new File("shared_files");
-        if(file.mkdir())
+        if (file.mkdir())
         {
             System.out.println("Created new shared_files directory");
         }
-        else if(file.exists())
+        else if (file.exists())
         {
             System.out.println("Found shared_files directory");
         }
@@ -85,11 +79,10 @@ public class FileServer extends Server
             System.out.println("Error creating shared_files directory");
         }
 
-        //Autosave Daemon. Saves lists every 5 minutes
+        // Autosave Daemon. Saves lists every 5 minutes
         AutoSaveFS aSave = new AutoSaveFS();
         aSave.setDaemon(true);
         aSave.start();
-
 
         boolean running = true;
 
@@ -101,7 +94,7 @@ public class FileServer extends Server
             Socket sock = null;
             Thread thread = null;
 
-            while(running)
+            while (running)
             {
                 sock = serverSock.accept();
                 thread = new FileThread(sock, this);
@@ -110,7 +103,7 @@ public class FileServer extends Server
 
             System.out.printf("%s shut down\n", this.getClass().getName());
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -118,7 +111,7 @@ public class FileServer extends Server
     }
 }
 
-//This thread saves user and group lists
+// This thread saves user and group lists
 class ShutDownListenerFS implements Runnable
 {
     public void run()
@@ -131,7 +124,7 @@ class ShutDownListenerFS implements Runnable
             outStream = new ObjectOutputStream(new FileOutputStream("FileList.bin"));
             outStream.writeObject(FileServer.fileList);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -148,7 +141,7 @@ class AutoSaveFS extends Thread
             try
             {
                 // Thread.sleep(300000); //Save group and user lists every 5 minutes
-                Thread.sleep(10000); //Save group and user lists every 5 minutes
+                Thread.sleep(10000); // Save group and user lists every 5 minutes
                 System.out.println("Autosave file list...");
                 ObjectOutputStream outStream;
                 try
@@ -156,17 +149,17 @@ class AutoSaveFS extends Thread
                     outStream = new ObjectOutputStream(new FileOutputStream("FileList.bin"));
                     outStream.writeObject(FileServer.fileList);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     System.err.println("Error: " + e.getMessage());
                     e.printStackTrace(System.err);
                 }
-
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 System.out.println("Autosave Interrupted");
             }
-        } while(true);
+        }
+        while (true);
     }
 }

@@ -7,7 +7,6 @@ import java.util.List;
 
 public class FileList implements java.io.Serializable
 {
-
     /*Serializable so it can be stored in a file for persistence */
     private static final long serialVersionUID = -8911161283900260136L;
     private ArrayList<ShareFile> list;
@@ -20,14 +19,15 @@ public class FileList implements java.io.Serializable
     public synchronized void addFile(String owner, String group, String path, int keyVersion, int fileSize, byte[] fileHmac)
     {
         ShareFile newFile = new ShareFile(owner, group, path, keyVersion, fileSize, fileHmac);
+
         this.list.add(newFile);
     }
 
     public synchronized void removeFile(String path)
     {
-        for(int i = 0; i < this.list.size(); i++)
+        for (int i = 0; i < this.list.size(); i++)
         {
-            if(this.list.get(i).getPath().compareTo(path) == 0)
+            if (this.list.get(i).getPath().compareTo(path) == 0)
             {
                 this.list.remove(i);
             }
@@ -36,19 +36,21 @@ public class FileList implements java.io.Serializable
 
     public synchronized boolean checkFile(String path)
     {
-        for(int i = 0; i < this.list.size(); i++)
+        for (int i = 0; i < this.list.size(); i++)
         {
-            if(this.list.get(i).getPath().compareTo(path) == 0)
+            if (this.list.get(i).getPath().compareTo(path) == 0)
             {
                 return true;
             }
         }
+
         return false;
     }
 
     public synchronized ArrayList<ShareFile> getFiles()
     {
         Collections.sort(this.list);
+
         return this.list;
     }
 
@@ -60,21 +62,24 @@ public class FileList implements java.io.Serializable
         for (ShareFile file : files)
         {
             if (userGroups.contains(file.getGroup()))
+            {
                 userFiles.add(file.getPath());
+            }
         }
+
         return userFiles;
     }
 
-
     public synchronized ShareFile getFile(String path)
     {
-        for(int i = 0; i < this.list.size(); i++)
+        for (int i = 0; i < this.list.size(); i++)
         {
-            if(this.list.get(i).getPath().compareTo(path) == 0)
+            if (this.list.get(i).getPath().compareTo(path) == 0)
             {
                 return this.list.get(i);
             }
         }
+
         return null;
     }
 }

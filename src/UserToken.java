@@ -22,7 +22,6 @@ public interface UserToken
      */
     public String getIssuer();
 
-
     /**
      * This method should return a string indicating the name of the
      * subject of the token.  For instance, if "Alice" requests a
@@ -32,7 +31,6 @@ public interface UserToken
      * @return The subject of this token
      */
     public String getSubject();
-
 
     /**
      * This method extracts the list of groups that the owner of this
@@ -47,20 +45,18 @@ public interface UserToken
     public Key getFileServerPublicKey();
 
     /*
-    * This method returns whether or not the user is ADMIN
-    */
+     * This method returns whether or not the user is ADMIN
+     */
     public boolean isAdmin();
 
-
     /*
-    * This method checks to see whether or not the token is expired
-    */
+     * This method checks to see whether or not the token is expired
+     */
     public boolean isExpired();
 
-	public void setSignedHash(byte[] signedHash);
+    public void setSignedHash(byte[] signedHash);
 
-	public byte[] getSignedHash();
+    public byte[] getSignedHash();
 
     public String toString();
-
-}   //-- end interface UserToken
+}   // -- end interface UserToken

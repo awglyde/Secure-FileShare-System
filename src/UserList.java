@@ -5,7 +5,6 @@ import java.util.Hashtable;
 
 public class UserList implements java.io.Serializable
 {
-
     /**
      *
      */
@@ -15,6 +14,7 @@ public class UserList implements java.io.Serializable
     public synchronized void addUser(String username, String email, byte[] saltedPwHash, byte[] salt)
     {
         User newUser = new User();
+
         newUser.setPasswordHash(saltedPwHash);
         newUser.setPasswordSalt(salt);
         newUser.setEmail(email);
@@ -28,7 +28,7 @@ public class UserList implements java.io.Serializable
 
     public synchronized boolean isUser(String username)
     {
-        if(this.list.containsKey(username))
+        if (this.list.containsKey(username))
         {
             return true;
         }
@@ -46,37 +46,53 @@ public class UserList implements java.io.Serializable
     public synchronized boolean isLocked(String username)
     {
         if (this.getUser(username) != null)
+        {
             return this.list.get(username).isLocked();
+        }
         else
+        {
             return true;
+        }
     }
 
     public synchronized void failedLogin(String username)
     {
         if (this.getUser(username) != null)
+        {
             this.list.get(username).failedLogin();
+        }
     }
 
     public synchronized void unlockUser(String username)
     {
         if (this.getUser(username) != null)
+        {
             this.list.get(username).unlock();
+        }
     }
 
     public synchronized byte[] getPasswordHash(String username)
     {
         if (this.getUser(username) != null)
+        {
             return this.getUser(username).getPasswordHash();
+        }
         else
+        {
             return null;
+        }
     }
 
     public synchronized byte[] getPasswordSalt(String username)
     {
         if (this.getUser(username) != null)
+        {
             return this.getUser(username).getPasswordSalt();
+        }
         else
+        {
             return null;
+        }
     }
 
     public synchronized String getUserEmail(String username)
@@ -121,14 +137,17 @@ public class UserList implements java.io.Serializable
         {
             // If the user is the owner af the  group, remove their ownership
             if (user.getOwnership().contains(groupname))
+            {
                 user.removeOwnership(groupname);
+            }
 
             // If the user is simply a member of the group, remove their membership
             if (user.getGroups().contains(groupname))
+            {
                 user.removeGroup(groupname);
+            }
         }
     }
-
 
     public static class User implements java.io.Serializable
     {
@@ -158,10 +177,12 @@ public class UserList implements java.io.Serializable
         public boolean isLocked()
         {
             boolean locked = false;
-            if(numLogin >= 3)
+
+            if (numLogin >= 3)
             {
                 locked = true;
             }
+
             return locked;
         }
 
@@ -218,9 +239,9 @@ public class UserList implements java.io.Serializable
 
         public boolean removeGroup(String group)
         {
-            if(!this.groups.isEmpty())
+            if (!this.groups.isEmpty())
             {
-                if(this.groups.contains(group))
+                if (this.groups.contains(group))
                 {
                     return this.groups.remove(group);
                 }
@@ -236,16 +257,15 @@ public class UserList implements java.io.Serializable
 
         public boolean removeOwnership(String group)
         {
-            if(!this.ownership.isEmpty())
+            if (!this.ownership.isEmpty())
             {
-                if(this.ownership.contains(group))
+                if (this.ownership.contains(group))
                 {
                     return this.ownership.remove(group);
                 }
             }
+
             return false;
         }
-
     }
-
 }

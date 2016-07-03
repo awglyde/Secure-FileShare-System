@@ -8,29 +8,27 @@ import java.util.List;
 
 public class UserClient
 {
-	static GroupClient groupClient;
-	static FileClient fileClient;
+    static GroupClient groupClient;
+    static FileClient fileClient;
     static String userName = "";
     static UserToken userToken = null;
-	static Hashtable<String, ArrayList<Key>> keyRing = null;
+    static Hashtable<String, ArrayList<Key> > keyRing = null;
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-    public static void connectGroupServer(String groupServerName, int groupPort, EncryptionSuite userKeys,
-	EncryptionSuite groupServerPublicKey,
-	Key fileServerPublicKey) throws Exception
+    public static void connectGroupServer(String groupServerName, int groupPort, EncryptionSuite userKeys, EncryptionSuite groupServerPublicKey, Key fileServerPublicKey) throws Exception
     {
-        groupClient.connect(groupServerName,  groupPort);
+        groupClient.connect(groupServerName, groupPort);
         if (groupClient.isConnected())
         {
-			if (groupClient.authenticateGroupServer(userKeys, groupServerPublicKey))
-			{
+            if (groupClient.authenticateGroupServer(userKeys, groupServerPublicKey))
+            {
                 System.out.println("Logged in and authenticated group server successfully!");
-	            groupOptions(fileServerPublicKey);
-			}
-			else
-			{
-				System.out.println("Failed to authenticate group server. :(");
-			}
+                groupOptions(fileServerPublicKey);
+            }
+            else
+            {
+                System.out.println("Failed to authenticate group server. :(");
+            }
         }
         else
         {
@@ -43,20 +41,12 @@ public class UserClient
     public static void groupOptions(Key fileServerPublicKey) throws Exception
     {
         String choice = "";
+
         System.out.println("Welcome to the group server! Please choose from the list of options.\n\n");
 
-        String[] menuOptions = new String[]{"Disconnect from group server",
-											"Retrieve a token",
-                                            "Add (create) a group",
-                                            "Remove (delete) a group",
-                                            "Add a user to a group",
-                                            "Remove a user from a group",
-                                            "List all of the members of a group (that you are a member of)"};
+        String[] menuOptions = new String[] { "Disconnect from group server", "Retrieve a token", "Add (create) a group", "Remove (delete) a group", "Add a user to a group", "Remove a user from a group", "List all of the members of a group (that you are a member of)" };
 
-        String[] adminOptions = new String[]{"Add (create) a user",
-                                             "Remove (delete) a user",
- 											 "Unlock a user"};
-
+        String[] adminOptions = new String[] { "Add (create) a user", "Remove (delete) a user", "Unlock a user" };
 
         while (true)
         {
@@ -65,241 +55,253 @@ public class UserClient
 
             for (int i = 0; i < menuOptions.length; i++)
             {
-                System.out.println(i+". \t"+menuOptions[i]);
+                System.out.println(i + ". \t" + menuOptions [i]);
             }
 
             // print admin options if they are an admin
             if (groupClient.isAdmin(userName))
             {
-                for(int i = 0; i < adminOptions.length; i++){
-                    System.out.println((i+menuOptions.length) + ". \t" + adminOptions[i]);
+                for (int i = 0; i < adminOptions.length; i++)
+                {
+                    System.out.println((i + menuOptions.length) + ". \t" + adminOptions [i]);
                 }
-
             }
 
-            System.out.print(userName+" >> ");
+            System.out.print(userName + " >> ");
 
             try
             {
                 choice = inputValidation(in.readLine());
             }
-            catch(IOException e)
+            catch (IOException e)
             {
                 System.out.println("Error parsing input. Exiting...");
             }
 
             // Options for Admins Only
             boolean selectedAdminOption = false;
-            if(groupClient.isAdmin(userName)){
-                switch(choice)
+            if (groupClient.isAdmin(userName))
+            {
+                switch (choice)
                 {
-                    case "7": // Create a user
-                        System.out.println("Enter username of new user to create: ");
-                        String newUserName = inputValidation(in.readLine());
-                        System.out.println("Enter email of new user to create: ");
-                        String newUserEmail = inputValidation(in.readLine());
-                        System.out.println("Enter password for "+newUserName +":");
-                        String password = inputValidation(in.readLine());
+                case "7":     // Create a user
+                    System.out.println("Enter username of new user to create: ");
+                    String newUserName = inputValidation(in.readLine());
+                    System.out.println("Enter email of new user to create: ");
+                    String newUserEmail = inputValidation(in.readLine());
+                    System.out.println("Enter password for " + newUserName + ":");
+                    String password = inputValidation(in.readLine());
 
-						// verify if the password follows the requirements specified by
-						// the encryption suite
-						if(!EncryptionSuite.verifyPassword(newUserName, password))
-						{
-							System.out.println("Invalid Password. \n" + EncryptionSuite.PASSWORD_INFO);
-						}
-						else
-						{
-
-	                        if (groupClient.createUser(newUserName, newUserEmail, password, userName))
-	                        {
-	                            System.out.println("User created successfully!");
-	                        }
-	                        else
-	                        {
-	                            System.out.println("User creation failed!");
-	                            System.out.println("You cannot create a user with a duplicate username.");
-	                        }
-	                        selectedAdminOption = true;
-
-						}
-                        break;
-                    case "8": // Delete a user
-                        System.out.println("Enter username of user to delete: ");
-                        String userToDelete = inputValidation(in.readLine());
-                        if (groupClient.deleteUser(userToDelete, userName))
+                    // verify if the password follows the requirements specified by
+                    // the encryption suite
+                    if (!EncryptionSuite.verifyPassword(newUserName, password))
+                    {
+                        System.out.println("Invalid Password. \n" + EncryptionSuite.PASSWORD_INFO);
+                    }
+                    else
+                    {
+                        if (groupClient.createUser(newUserName, newUserEmail, password, userName))
                         {
-                            System.out.println("User deleted successfully!");
+                            System.out.println("User created successfully!");
                         }
                         else
                         {
-                            System.out.println("User deletion failed!");
-                            System.out.println("Does this user exist?");
-                            System.out.println("Are you trying to delete the owner of the admin group?");
+                            System.out.println("User creation failed!");
+                            System.out.println("You cannot create a user with a duplicate username.");
                         }
                         selectedAdminOption = true;
-                        break;
-					case "9":
-						System.out.println("Enter username of the user to unlock:");
-						String userToUnlock = inputValidation(in.readLine());
+                    }
+                    break;
 
-						System.out.println("Enter new password of the user to unlock:");
-						String newPassword = inputValidation(in.readLine());
+                case "8":     // Delete a user
+                    System.out.println("Enter username of user to delete: ");
+                    String userToDelete = inputValidation(in.readLine());
+                    if (groupClient.deleteUser(userToDelete, userName))
+                    {
+                        System.out.println("User deleted successfully!");
+                    }
+                    else
+                    {
+                        System.out.println("User deletion failed!");
+                        System.out.println("Does this user exist?");
+                        System.out.println("Are you trying to delete the owner of the admin group?");
+                    }
+                    selectedAdminOption = true;
+                    break;
 
-						// verify if the password follows the requirements specified by
-						// the encryption suite
-						if(!EncryptionSuite.verifyPassword(userToUnlock, newPassword))
-						{
-							System.out.println("Invalid Password. \n" + EncryptionSuite.PASSWORD_INFO);
-						}
-						else
-						{
-							if(groupClient.unlockUser(userToUnlock, newPassword, userName))
-							{
-								System.out.println("User unlocked!");
-							}
-							else
-							{
-								System.out.println("User not unlocked.");
-							}
-						}
-						selectedAdminOption = true;
-						break;
+                case "9":
+                    System.out.println("Enter username of the user to unlock:");
+                    String userToUnlock = inputValidation(in.readLine());
+
+                    System.out.println("Enter new password of the user to unlock:");
+                    String newPassword = inputValidation(in.readLine());
+
+                    // verify if the password follows the requirements specified by
+                    // the encryption suite
+                    if (!EncryptionSuite.verifyPassword(userToUnlock, newPassword))
+                    {
+                        System.out.println("Invalid Password. \n" + EncryptionSuite.PASSWORD_INFO);
+                    }
+                    else
+                    {
+                        if (groupClient.unlockUser(userToUnlock, newPassword, userName))
+                        {
+                            System.out.println("User unlocked!");
+                        }
+                        else
+                        {
+                            System.out.println("User not unlocked.");
+                        }
+                    }
+                    selectedAdminOption = true;
+                    break;
                 }
             }
 
             // Options for Any Users
-            switch(choice)
+            switch (choice)
             {
-                case "0":
-                    return;
-				case "1":
-					// get the token keyRing pair and split them
-					Pair<UserToken, Hashtable<String, ArrayList<Key>>> pair = groupClient.getToken(userName, fileServerPublicKey);
-					userToken = pair.getFirst();
-					keyRing = pair.getSecond();
+            case "0":
 
-					if(userToken != null)
-					{
-						System.out.println("Token received!");
-					}
-					else
-					{
-						System.out.println("No token received... :(");
-					}
+                return;
 
-					break;
-                case "2": // Create a group
-                    System.out.println("Enter a group name: ");
-                    String newGroupName = inputValidation(in.readLine());
-                    if (groupClient.createGroup(newGroupName, userName))
-                    {
-                        System.out.println("Group "+newGroupName+" created successfully!");
-                    }
-                    else
-                    {
-                        System.out.println("Group creation failed. :(");
-                        System.out.println("There may be a group with a duplicate name.");
-                    }
-                    break;
-                case "3": // Delete a group
-                    System.out.println("Enter a group name to delete: ");
-                    String groupToDelete = inputValidation(in.readLine());
+            case "1":
+                // get the token keyRing pair and split them
+                Pair < UserToken, Hashtable < String, ArrayList < Key >>> pair = groupClient.getToken(userName, fileServerPublicKey);
+                userToken = pair.getFirst();
+                keyRing = pair.getSecond();
 
-                    if (groupClient.deleteGroup(groupToDelete, userName))
-                    {
-                        System.out.println("Group "+groupToDelete+" deleted successfully!");
-                    }
-                    else
-                    {
-                        System.out.println("Failed to delete the group.");
-                        System.out.println("Are you sure the group exists?");
-                        System.out.println("You must be the owner of a group to delete it.");
-                    }
+                if (userToken != null)
+                {
+                    System.out.println("Token received!");
+                }
+                else
+                {
+                    System.out.println("No token received... :(");
+                }
 
-                    break;
-                case "4": // Add a user to a group
-                    // GET the owner of the group specified
-                    // Make sure the userToken matches the owner of the group
-                    // then add the user to the group
-                    System.out.println("Enter a user name to add: ");
-                    String userToAdd = inputValidation(in.readLine());
+                break;
 
-                    System.out.println("Enter a group to add "+userToAdd+" to: ");
-                    String groupToAddUserTo = inputValidation(in.readLine());
+            case "2":     // Create a group
+                System.out.println("Enter a group name: ");
+                String newGroupName = inputValidation(in.readLine());
+                if (groupClient.createGroup(newGroupName, userName))
+                {
+                    System.out.println("Group " + newGroupName + " created successfully!");
+                }
+                else
+                {
+                    System.out.println("Group creation failed. :(");
+                    System.out.println("There may be a group with a duplicate name.");
+                }
+                break;
 
-                    if (groupClient.addUserToGroup(userToAdd, groupToAddUserTo, userName))
-                    {
-                        System.out.println(userToAdd+" added successfully to "+groupToAddUserTo+".");
-                    }
-                    else
-                    {
-                        System.out.println("Failed to add user to group.");
-                        System.out.println("The user may not exist.");
-                        System.out.println("The group may not exist.");
-                        System.out.println("The user may already be a member of the group");
-                        System.out.println("You must be the owner of a group to add a user.");
-                    }
-                    break;
-                case "5": // Remove a user from a group
+            case "3":     // Delete a group
+                System.out.println("Enter a group name to delete: ");
+                String groupToDelete = inputValidation(in.readLine());
 
-                    System.out.println("Enter a group name that you're an owner of: ");
-                    String group = inputValidation(in.readLine());
+                if (groupClient.deleteGroup(groupToDelete, userName))
+                {
+                    System.out.println("Group " + groupToDelete + " deleted successfully!");
+                }
+                else
+                {
+                    System.out.println("Failed to delete the group.");
+                    System.out.println("Are you sure the group exists?");
+                    System.out.println("You must be the owner of a group to delete it.");
+                }
 
-                    System.out.println("Enter the name of the user in "+group+" that you'd like to remove: ");
-                    String userToRemove = inputValidation(in.readLine());
+                break;
 
-                    if (groupClient.deleteUserFromGroup(userToRemove,group, userName))
-                        System.out.println("Successfully deleted "+userToRemove+" from "+group+"!");
-                    else
-                    {
-                        System.out.println("Deletion of "+userToRemove+" from "+group+" failed.");
-                        System.out.println("Are you sure the group exists?");
-                        System.out.println("Are you sure "+userToRemove+" is a member of the group?");
-                        System.out.println("You must be the owner of a group to remove a user from it.");
-                    }
+            case "4":     // Add a user to a group
+                // GET the owner of the group specified
+                // Make sure the userToken matches the owner of the group
+                // then add the user to the group
+                System.out.println("Enter a user name to add: ");
+                String userToAdd = inputValidation(in.readLine());
 
-                    break;
-                case "6": // List all the members of a group
-                    System.out.println("Enter a group name you're a member of to list: ");
-                    String groupName = inputValidation(in.readLine());
-                    List<String> groupMembers = groupClient.listMembers(groupName, userName);
-                    if (groupMembers != null)
+                System.out.println("Enter a group to add " + userToAdd + " to: ");
+                String groupToAddUserTo = inputValidation(in.readLine());
+
+                if (groupClient.addUserToGroup(userToAdd, groupToAddUserTo, userName))
+                {
+                    System.out.println(userToAdd + " added successfully to " + groupToAddUserTo + ".");
+                }
+                else
+                {
+                    System.out.println("Failed to add user to group.");
+                    System.out.println("The user may not exist.");
+                    System.out.println("The group may not exist.");
+                    System.out.println("The user may already be a member of the group");
+                    System.out.println("You must be the owner of a group to add a user.");
+                }
+                break;
+
+            case "5":     // Remove a user from a group
+
+                System.out.println("Enter a group name that you're an owner of: ");
+                String group = inputValidation(in.readLine());
+
+                System.out.println("Enter the name of the user in " + group + " that you'd like to remove: ");
+                String userToRemove = inputValidation(in.readLine());
+
+                if (groupClient.deleteUserFromGroup(userToRemove, group, userName))
+                {
+                    System.out.println("Successfully deleted " + userToRemove + " from " + group + "!");
+                }
+                else
+                {
+                    System.out.println("Deletion of " + userToRemove + " from " + group + " failed.");
+                    System.out.println("Are you sure the group exists?");
+                    System.out.println("Are you sure " + userToRemove + " is a member of the group?");
+                    System.out.println("You must be the owner of a group to remove a user from it.");
+                }
+
+                break;
+
+            case "6":     // List all the members of a group
+                System.out.println("Enter a group name you're a member of to list: ");
+                String groupName = inputValidation(in.readLine());
+                List<String> groupMembers = groupClient.listMembers(groupName, userName);
+                if (groupMembers != null)
+                {
+                    System.out.println(groupName + ": ");
+                    for (String memberName : groupMembers)
                     {
-                        System.out.println(groupName+": ");
-                        for (String memberName : groupMembers)
-                            System.out.println(memberName);
+                        System.out.println(memberName);
                     }
-                    else
-                    {
-                        System.out.println("Are you sure the group exists?");
-                        System.out.println("You may not be a member of the group.");
-                        System.out.println("Contact the group owner.");
-                    }
-                    break;
-                case "-help":
-                    System.out.println("You're screwed. Sorry...");
-                    break;
-                default:
-                    if(!selectedAdminOption)
-                    {
-                        System.out.println("Command not recognized.");
-                    }
+                }
+                else
+                {
+                    System.out.println("Are you sure the group exists?");
+                    System.out.println("You may not be a member of the group.");
+                    System.out.println("Contact the group owner.");
+                }
+                break;
+
+            case "-help":
+                System.out.println("You're screwed. Sorry...");
+                break;
+
+            default:
+                if (!selectedAdminOption)
+                {
+                    System.out.println("Command not recognized.");
+                }
             }
         }
     }
 
-    public static void connectFileServer(String fileServerName, int filePort,
-										 EncryptionSuite userKeys,
-										 EncryptionSuite fileServerPublicKey) throws Exception
+    public static void connectFileServer(String fileServerName, int filePort, EncryptionSuite userKeys, EncryptionSuite fileServerPublicKey) throws Exception
     {
-        fileClient.connect(fileServerName,  filePort);
+        fileClient.connect(fileServerName, filePort);
         if (fileClient.isConnected())
         {
-			if (fileClient.authenticateFileServer(userKeys, userToken, fileServerPublicKey))
-			{
-				System.out.println("Successfully authenticated file server!");
-            	fileOptions(userKeys.getEncryptionKey());
-			}
+            if (fileClient.authenticateFileServer(userKeys, userToken, fileServerPublicKey))
+            {
+                System.out.println("Successfully authenticated file server!");
+                fileOptions(userKeys.getEncryptionKey());
+            }
         }
         else
         {
@@ -311,13 +313,10 @@ public class UserClient
     public static void fileOptions(Key clientPublicKey) throws Exception
     {
         String choice = "";
+
         System.out.println("Welcome to the File Server! Please choose from the list of options.\n\n");
 
-        String[] menuOptions = new String[]{"Disconnect from file server",
-                                            "List shared files",
-                                            "Upload file to group",
-                                            "Download file",
-                                            "Delete file"};
+        String[] menuOptions = new String[] { "Disconnect from file server", "List shared files", "Upload file to group", "Download file", "Delete file" };
 
         while (true)
         {
@@ -326,163 +325,177 @@ public class UserClient
 
             for (int i = 0; i < menuOptions.length; i++)
             {
-                System.out.println(i+". \t"+menuOptions[i]);
+                System.out.println(i + ". \t" + menuOptions [i]);
             }
-            System.out.print(userName+" >> ");
+            System.out.print(userName + " >> ");
 
             try
             {
                 choice = inputValidation(in.readLine());
             }
-            catch(IOException e)
+            catch (IOException e)
             {
                 System.out.println("Error parsing input. Exiting...");
             }
 
-			// if the user token is expire the user must go back to the group server to get a new token
-			if(userToken != null && userToken.isExpired())
-			{
-				System.out.println("User Token is expired. Contact the Group Server to recieve a new token.");
-			}
-
-            switch(choice)
+            // if the user token is expire the user must go back to the group server to get a new token
+            if (userToken != null && userToken.isExpired())
             {
-                case "0":
-                    return;
-                case "1":
-                    System.out.println("List of files: \n");
-                    List<String> fileList = fileClient.listFiles(userToken);
-					if (fileList == null)
-					{
-						System.out.println("File List was null. Please retrieve a token before attempting to list files");
-						break;
-					}
-                    for (String file : fileList)
-                     System.out.println(file);
+                System.out.println("User Token is expired. Contact the Group Server to recieve a new token.");
+            }
 
-                    System.out.println();
+            switch (choice)
+            {
+            case "0":
+
+                return;
+
+            case "1":
+                System.out.println("List of files: \n");
+                List<String> fileList = fileClient.listFiles(userToken);
+                if (fileList == null)
+                {
+                    System.out.println("File List was null. Please retrieve a token before attempting to list files");
                     break;
-                case "2":
-                    System.out.println("Enter a source file name to upload: ");
-                    String srcFile = inputValidation(in.readLine());
+                }
+                for (String file : fileList)
+                {
+                    System.out.println(file);
+                }
 
-                    System.out.println("Enter a destination file name to add to the server: ");
-                    String destFile = inputValidation(in.readLine());
+                System.out.println();
+                break;
 
-                    System.out.println("Enter a group name to share the file with: ");
-                    String groupName = inputValidation(in.readLine());
+            case "2":
+                System.out.println("Enter a source file name to upload: ");
+                String srcFile = inputValidation(in.readLine());
 
+                System.out.println("Enter a destination file name to add to the server: ");
+                String destFile = inputValidation(in.readLine());
 
-                    if (fileClient.upload(srcFile, destFile, groupName, userToken, keyRing))
-                        System.out.println("File uploaded successfully!");
-                    else
-                    {
-                        System.out.println("File upload failed.");
-                        System.out.println("You must be a member of the group you're uploading to");
-                        System.out.println("The file must exist. Please try again.");
-                    }
+                System.out.println("Enter a group name to share the file with: ");
+                String groupName = inputValidation(in.readLine());
 
-                    break;
-                case "3":
-                    System.out.println("Enter a source file name from the server: ");
-                    srcFile = inputValidation(in.readLine());
+                if (fileClient.upload(srcFile, destFile, groupName, userToken, keyRing))
+                {
+                    System.out.println("File uploaded successfully!");
+                }
+                else
+                {
+                    System.out.println("File upload failed.");
+                    System.out.println("You must be a member of the group you're uploading to");
+                    System.out.println("The file must exist. Please try again.");
+                }
 
-                    System.out.println("Enter a destination file name to download to: ");
-                    destFile = inputValidation(in.readLine());
+                break;
 
-                    if (fileClient.download(srcFile, destFile, userToken, keyRing))
-                        System.out.println("File downloaded succesfully!");
-                    else
-                    {
-                        System.out.println("File download failed.");
-                        System.out.println("The file must exist. Please try again.");
-                    }
-                    break;
-                case "4":
-                    System.out.println("Enter a filename to delete: ");
-                    String fileName = inputValidation(in.readLine());
-                    if (fileClient.delete(fileName, userToken))
-                        System.out.println("File deletion successful.");
-                    else
-                    {
-                        System.out.println("File deletion failed.");
-                        System.out.println("The file must exist. Please try again.");
-                    }
+            case "3":
+                System.out.println("Enter a source file name from the server: ");
+                srcFile = inputValidation(in.readLine());
 
+                System.out.println("Enter a destination file name to download to: ");
+                destFile = inputValidation(in.readLine());
 
-                    break;
-                case "-help":
-                    System.out.println("You're screwed. Sorry...");
-                    break;
-                default:
-                    System.out.println("Command not recognized.");
+                if (fileClient.download(srcFile, destFile, userToken, keyRing))
+                {
+                    System.out.println("File downloaded succesfully!");
+                }
+                else
+                {
+                    System.out.println("File download failed.");
+                    System.out.println("The file must exist. Please try again.");
+                }
+                break;
+
+            case "4":
+                System.out.println("Enter a filename to delete: ");
+                String fileName = inputValidation(in.readLine());
+                if (fileClient.delete(fileName, userToken))
+                {
+                    System.out.println("File deletion successful.");
+                }
+                else
+                {
+                    System.out.println("File deletion failed.");
+                    System.out.println("The file must exist. Please try again.");
+                }
+
+                break;
+
+            case "-help":
+                System.out.println("You're screwed. Sorry...");
+                break;
+
+            default:
+                System.out.println("Command not recognized.");
             }
         }
     }
 
     public static void chooseServer(String groupServerName, int groupPort, String fileServerName, int filePort) throws Exception
     {
-
         // Generate users private / public key pair
         EncryptionSuite userKeys = new EncryptionSuite(EncryptionSuite.ENCRYPTION_RSA);
         EncryptionSuite groupServerPublicKey = new EncryptionSuite("client_config/group_server_pub", "");
-		EncryptionSuite fileServerPublicKey = null;
-    	fileClient.connect(fileServerName,  filePort);
-    	if (fileClient.isConnected())
-		{
-			fileServerPublicKey = fileClient.getFileServerPublicKey();
-			fileClient.disconnect();
-			if (fileServerPublicKey == null)
-			{
-				System.out.println("File server public key was not legitimate! Malicious activity detected! EXITING");
-				System.exit(0);
-			}
-		}
+        EncryptionSuite fileServerPublicKey = null;
 
+        fileClient.connect(fileServerName, filePort);
+        if (fileClient.isConnected())
+        {
+            fileServerPublicKey = fileClient.getFileServerPublicKey();
+            fileClient.disconnect();
+            if (fileServerPublicKey == null)
+            {
+                System.out.println("File server public key was not legitimate! Malicious activity detected! EXITING");
+                System.exit(0);
+            }
+        }
 
         try
         {
-            while(true)
+            while (true)
             {
                 System.out.println("1. \tGroup Server");
                 System.out.println("2. \tFile Server");
                 System.out.println("0. \tExit");
-                System.out.print(userName+" >> ");
+                System.out.print(userName + " >> ");
 
                 String choice = inputValidation(in.readLine());
 
-                switch(choice)
+                switch (choice)
                 {
-                    case "1":
-                        System.out.println("Group Server");
-                        connectGroupServer(groupServerName, groupPort, userKeys, groupServerPublicKey, fileServerPublicKey.getEncryptionKey());
+                case "1":
+                    System.out.println("Group Server");
+                    connectGroupServer(groupServerName, groupPort, userKeys, groupServerPublicKey, fileServerPublicKey.getEncryptionKey());
 
-                        break;
-                    case "2":
-                        System.out.println("File Server");
-                        connectFileServer(fileServerName, filePort, userKeys, fileServerPublicKey);
+                    break;
 
-                        break;
-                    case "0":
+                case "2":
+                    System.out.println("File Server");
+                    connectFileServer(fileServerName, filePort, userKeys, fileServerPublicKey);
 
-                        System.out.println("Exiting");
+                    break;
 
-                        return;
-                    case "-help":
-                        System.out.println("You're screwed. Sorry...");
+                case "0":
 
-                        break;
-                    default:
-                        System.out.println("Command not recognized");
+                    System.out.println("Exiting");
 
+                    return;
+
+                case "-help":
+                    System.out.println("You're screwed. Sorry...");
+
+                    break;
+
+                default:
+                    System.out.println("Command not recognized");
                 }
             }
         }
-        catch(IOException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
-
     }
 
     public static String inputValidation(String input)
@@ -493,9 +506,8 @@ public class UserClient
 
     public static void main(String args[]) throws Exception
     {
-
-	    groupClient = new GroupClient();
-	    fileClient = new FileClient();
+        groupClient = new GroupClient();
+        fileClient = new FileClient();
 
         String groupServerName = "localhost";
         int groupPort = GroupClient.SERVER_PORT;
@@ -506,12 +518,12 @@ public class UserClient
         try
         {
             // if we pass in more than 1 parameter, set the values for each parameter
-            if(args.length > 0)
+            if (args.length > 0)
             {
-                groupServerName = args[0];
-                groupPort = Integer.parseInt(args[1]);
-                fileServerName = args[2];
-                filePort = Integer.parseInt(args[3]);
+                groupServerName = args [0];
+                groupPort = Integer.parseInt(args [1]);
+                fileServerName = args [2];
+                filePort = Integer.parseInt(args [3]);
             }
         }
         catch (Exception e)
@@ -523,12 +535,11 @@ public class UserClient
         {
             chooseServer(groupServerName, groupPort, fileServerName, filePort);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            System.out.println("Disconnected from server\n"+e.getMessage());
+            System.out.println("Disconnected from server\n" + e.getMessage());
         }
 
         in.close();
     }
-
-} //-- end class UserClient
+} // -- end class UserClient

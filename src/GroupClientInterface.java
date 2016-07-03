@@ -20,12 +20,10 @@ public interface GroupClientInterface
      */
     public boolean connect(final String server, final int port);
 
-
     /**
      * Close down the connection to the group server.
      */
     public void disconnect();
-
 
     /**
      * Method used to get a token from the group server.  Right now,
@@ -35,8 +33,7 @@ public interface GroupClientInterface
      * @return A UserToken describing the permissions of "userName."
      * If this user does not exist, a null value will be returned.
      */
-    public Pair<UserToken, Hashtable<String, ArrayList<Key>>> getToken(final String userName, final Key fileServerPublickey);
-
+    public Pair < UserToken, Hashtable < String, ArrayList < Key >>> getToken(final String userName, final Key fileServerPublickey);
 
     /**
      * Creates a new user.  This method should only succeed if the
@@ -47,7 +44,6 @@ public interface GroupClientInterface
      * @return true if the new user was created, false otherwise
      */
     public boolean createUser(final String userName, final String email, final String password, final String requester);
-
 
     /**
      * Deletes a user.  This method should only succeed if the user
@@ -60,7 +56,6 @@ public interface GroupClientInterface
      */
     public boolean deleteUser(final String userName, final String requester);
 
-
     /**
      * Creates a new group.  Any user may create a group, provided
      * that it does not already exist.
@@ -71,7 +66,6 @@ public interface GroupClientInterface
      */
     public boolean createGroup(final String groupName, final String requester);
 
-
     /**
      * Deletes a group.  This method should only succeed if the user
      * invoking it is the user that originally created the group.
@@ -81,7 +75,6 @@ public interface GroupClientInterface
      * @return true if the group was deleted, false otherwise
      */
     public boolean deleteGroup(final String groupName, final String requester);
-
 
     /**
      * Adds a user to some group.  This method should succeed if
@@ -94,7 +87,6 @@ public interface GroupClientInterface
      */
     public boolean addUserToGroup(final String user, final String group, final String requester);
 
-
     /**
      * Removes a user from some group.  This method should succeed if
      * the user invoking the operation is the owner of the group.
@@ -105,7 +97,6 @@ public interface GroupClientInterface
      * @return true if the user was removed, false otherwise
      */
     public boolean deleteUserFromGroup(final String user, final String group, final String requester);
-
 
     /**
      * Lists the members of a group.  This method should only succeed
@@ -122,8 +113,7 @@ public interface GroupClientInterface
 
     public boolean isAdmin(String userName) throws Exception;
 
-	public boolean authChallenge(EncryptionSuite userKeys) throws Exception;
-	public boolean authLogin(EncryptionSuite userKeys) throws Exception;
-	public boolean authenticateGroupServer(EncryptionSuite userKeys, EncryptionSuite groupServerPublicKey) throws Exception;
-
-}   //-- end interface GroupClientInterface
+    public boolean authChallenge(EncryptionSuite userKeys) throws Exception;
+    public boolean authLogin(EncryptionSuite userKeys) throws Exception;
+    public boolean authenticateGroupServer(EncryptionSuite userKeys, EncryptionSuite groupServerPublicKey) throws Exception;
+}   // -- end interface GroupClientInterface
