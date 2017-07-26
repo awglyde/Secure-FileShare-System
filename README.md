@@ -4,7 +4,7 @@ This README would normally document whatever steps are necessary to get your app
 
 ### What is this repository for? ###
 
-CS1653 - Applied Cryptography
+Final project for Applied Cryptography and Network Security (CS 1653). The goal of this project is to design and implement a secure file sharing system. The design has very specific requirements and scenarios in which the system handles. These specifications can be found in phase5-writeup.htm under the docs folder.
 
 ### How do I get set up? ###
 
